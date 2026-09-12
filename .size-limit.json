@@ -1,0 +1,8 @@
+[
+  {
+    "name": "initial payload",
+    "path": ["dist/assets/*.js", "dist/assets/*.css"],
+    "limit": "1.5 MB",
+    "gzip": true
+  }
+]

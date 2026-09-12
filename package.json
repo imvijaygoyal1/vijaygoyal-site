@@ -7,7 +7,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "size": "size-limit"
   },
   "dependencies": {
     "react": "19.2.8",
@@ -26,6 +27,8 @@
     "vite": "8.3.0",
     "vitest": "5.0.0",
     "jsdom": "30.0.1",
-    "@testing-library/react": "16.3.3"
+    "@testing-library/react": "16.3.3",
+    "size-limit": "13.1.1",
+    "@size-limit/file": "13.1.1"
   }
 }
