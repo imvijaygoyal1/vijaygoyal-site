@@ -9,7 +9,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "size": "size-limit",
-    "e2e": "playwright test e2e/narrative.spec.ts e2e/fallback.spec.ts"
+    "e2e": "playwright test e2e/narrative.spec.ts e2e/fallback.spec.ts",
+    "lh": "lhci autorun"
   },
   "dependencies": {
     "react": "19.2.8",
@@ -31,6 +32,7 @@
     "jsdom": "30.0.1",
     "@testing-library/react": "16.3.3",
     "size-limit": "13.1.1",
-    "@size-limit/file": "13.1.1"
+    "@size-limit/file": "13.1.1",
+    "@lhci/cli": "0.15.1"
   }
 }
