@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { CHAPTERS } from "./chapters/registry";
 import { ChapterBoundary } from "./dom/ChapterBoundary";
 import { StaticRoute } from "./dom/StaticRoute";
@@ -11,13 +11,14 @@ export function App() {
   const progress = useGlobalProgress();
   const reduced = useReducedMotion();
   const webgl = useMemo(() => hasWebGL(), []);
+  const [lost, setLost] = useState(false);
 
-  if (reduced || !webgl) return <StaticRoute />;
+  if (reduced || !webgl || lost) return <StaticRoute />;
 
   return (
     <>
       <ChapterBoundary id="stage">
-        <Stage progress={progress} />
+        <Stage progress={progress} onContextLost={() => setLost(true)} />
       </ChapterBoundary>
       <main>
         {CHAPTERS.map(({ id, Content }) => (

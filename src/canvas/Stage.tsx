@@ -5,6 +5,7 @@ import { CameraRig } from "./CameraRig";
 import { ScrollRig } from "./ScrollRig";
 import { TIER_SETTINGS } from "../lib/tier";
 import type { ProgressRef } from "../hooks/useGlobalProgress";
+import { attachContextLossHandlers } from "./useContextLoss";
 
 function Lights() {
   const { lights } = TIER_SETTINGS[useTier()];
@@ -17,12 +18,19 @@ function Lights() {
   );
 }
 
-export function Stage({ progress }: { progress: ProgressRef }) {
+export function Stage({
+  progress,
+  onContextLost,
+}: {
+  progress: ProgressRef;
+  onContextLost: () => void;
+}) {
   return (
     <Canvas
       dpr={[1, 2]}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       style={{ position: "fixed", inset: 0 }}
+      onCreated={({ gl }) => attachContextLossHandlers(gl.domElement, onContextLost)}
     >
       <QualityProvider>
         <Lights />
