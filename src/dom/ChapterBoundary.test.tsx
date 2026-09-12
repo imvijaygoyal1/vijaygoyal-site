@@ -13,11 +13,13 @@ describe("ChapterBoundary", () => {
   });
 
   it("swallows a child failure and renders nothing rather than unmounting the app", () => {
-    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const { container } = render(
       <ChapterBoundary id="a"><Boom /></ChapterBoundary>,
     );
     expect(container.textContent).toBe("");
-    spy.mockRestore();
+    errorSpy.mockRestore();
+    warnSpy.mockRestore();
   });
 });
