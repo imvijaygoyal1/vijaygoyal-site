@@ -3,8 +3,9 @@ import { expect, test } from "@playwright/test";
 const FLOOR_FPS = 30;
 const SAMPLE_MS = 4000;
 
-test("holds the frame rate floor under 4x CPU throttling", async ({ page, browserName }) => {
+test("holds the frame rate floor under 4x CPU throttling", async ({ page, browserName }, testInfo) => {
   test.skip(browserName !== "chromium", "CDP throttling is chromium-only");
+  test.skip(testInfo.project.name !== "desktop", "perf gate runs only on the desktop project");
 
   const client = await page.context().newCDPSession(page);
   await client.send("Emulation.setCPUThrottlingRate", { rate: 4 });
