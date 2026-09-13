@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { activeChapters, activeIdsMatch, CHAPTERS } from "../chapters/registry";
 import { ChapterBoundary } from "../dom/ChapterBoundary";
 import { useTier } from "./QualityProvider";
@@ -31,7 +31,13 @@ export function ScrollRig({ progress }: { progress: ProgressRef }) {
     <>
       {CHAPTERS.filter((c) => activeIds.includes(c.id)).map(({ id, range, Scene }) => (
         <ChapterBoundary key={id} id={id}>
-          <Scene progress={progress} range={range} tier={tier} />
+          {/* Scenes that load a screen texture suspend on first mount. The
+              boundary is outside, so a texture that fails to load costs that
+              chapter its scene and nothing else -- the copy is DOM and lives
+              outside the canvas entirely. */}
+          <Suspense fallback={null}>
+            <Scene progress={progress} range={range} tier={tier} />
+          </Suspense>
         </ChapterBoundary>
       ))}
     </>

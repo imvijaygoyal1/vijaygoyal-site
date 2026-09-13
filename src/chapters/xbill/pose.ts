@@ -1,17 +1,19 @@
 import { clamp01 } from "../../lib/progress";
 
-/** How far the outer shards travel from the stack, in world units. */
-const SPREAD = 0.62;
+/** Shard width. Three of them tile into the 1.11-wide device face. */
+export const SHARD_W = 0.37;
 
-/** Peak of the fan, as a fraction of the chapter. The shards split apart
- *  and come back together: a bill divided, then settled. */
+/** Extra travel per shard at full fan, on top of its resting slot. */
+const SPREAD = 0.42;
+
+/** Peak of the fan: a bill divided, then settled. */
 const PEAK = 0.55;
 
 export interface XBillPose {
-  /** Signed lateral offset for a shard at `index` of `count`. */
-  offsets: readonly number[];
+  /** Absolute x per shard -- resting slot plus fan travel. */
+  positions: readonly number[];
   rotationY: number;
-  /** 0 at rest, 1 fully apart -- also drives the settle indicator. */
+  /** 0 closed, 1 fully apart. */
   openness: number;
 }
 
@@ -25,9 +27,12 @@ export function xbillPose(p: number, count = 3): XBillPose {
   const t = clamp01(p);
   const openness = fanEnvelope(t);
   const mid = (count - 1) / 2;
-  const offsets = Array.from(
+  // Closed, the shards tile edge to edge into one face. They never stack on
+  // the same coordinate, which would z-fight and hide two thirds of the
+  // screen they carry between them.
+  const positions = Array.from(
     { length: count },
-    (_, i) => (i - mid) * SPREAD * openness,
+    (_, i) => (i - mid) * (SHARD_W + SPREAD * openness),
   );
-  return { offsets, rotationY: -0.55 + 1.1 * t, openness };
+  return { positions, rotationY: -0.55 + 1.1 * t, openness };
 }

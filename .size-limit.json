@@ -1,8 +1,21 @@
 [
   {
     "name": "initial payload",
-    "path": ["dist/assets/*.js", "dist/assets/*.css"],
+    "path": [
+      "dist/assets/*.js",
+      "dist/assets/*.css"
+    ],
     "limit": "1.5 MB",
     "gzip": true
+  },
+  {
+    "name": "screen textures",
+    "path": [
+      "dist/assets/*.jpg",
+      "dist/assets/*.png",
+      "dist/assets/*.webp"
+    ],
+    "limit": "250 kB",
+    "gzip": false
   }
 ]

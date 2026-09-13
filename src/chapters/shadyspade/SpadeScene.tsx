@@ -4,6 +4,8 @@ import type { Group, Mesh } from "three";
 import type { ChapterSceneProps } from "../types";
 import { localProgress } from "../../lib/progress";
 import { spadePose } from "./pose";
+import { ScreenPlane } from "../../canvas/ScreenPlane";
+import screenUrl from "./spade-screen.jpg";
 
 const CARDS = 5;
 
@@ -53,6 +55,8 @@ export function SpadeScene({ progress, range }: ChapterSceneProps) {
         <mesh>
           <boxGeometry args={[1.1, 2.2, 0.08]} />
           <meshStandardMaterial {...SURFACE} />
+          {/* The real app, captured from the simulator. */}
+          <ScreenPlane url={screenUrl} width={0.98} height={2.02} />
         </mesh>
       </group>
 
