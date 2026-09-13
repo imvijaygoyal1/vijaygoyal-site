@@ -1,34 +1,21 @@
 import { forwardRef, useMemo, type ReactNode } from "react";
 import type { Group } from "three";
-import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import {
-  BODY_D, BODY_H, BODY_R, BODY_W, SCREEN_H, SCREEN_R, SCREEN_W,
+  SCREEN_H, SCREEN_R, SCREEN_W,
 } from "./dimensions";
-import { CameraModule } from "./CameraModule";
 import { ScreenGlass } from "./ScreenGlass";
-import { TIER_SETTINGS } from "../lib/tier";
-import { useTier } from "../canvas/QualityProvider";
 
-/** Just in front of the body face, clear of z-fighting. */
-export const FACE_Z = BODY_D / 2 + 0.002;
+/** The screen floats on its own; there is intentionally no phone shell. */
+export const FACE_Z = 0.001;
 
 /**
- * The device body: an extruded rail with a black display recess inside a
- * uniform bezel, with the body and cover-glass corners aligned.
- *
- * The profile is extruded rather than a rounded box. A rounded box softens
- * every edge equally and reads as a soap bar the moment the device turns;
- * hardware has a flat rail and only a chamfer where it meets the glass.
+ * The presentation deliberately shows only the captured display. The device
+ * shell and camera hardware are omitted so the screen remains the sole visual
+ * subject as the chapters turn it through space.
  */
 export const Phone = forwardRef<Group, { children?: ReactNode }>(
   function Phone({ children }, ref) {
-    const { metalness } = TIER_SETTINGS[useTier()];
-
-    const body = useMemo(
-      () => deviceGeometry(BODY_W, BODY_H, BODY_D, BODY_R, 0.011),
-      [],
-    );
     const recess = useMemo(
       () => roundedRectGeometry(SCREEN_W, SCREEN_H, SCREEN_R),
       [],
@@ -36,17 +23,7 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
 
     return (
       <group ref={ref}>
-        <mesh geometry={body}>
-          <meshStandardMaterial
-            color="#2b2e34"
-            metalness={Math.max(metalness, 0.55)}
-            roughness={0.24}
-            envMapIntensity={1.4}
-          />
-        </mesh>
-
-        {/* The black glass the display sits in. Without it the screen meets
-            bare aluminium and the device reads as a printed card. */}
+        {/* Backing keeps the rounded display legible during screen fades. */}
         <mesh geometry={recess} position={[0, 0, FACE_Z - 0.001]}>
           <meshStandardMaterial color="#04050a" metalness={0.35} roughness={0.22} />
         </mesh>
@@ -56,8 +33,6 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
         {/* Above the screen, so the highlight sits on the glass rather than
             under the pixels. */}
         <ScreenGlass z={FACE_Z + 0.004} />
-
-        <CameraModule />
       </group>
     );
   },
