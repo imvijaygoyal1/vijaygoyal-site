@@ -26,13 +26,13 @@ const POSES: readonly SubjectState[] = [
   subjectState({ rotationY: (72 * Math.PI) / 180, positionY: 1.5, screenOn: 0 }),
   // 1 - facing the viewer, settled, still dark.
   subjectState({ rotationY: 0, positionY: 0.95, screenOn: 0 }),
-  // 2 - xBill: the screen comes on and the bill divides.
-  subjectState({ rotationY: -0.42, positionY: 0.95, splitX: 1, screenOn: 1, screenMix: 0 }),
-  // 3 - Shady Spade: the split closes, the Watch arrives, the screen changes.
-  subjectState({ rotationY: 0.22, positionY: 0.95, splitX: 0, screenOn: 1, screenMix: 1, companion: 1, cards: 1 }),
-  // 4 - Craft: companions withdraw, the device separates into layers.
-  subjectState({ rotationY: 0, tiltX: -0.5, positionY: 0.95, layerY: 1, screenOn: 0.3, screenMix: 1, scale: 0.86 }),
-  // 5 - Colophon: everything closes and recedes.
+  // 2 - xBill: the screen comes on and the device turns slowly through it.
+  subjectState({ rotationY: -0.5, positionY: 0.95, screenOn: 1, screenMix: 0 }),
+  // 3 - Shady Spade: the screen changes, the Watch arrives, cards deal.
+  subjectState({ rotationY: 0.3, positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1 }),
+  // 4 - Craft: companions withdraw and the device turns to show its profile.
+  subjectState({ rotationY: 1.15, tiltX: -0.26, positionY: 0.95, screenOn: 0.75, screenMix: 1, scale: 0.95 }),
+  // 5 - Colophon: it closes and recedes.
   subjectState({ rotationY: 0.4, positionY: 0.95, positionZ: -5, scale: 0.3, screenOn: 0 }),
 ];
 

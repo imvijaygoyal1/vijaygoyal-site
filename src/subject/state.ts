@@ -11,10 +11,6 @@ import { easeInOutCubic } from "../lib/ease";
  * interpolation rather than a hand-off.
  */
 export interface SubjectState {
-  /** Lateral separation of the three slabs: a bill splitting. */
-  splitX: number;
-  /** Vertical separation of the same three slabs: an exploded stack. */
-  layerY: number;
   rotationY: number;
   tiltX: number;
   positionY: number;
@@ -31,13 +27,13 @@ export interface SubjectState {
 }
 
 export const SUBJECT_KEYS = [
-  "splitX", "layerY", "rotationY", "tiltX", "positionY", "positionZ",
+  "rotationY", "tiltX", "positionY", "positionZ",
   "scale", "companion", "cards", "screenOn", "screenMix",
 ] as const satisfies readonly (keyof SubjectState)[];
 
 /** The subject at rest: one solid slab, facing the viewer, screen dark. */
 export const NEUTRAL: SubjectState = {
-  splitX: 0, layerY: 0, rotationY: 0, tiltX: 0,
+  rotationY: 0, tiltX: 0,
   positionY: 0.95, positionZ: 0, scale: 1,
   companion: 0, cards: 0, screenOn: 0, screenMix: 0,
 };

@@ -1,12 +1,13 @@
-import { RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import type { Group, Material, Mesh } from "three";
 import { CHAPTERS } from "../chapters/registry";
 import { subjectStateAt } from "./sequence";
 import { Phone } from "./Phone";
 import { Screen } from "./Screen";
 import { WATCH_D, WATCH_H, WATCH_R, WATCH_W } from "./dimensions";
+import { deviceGeometry } from "../canvas/deviceGeometry";
+import { roundedRectGeometry } from "../canvas/roundedRect";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
 import type { ProgressRef } from "../lib/progress";
@@ -14,8 +15,6 @@ import xbillScreen from "../chapters/xbill/xbill-screen.jpg";
 import spadeScreen from "../chapters/shadyspade/spade-screen.jpg";
 
 /** How far the translucent copies travel at full split / full separation. */
-const SPLIT_GAP = 1.75;
-const LAYER_GAP = 1.15;
 const CARDS = 5;
 
 function isMesh(o: unknown): o is Mesh {
@@ -23,7 +22,7 @@ function isMesh(o: unknown): o is Mesh {
 }
 
 /** Sets opacity across a subtree, switching transparency on only when needed. */
-function setOpacity(root: Group | null, opacity: number): void {
+function setOpacity(root: Group | null | undefined, opacity: number): void {
   if (!root) return;
   const visible = opacity > 0.004;
   root.visible = visible;
@@ -56,12 +55,21 @@ function setOpacity(root: Group | null, opacity: number): void {
  */
 export function Subject({ progress }: { progress: ProgressRef }) {
   const root = useRef<Group>(null);
-  const ghosts = useRef<(Group | null)[]>([]);
   const watch = useRef<Group>(null);
   const cards = useRef<(Mesh | null)[]>([]);
   const screenA = useRef<Group>(null);
   const screenB = useRef<Group>(null);
   const { metalness } = TIER_SETTINGS[useTier()];
+
+  const watchBody = useMemo(
+    () => deviceGeometry(WATCH_W, WATCH_H, WATCH_D, WATCH_R, 0.02),
+    [],
+  );
+  const watchGlass = useMemo(
+    () => roundedRectGeometry(WATCH_W - 0.07, WATCH_H - 0.07, WATCH_R - 0.035),
+    [],
+  );
+  const cardBody = useMemo(() => deviceGeometry(0.4, 0.58, 0.014, 0.045, 0.004), []);
 
   useFrame(() => {
     const g = root.current;
@@ -71,19 +79,6 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     g.position.set(0, s.positionY, s.positionZ);
     g.rotation.set(s.tiltX, s.rotationY, 0);
     g.scale.setScalar(s.scale);
-
-    const copyOpacity = Math.min(1, s.splitX + s.layerY) * 0.55;
-    for (let i = 0; i < 2; i++) {
-      const ghost = ghosts.current[i];
-      if (!ghost) continue;
-      const side = i === 0 ? -1 : 1;
-      ghost.position.set(
-        side * SPLIT_GAP * s.splitX,
-        side * LAYER_GAP * s.layerY,
-        side * 0.35 * s.layerY,
-      );
-      setOpacity(ghost, copyOpacity);
-    }
 
     setOpacity(screenA.current, s.screenOn * (1 - s.screenMix));
     setOpacity(screenB.current, s.screenOn * s.screenMix);
@@ -107,19 +102,6 @@ export function Subject({ progress }: { progress: ProgressRef }) {
 
   return (
     <group ref={root}>
-      {/* Translucent copies: the split and the exploded stack. */}
-      {[0, 1].map((i) => (
-        <group
-          key={i}
-          ref={(el) => {
-            ghosts.current[i] = el;
-          }}
-          visible={false}
-        >
-          <Phone />
-        </group>
-      ))}
-
       <Phone>
         <group ref={screenA} visible={false}>
           <Screen url={xbillScreen} opacity={1} renderOrder={1} />
@@ -130,27 +112,35 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       </Phone>
 
       <group ref={watch} visible={false}>
-        <RoundedBox args={[WATCH_W, WATCH_H, WATCH_D]} radius={WATCH_R} smoothness={3}>
+        <mesh geometry={watchBody}>
           <meshStandardMaterial
-            color="#c8ccd6"
-            metalness={Math.max(metalness, 0.5)}
-            roughness={0.19}
-            envMapIntensity={1.35}
+            color="#c9cdd7"
+            metalness={Math.max(metalness, 0.55)}
+            roughness={0.17}
+            envMapIntensity={1.4}
           />
-        </RoundedBox>
+        </mesh>
+        {/* Black glass, so the Watch is a device rather than a white block. It
+            carries no captured screen: that needs a paired watch simulator,
+            which is not wired up. */}
+        <mesh geometry={watchGlass} position={[0, 0, WATCH_D / 2 + 0.002]}>
+          <meshStandardMaterial color="#04050a" metalness={0.35} roughness={0.2} />
+        </mesh>
       </group>
 
       <group position={[-1.8, -0.2, 0.5]}>
         {Array.from({ length: CARDS }, (_, i) => (
           <mesh
             key={i}
+            geometry={cardBody}
             ref={(m) => {
               cards.current[i] = m;
             }}
             visible={false}
           >
-            <boxGeometry args={[0.4, 0.58, 0.014]} />
-            <meshStandardMaterial color="#dfe4ee" metalness={0.1} roughness={0.42} />
+            {/* Face down and dark: white rectangles read as missing textures,
+                not as playing cards. */}
+            <meshStandardMaterial color="#1b2030" metalness={0.15} roughness={0.5} />
           </mesh>
         ))}
       </group>

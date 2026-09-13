@@ -3,9 +3,9 @@ import { subjectStateAt, validateContinuity, type SubjectChapter } from "./seque
 import { sameSubject, subjectState, SUBJECT_KEYS } from "./state";
 import { CHAPTERS } from "../chapters/registry";
 
-const a = subjectState({ splitX: 0 });
-const b = subjectState({ splitX: 1 });
-const c = subjectState({ splitX: 0, companion: 1 });
+const a = subjectState({ companion: 0 });
+const b = subjectState({ companion: 1 });
+const c = subjectState({ companion: 1, cards: 1 });
 
 const chain: SubjectChapter[] = [
   { id: "one", range: [0, 0.5], enter: a, exit: b },

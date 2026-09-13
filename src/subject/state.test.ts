@@ -5,15 +5,15 @@ import {
 
 describe("subjectState", () => {
   it("fills unspecified fields from the neutral pose", () => {
-    const s = subjectState({ splitX: 1 });
-    expect(s.splitX).toBe(1);
+    const s = subjectState({ companion: 1 });
+    expect(s.companion).toBe(1);
     expect(s.scale).toBe(NEUTRAL.scale);
   });
 });
 
 describe("blendSubject", () => {
-  const a = subjectState({ splitX: 0, scale: 1, screenOn: 0 });
-  const b = subjectState({ splitX: 1, scale: 0.5, screenOn: 1 });
+  const a = subjectState({ companion: 0, scale: 1, screenOn: 0 });
+  const b = subjectState({ companion: 1, scale: 0.5, screenOn: 1 });
 
   it("returns the endpoints exactly", () => {
     expect(sameSubject(blendSubject(a, b, 0), a)).toBe(true);
@@ -31,7 +31,7 @@ describe("blendSubject", () => {
   });
 
   it("is eased rather than linear", () => {
-    expect(blendSubject(a, b, 0.25).splitX).toBeLessThan(0.25);
+    expect(blendSubject(a, b, 0.25).companion).toBeLessThan(0.25);
   });
 
   it("clamps outside 0..1 instead of overshooting the pose", () => {
@@ -42,7 +42,7 @@ describe("blendSubject", () => {
   it("moves monotonically on every field, so nothing jitters mid-scrub", () => {
     let previous = -Infinity;
     for (let t = 0; t <= 1.0001; t += 0.02) {
-      const v = blendSubject(a, b, t).splitX;
+      const v = blendSubject(a, b, t).companion;
       expect(v).toBeGreaterThanOrEqual(previous - 1e-9);
       previous = v;
     }
