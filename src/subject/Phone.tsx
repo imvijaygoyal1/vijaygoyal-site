@@ -3,9 +3,10 @@ import type { Group } from "three";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import {
-  BODY_D, BODY_H, BODY_R, BODY_W, SCREEN_H, SCREEN_R, SCREEN_W,
+  BODY_D, BODY_H, BODY_R, BODY_W, MM, SCREEN_H, SCREEN_R, SCREEN_W,
 } from "./dimensions";
 import { CameraModule } from "./CameraModule";
+import { AppleLogo } from "./AppleLogo";
 import { ScreenGlass } from "./ScreenGlass";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
@@ -38,7 +39,7 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
       <group ref={ref}>
         <mesh geometry={body}>
           <meshStandardMaterial
-            color="#2b2e34"
+            color="#a8aaae"
             metalness={Math.max(metalness, 0.55)}
             roughness={0.24}
             envMapIntensity={1.4}
@@ -52,6 +53,13 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
         </mesh>
 
         <group position={[0, 0, FACE_Z]}>{children}</group>
+
+        {/* Apple places the reflective mark below the camera plateau on the
+            rear shell. It is deliberately geometry, so it remains visible as
+            the phone turns instead of depending on a back texture. */}
+        <group position={[0, -18 * MM, -BODY_D / 2 - 0.004]}>
+          <AppleLogo />
+        </group>
 
         {/* Above the screen, so the highlight sits on the glass rather than
             under the pixels. */}
