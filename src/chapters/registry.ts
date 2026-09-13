@@ -30,15 +30,20 @@ const POSES: readonly SubjectState[] = [
   // 2 - xBill: the view dives into the xBill icon while the app dissolves in
   //     behind it, the way iOS opens an app.
   subjectState({
-    rotationY: -0.5, positionY: 0.95,
+    rotationY: -0.42, positionY: 0.95,
     homeOn: 0, homeZoom: 1, screenOn: 1, screenMix: 0,
   }),
   // 3 - Shady Spade: the screen changes, the Watch arrives, cards deal.
-  subjectState({ rotationY: 0.3, positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1 }),
+  subjectState({
+    // A full turn through this beat -- the device rotates all the way round,
+    // showing its back and rail, and arrives facing the viewer again.
+    rotationY: -0.42 + Math.PI * 2,
+    positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1,
+  }),
   // 4 - Craft: companions withdraw and the device turns to show its profile.
-  subjectState({ rotationY: 1.15, tiltX: -0.26, positionY: 0.95, screenOn: 0.75, screenMix: 1, scale: 0.95 }),
+  subjectState({ rotationY: -0.42 + Math.PI * 2 + 1.3, tiltX: -0.38, positionY: 0.95, screenOn: 0.75, screenMix: 1, scale: 0.95 }),
   // 5 - Colophon: it closes and recedes.
-  subjectState({ rotationY: 0.4, positionY: 0.95, positionZ: -5, scale: 0.3, screenOn: 0 }),
+  subjectState({ rotationY: -0.42 + Math.PI * 2 + 2.3, positionY: 0.95, positionZ: -6, scale: 0.28, screenOn: 0 }),
 ];
 
 

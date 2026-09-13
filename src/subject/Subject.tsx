@@ -6,6 +6,7 @@ import { subjectStateAt } from "./sequence";
 import { Phone } from "./Phone";
 import { Screen } from "./Screen";
 import { applyHomeZoom, HomeScreen } from "./HomeScreen";
+import { facing } from "./facing";
 import { WATCH_D, WATCH_H, WATCH_R, WATCH_W } from "./dimensions";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
@@ -84,11 +85,15 @@ export function Subject({ progress }: { progress: ProgressRef }) {
 
     // The home screen sits under the app screens and dives into an icon as
     // the app dissolves in over it.
-    setOpacity(home.current, s.homeOn);
+    // A display is only visible when it faces you. This also hides the app
+    // swap, which happens while the device is turned away mid-rotation.
+    const face = facing(s.rotationY);
+
+    setOpacity(home.current, s.homeOn * face);
     applyHomeZoom(home.current, s.homeZoom, s.screenMix);
 
-    setOpacity(screenA.current, s.screenOn * (1 - s.screenMix));
-    setOpacity(screenB.current, s.screenOn * s.screenMix);
+    setOpacity(screenA.current, s.screenOn * (1 - s.screenMix) * face);
+    setOpacity(screenB.current, s.screenOn * s.screenMix * face);
 
     const w = watch.current;
     if (w) {
