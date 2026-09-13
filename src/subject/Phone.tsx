@@ -5,6 +5,7 @@ import { roundedRectGeometry } from "../canvas/roundedRect";
 import {
   BODY_D, BODY_H, BODY_R, BODY_W, SCREEN_H, SCREEN_R, SCREEN_W,
 } from "./dimensions";
+import { CameraModule } from "./CameraModule";
 import { ScreenGlass } from "./ScreenGlass";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
@@ -37,9 +38,9 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
       <group ref={ref}>
         <mesh geometry={body}>
           <meshStandardMaterial
-            color="#c9cdd7"
+            color="#2b2e34"
             metalness={Math.max(metalness, 0.55)}
-            roughness={0.17}
+            roughness={0.24}
             envMapIntensity={1.4}
           />
         </mesh>
@@ -51,6 +52,12 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
         </mesh>
 
         <group position={[0, 0, FACE_Z]}>{children}</group>
+
+        {/* Above the screen, so the highlight sits on the glass rather than
+            under the pixels. */}
+        <ScreenGlass z={FACE_Z + 0.004} />
+
+        <CameraModule />
       </group>
     );
   },

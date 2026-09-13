@@ -127,9 +127,9 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       <group ref={watch} visible={false}>
         <mesh geometry={watchBody}>
           <meshStandardMaterial
-            color="#c9cdd7"
+            color="#2b2e34"
             metalness={Math.max(metalness, 0.55)}
-            roughness={0.17}
+            roughness={0.24}
             envMapIntensity={1.4}
           />
         </mesh>
