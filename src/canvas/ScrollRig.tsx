@@ -1,6 +1,7 @@
 import { useFrame } from "@react-three/fiber";
 import { useRef, useState } from "react";
 import { activeChapters, activeIdsMatch, CHAPTERS } from "../chapters/registry";
+import { ChapterBoundary } from "../dom/ChapterBoundary";
 import { useTier } from "./QualityProvider";
 import type { ProgressRef } from "../lib/progress";
 
@@ -29,7 +30,9 @@ export function ScrollRig({ progress }: { progress: ProgressRef }) {
   return (
     <>
       {CHAPTERS.filter((c) => activeIds.includes(c.id)).map(({ id, range, Scene }) => (
-        <Scene key={id} progress={progress} range={range} tier={tier} />
+        <ChapterBoundary key={id} id={id}>
+          <Scene progress={progress} range={range} tier={tier} />
+        </ChapterBoundary>
       ))}
     </>
   );
