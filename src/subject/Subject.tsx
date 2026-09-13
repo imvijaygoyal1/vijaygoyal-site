@@ -9,6 +9,7 @@ import { applyHomeZoom, HomeScreen } from "./HomeScreen";
 import { facing } from "./facing";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { WatchHomeScreen } from "./WatchHomeScreen";
+import { watchOpacity } from "./watchPresentation";
 import type { ProgressRef } from "../lib/progress";
 import xbillScreen from "../chapters/xbill/xbill-screen.webp";
 import spadeScreen from "../chapters/shadyspade/spade-screen.webp";
@@ -84,9 +85,14 @@ export function Subject({ progress }: { progress: ProgressRef }) {
 
     const w = watch.current;
     if (w) {
-      w.position.set(1.35, -0.15, 0.35);
-      w.scale.setScalar(0.85 + 0.25 * s.companion);
-      setOpacity(w, s.companion);
+      const shadySpade = CHAPTERS.find((chapter) => chapter.id === "shady-spade");
+      const inShadySpade = shadySpade
+        ? progress.current >= shadySpade.range[0] && progress.current <= shadySpade.range[1]
+        : false;
+      w.position.set(1.08, -0.12, 0.62);
+      w.scale.setScalar(1.12);
+      w.renderOrder = 20;
+      setOpacity(w, watchOpacity(s.companion, inShadySpade));
     }
 
     for (let i = 0; i < CARDS; i++) {

@@ -11,12 +11,12 @@ export function WatchHomeScreen() {
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Unable to create the Watch face canvas");
 
-    // A slightly lifted navy background keeps the screen visible against the
-    // site's near-black stage while retaining the dark Apple Watch treatment.
-    context.fillStyle = "#101827";
+    // A high-contrast navy face remains recognizable against the site's dark
+    // stage while retaining the default Apple Watch treatment.
+    context.fillStyle = "#17243a";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = "#1c2027";
-    context.lineWidth = 24;
+    context.lineWidth = 28;
     context.beginPath();
     context.arc(185, 225, 126, 0, Math.PI * 2);
     context.stroke();
@@ -65,8 +65,14 @@ export function WatchHomeScreen() {
   );
 
   return (
-    <mesh geometry={geometry} position={[0, 0, 0.001]} frustumCulled={false}>
-      <meshBasicMaterial map={texture} toneMapped={false} color="#ffffff" />
+    <mesh geometry={geometry} position={[0, 0, 0.001]} frustumCulled={false} renderOrder={21}>
+      <meshBasicMaterial
+        map={texture}
+        toneMapped={false}
+        color="#ffffff"
+        depthTest={false}
+        depthWrite={false}
+      />
     </mesh>
   );
 }
