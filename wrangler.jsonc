@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vijaygoyal-site",
+  "compatibility_date": "2026-09-11",
+  "observability": {
+    "enabled": true
+  },
+  // Static site: `npm run build` emits dist/, and Cloudflare serves it directly.
+  // There is no Worker script — `assets.directory` alone is the whole deployment.
+  // "single-page-application" makes unknown paths fall back to index.html, which
+  // the scroll narrative needs for anchor URLs like /#opening to resolve.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "vijaygoyal.org", "custom_domain": true },
+    { "pattern": "www.vijaygoyal.org", "custom_domain": true }
+  ]
+}
