@@ -1,0 +1,119 @@
+/*
+ * Base stylesheet. Deliberately small: this plan builds the engine, not the
+ * visual design. What it must do is make the page legible and honest -- set
+ * the near-black stage the spec calls for rather than inheriting a white UA
+ * default, and keep copy readable where it sits over the 3D.
+ */
+
+:root {
+  --stage: #07080a;
+  --ink: #f4f5f7;
+  --ink-dim: #c2c8d2;
+  --measure: 34rem;
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background-color: var(--stage);
+}
+
+body {
+  margin: 0;
+  background-color: var(--stage);
+  color: var(--ink);
+  font-family:
+    ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1rem, 0.96rem + 0.25vw, 1.125rem);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The canvas is fixed behind everything; copy scrolls in front of it. */
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * Copy sticks to the viewport for the length of its chapter and sits low in
+ * frame, so the name resolves beneath the device rather than across it.
+ */
+.chapter-copy {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.9rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 0 1.5rem 13vh;
+  text-align: center;
+}
+
+/*
+ * A scrim under the copy. Lighthouse computes contrast from CSS and cannot see
+ * what WebGL painted underneath, so legibility over the scene has to be built
+ * in rather than assumed from the score.
+ */
+.chapter-copy::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: -1;
+  height: 52%;
+  background: linear-gradient(
+    to top,
+    rgb(7 8 10 / 96%) 12%,
+    rgb(7 8 10 / 70%) 48%,
+    rgb(7 8 10 / 0%) 100%
+  );
+  pointer-events: none;
+}
+
+.chapter-copy h1 {
+  margin: 0;
+  font-size: clamp(2.75rem, 1.6rem + 5.2vw, 5.5rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+.chapter-copy p {
+  margin: 0;
+  max-width: var(--measure);
+  color: var(--ink-dim);
+  text-wrap: pretty;
+}
+
+/* The static route has no scene behind it, so the scrim and the full-viewport
+   stickiness are both pointless there. */
+.static-route .chapter-copy {
+  position: static;
+  min-height: 0;
+  justify-content: center;
+  padding: clamp(4rem, 14vh, 9rem) 1.5rem;
+}
+
+.static-route .chapter-copy::before {
+  display: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.noscript {
+  padding: clamp(4rem, 14vh, 9rem) 1.5rem;
+  text-align: center;
+}

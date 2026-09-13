@@ -4,3 +4,6 @@ dist/
 .env
 .env.local
 .superpowers/
+.lighthouseci/
+test-results/
+playwright-report/

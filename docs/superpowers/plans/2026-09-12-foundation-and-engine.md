@@ -95,7 +95,7 @@ Pure logic lives in `src/lib/` with no React or three imports, which is what kee
   },
   "devDependencies": {
     "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.18",
+    "@types/react-dom": "19.2.7",
     "@types/three": "0.186.0",
     "@vitejs/plugin-react": "6.1.1",
     "typescript": "6.0.3",
@@ -1158,16 +1158,11 @@ git commit -m "feat: add webgl detection and reduced-motion hook"
 
 `src/dom/StaticRoute.test.tsx`:
 ```tsx
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { StaticRoute } from "./StaticRoute";
 
 describe("StaticRoute", () => {
-  it("renders every chapter's content", () => {
-    render(<StaticRoute />);
-    expect(screen.getByText(/vijay goyal/i)).toBeDefined();
-  });
-
   it("renders no canvas element", () => {
     const { container } = render(<StaticRoute />);
     expect(container.querySelector("canvas")).toBeNull();
@@ -1266,7 +1261,9 @@ export function StaticRoute() {
 - [ ] **Step 4: Run to verify they pass**
 
 Run: `npx vitest run src/dom`
-Expected: FAIL on StaticRoute until Task 12 gives Opening real content. Proceed to Task 12, then rerun. `ChapterBoundary` tests must pass now — 2 tests.
+Expected: PASS, 4 tests.
+
+These tests run against the Task 6 stub chapter, whose `Content` renders nothing — so they assert only what is true without real content: no canvas, and an anchor per chapter. The assertion that content actually renders belongs to Task 12, where content exists.
 
 - [ ] **Step 5: Commit**
 
@@ -1668,15 +1665,28 @@ export const opening: Chapter = {
 
 The slow dolly from z=9 to z=4.2 is the spec's "slow dolly in from far". When the second plan adds siblings, `range` becomes `[0, 0.18]` and nothing else in this folder changes.
 
-- [ ] **Step 6: Run the full suite**
+- [ ] **Step 6: Add the StaticRoute content assertion deferred from Task 9**
+
+Append to `src/dom/StaticRoute.test.tsx`, and add `screen` to its `@testing-library/react` import:
+
+```tsx
+  it("renders every chapter's content now that Opening has copy", () => {
+    render(<StaticRoute />);
+    expect(screen.getByText(/ios developer/i)).toBeDefined();
+  });
+```
+
+This is the assertion Task 9 could not make: it proves the no-WebGL and reduced-motion route carries real copy, which is the §7 guarantee that the site is never blank.
+
+- [ ] **Step 7: Run the full suite**
 
 Run: `npm test`
-Expected: PASS — including the `StaticRoute` tests deferred in Task 9, which now find real content.
+Expected: PASS, 51 tests.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add src/chapters/opening
+git add src/chapters/opening src/dom/StaticRoute.test.tsx
 git commit -m "feat: add opening chapter"
 ```
 
@@ -2032,7 +2042,7 @@ Spec §10 requires a Lighthouse gate. Without it, the §8 accessibility guarante
 
 - [ ] **Step 1: Add the dependency and script**
 
-Add to devDependencies: `"@lhci/cli": "0.16.1"`. Add script: `"lh": "lhci autorun"`.
+Add to devDependencies: `"@lhci/cli": "0.15.1"`. Add script: `"lh": "lhci autorun"`.
 
 - [ ] **Step 2: Write the config**
 
