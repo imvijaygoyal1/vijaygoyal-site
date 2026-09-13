@@ -9,10 +9,20 @@ export function computeProgress(scrollY: number, limit: number): number {
   return clamp01(scrollY / limit);
 }
 
-export function useGlobalProgress(): ProgressRef {
+/**
+ * Drives the single source of truth for the whole site.
+ *
+ * `enabled` is a parameter rather than a call-site condition so hook order
+ * stays stable. It must be false on the static route: Lenis's inertial
+ * smoothing hijacks wheel and touch, which is itself a motion effect, and that
+ * route is the one handed to people who asked for less of it.
+ */
+export function useGlobalProgress(enabled: boolean): ProgressRef {
   const progress = useRef(0);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const lenis = new Lenis({ smoothWheel: true });
 
     lenis.on("scroll", ({ scroll, limit }: { scroll: number; limit: number }) => {
@@ -30,7 +40,7 @@ export function useGlobalProgress(): ProgressRef {
       cancelAnimationFrame(frame);
       lenis.destroy();
     };
-  }, []);
+  }, [enabled]);
 
   return progress;
 }
