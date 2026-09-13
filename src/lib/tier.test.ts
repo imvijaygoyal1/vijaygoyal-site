@@ -47,6 +47,7 @@ describe("TIER_SETTINGS", () => {
       expect(order[i]!.smoothness).toBeGreaterThanOrEqual(order[i - 1]!.smoothness);
       expect(order[i]!.envResolution).toBeGreaterThanOrEqual(order[i - 1]!.envResolution);
       expect(order[i]!.metalness).toBeGreaterThanOrEqual(order[i - 1]!.metalness);
+      expect(order[i]!.anisotropy).toBeGreaterThanOrEqual(order[i - 1]!.anisotropy);
       expect(order[i]!.dpr).toBeGreaterThanOrEqual(order[i - 1]!.dpr);
     }
   });

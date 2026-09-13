@@ -4,8 +4,9 @@ import { QualityProvider, useTier } from "./QualityProvider";
 import { CameraRig } from "./CameraRig";
 import { ScrollRig } from "./ScrollRig";
 import { FrameProbe } from "./FrameProbe";
+import { ScrollDriver } from "./ScrollDriver";
 import { TIER_SETTINGS } from "../lib/tier";
-import type { ProgressRef } from "../lib/progress";
+import type { ProgressSource } from "../lib/progress";
 import { attachContextLossHandlers } from "./useContextLoss";
 
 function Lights() {
@@ -46,7 +47,7 @@ export function Stage({
   onContextLost,
   onContextRestored,
 }: {
-  progress: ProgressRef;
+  progress: ProgressSource;
   /** True while a lost context is inside its restore window: kept in the
    *  document so `webglcontextrestored` can still fire, but invisible, inert,
    *  and not drawing frames. */
@@ -59,7 +60,9 @@ export function Stage({
       // Start at the conservative end of the budget table; QualityProvider
       // raises it once the tier is known and on every tier change after.
       dpr={1}
-      frameloop={hidden ? "never" : "always"}
+      // "demand": the canvas draws only when ScrollDriver asks it to, so an
+      // idle visitor costs no frames at all.
+      frameloop={hidden ? "never" : "demand"}
       aria-hidden={hidden || undefined}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       style={{
@@ -75,6 +78,7 @@ export function Stage({
       <QualityProvider>
         <Lights />
         <BakedEnvironment />
+        <ScrollDriver progress={progress} />
         <FrameProbe />
         <CameraRig progress={progress} />
         <ScrollRig progress={progress} />

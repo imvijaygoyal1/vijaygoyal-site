@@ -10,6 +10,13 @@ export type ScrollRange = readonly [number, number];
  */
 export type ProgressRef = { readonly current: number };
 
+/**
+ * The writable side of the same box. Held only by whatever drives the value --
+ * everything downstream takes `ProgressRef` and cannot write to it, which is
+ * what keeps "one source of truth" true rather than merely intended.
+ */
+export type ProgressSource = { current: number };
+
 export function clamp01(n: number): number {
   return n < 0 ? 0 : n > 1 ? 1 : n;
 }

@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CHAPTERS, sectionHeightVh } from "./chapters/registry";
 import { ChapterBoundary } from "./dom/ChapterBoundary";
 import { StaticRoute } from "./dom/StaticRoute";
 import { Stage } from "./canvas/Stage";
-import { useGlobalProgress } from "./hooks/useGlobalProgress";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { hasWebGL } from "./lib/webgl";
 
@@ -26,7 +25,9 @@ export function App() {
   const canvasMounted = !reduced && webgl && phase !== "abandoned";
   const narrative = canvasMounted && phase === "live";
 
-  const progress = useGlobalProgress(narrative);
+  // Owned here, driven by ScrollDriver inside the canvas, read everywhere
+  // else through the readonly ProgressRef view.
+  const progress = useRef(0);
 
   useEffect(() => {
     if (phase !== "lost") return;
