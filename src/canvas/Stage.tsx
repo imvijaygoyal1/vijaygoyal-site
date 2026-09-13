@@ -11,9 +11,11 @@ function Lights() {
   const { lights } = TIER_SETTINGS[useTier()];
   return (
     <>
-      <ambientLight intensity={0.35} />
-      {lights > 0 && <directionalLight position={[3, 4, 5]} intensity={1.1} />}
-      {lights > 2 && <pointLight position={[-4, -2, 3]} intensity={0.5} />}
+      {/* Ambient and the environment have to carry the low tier on their own:
+          TIER_SETTINGS gives it zero dynamic lights. */}
+      <ambientLight intensity={0.6} />
+      {lights > 0 && <directionalLight position={[3, 4, 5]} intensity={2.4} />}
+      {lights > 2 && <pointLight position={[-4, -2, 3]} intensity={0.9} />}
     </>
   );
 }
@@ -53,8 +55,11 @@ export function Stage({
       <QualityProvider>
         <Lights />
         <Environment resolution={64}>
-          <Lightformer intensity={2} position={[0, 2, 4]} scale={[8, 8, 1]} />
-          <Lightformer intensity={0.6} position={[-3, 1, 2]} scale={[4, 4, 1]} />
+          <Lightformer intensity={3.6} position={[0, 2, 4]} scale={[8, 8, 1]} />
+          <Lightformer intensity={1.6} position={[-3, 1, 2]} scale={[4, 4, 1]} />
+          {/* Rim from behind, so the slab keeps an edge against the stage even
+              when it is turned away. */}
+          <Lightformer intensity={2.2} position={[2, 1, -4]} scale={[5, 5, 1]} />
         </Environment>
         <CameraRig progress={progress} />
         <ScrollRig progress={progress} />

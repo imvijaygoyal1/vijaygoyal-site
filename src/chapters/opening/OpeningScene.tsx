@@ -19,7 +19,17 @@ export function OpeningScene({ progress, range }: ChapterSceneProps) {
   return (
     <mesh ref={slab}>
       <boxGeometry args={[1.1, 2.2, 0.08]} />
-      <meshStandardMaterial color="#15171d" metalness={0.6} roughness={0.35} />
+      {/* Light enough to clear ~4:1 against the stage. The previous #15171d
+          measured 1.12:1 against #07080a -- indistinguishable from the
+          background. Lower metalness so the base colour carries rather than
+          relying on reflections from a two-lightformer environment. */}
+      <meshStandardMaterial
+        color="#9aa3b7"
+        metalness={0.25}
+        roughness={0.32}
+        emissive="#20263a"
+        emissiveIntensity={0.45}
+      />
     </mesh>
   );
 }
