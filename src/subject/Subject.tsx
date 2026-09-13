@@ -84,8 +84,8 @@ export function Subject({ progress }: { progress: ProgressRef }) {
 
     const w = watch.current;
     if (w) {
-      w.position.set(1.45, -0.3, 0.35);
-      w.scale.setScalar(0.6 + 0.4 * s.companion);
+      w.position.set(1.35, -0.15, 0.35);
+      w.scale.setScalar(0.85 + 0.25 * s.companion);
       setOpacity(w, s.companion);
     }
 

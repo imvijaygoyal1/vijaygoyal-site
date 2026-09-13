@@ -11,10 +11,12 @@ export function WatchHomeScreen() {
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Unable to create the Watch face canvas");
 
-    context.fillStyle = "#050608";
+    // A slightly lifted navy background keeps the screen visible against the
+    // site's near-black stage while retaining the dark Apple Watch treatment.
+    context.fillStyle = "#101827";
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.strokeStyle = "#1c2027";
-    context.lineWidth = 20;
+    context.lineWidth = 24;
     context.beginPath();
     context.arc(185, 225, 126, 0, Math.PI * 2);
     context.stroke();
@@ -32,7 +34,7 @@ export function WatchHomeScreen() {
     }
     context.textAlign = "center";
     context.fillStyle = "#f5f5f7";
-    context.font = "600 70px -apple-system, Helvetica, sans-serif";
+    context.font = "600 78px -apple-system, Helvetica, sans-serif";
     context.fillText("10:09", 185, 166);
     context.fillStyle = "#aeb4bf";
     context.font = "18px -apple-system, Helvetica, sans-serif";
