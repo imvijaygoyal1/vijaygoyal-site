@@ -35,10 +35,6 @@ export function ColophonContent() {
         Built with three.js and React.
         {fps > 0 ? ` Right now you are getting ${fps} fps at ${calls} draw calls.` : ""}
       </p>
-      <p className="colophon-meta">
-        iPhone 17 Pro model by Ranguel, licensed under{" "}
-        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
-      </p>
     </div>
   );
 }

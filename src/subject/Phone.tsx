@@ -1,59 +1,49 @@
 import { forwardRef, useMemo, type ReactNode } from "react";
-import type { Group, Material, Mesh } from "three";
-import { useGLTF } from "@react-three/drei";
+import type { Group } from "three";
+import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import {
-  BODY_D, MM, SCREEN_H, SCREEN_R, SCREEN_W,
+  BODY_D, BODY_H, BODY_R, BODY_W, SCREEN_H, SCREEN_R, SCREEN_W,
 } from "./dimensions";
+import { CameraModule } from "./CameraModule";
 import { ScreenGlass } from "./ScreenGlass";
+import { TIER_SETTINGS } from "../lib/tier";
+import { useTier } from "../canvas/QualityProvider";
 
 /** Just in front of the body face, clear of z-fighting. */
 export const FACE_Z = BODY_D / 2 + 0.002;
 
-const MODEL_URL = "/models/iphone-17-pro.glb";
-const MODEL_SCALE = 1000 * MM;
-
-function isMesh(object: unknown): object is Mesh {
-  return (object as Mesh).isMesh === true;
-}
-
 /**
- * The device body and rear camera assembly come from the downloaded GLB model,
- * scaled to the published iPhone 17 Pro millimetre dimensions. The site keeps
- * its own captured app screens on top of the model’s front display.
+ * The device body: an extruded rail with a black display recess inside a
+ * uniform bezel, with the body and cover-glass corners aligned.
+ *
+ * The profile is extruded rather than a rounded box. A rounded box softens
+ * every edge equally and reads as a soap bar the moment the device turns;
+ * hardware has a flat rail and only a chamfer where it meets the glass.
  */
 export const Phone = forwardRef<Group, { children?: ReactNode }>(
   function Phone({ children }, ref) {
-    const { scene } = useGLTF(MODEL_URL);
+    const { metalness } = TIER_SETTINGS[useTier()];
+
+    const body = useMemo(
+      () => deviceGeometry(BODY_W, BODY_H, BODY_D, BODY_R, 0.011),
+      [],
+    );
     const recess = useMemo(
       () => roundedRectGeometry(SCREEN_W, SCREEN_H, SCREEN_R),
       [],
     );
-    const model = useMemo(() => {
-      const clone = scene.clone(true);
-      clone.scale.setScalar(MODEL_SCALE);
-      clone.traverse((object) => {
-        if (!isMesh(object)) return;
-        const materials = (Array.isArray(object.material)
-          ? object.material
-          : [object.material]) as Material[];
-        object.material = materials.map((material) => {
-          const copy = material.clone();
-          // Keep the site’s captured screens on top of the downloaded model.
-          if (["OLED", "OLED off", "Display Frame"].includes(copy.name)) {
-            copy.transparent = true;
-            copy.opacity = 0;
-            copy.depthWrite = false;
-          }
-          return copy;
-        });
-      });
-      return clone;
-    }, [scene]);
 
     return (
       <group ref={ref}>
-        <primitive object={model} />
+        <mesh geometry={body}>
+          <meshStandardMaterial
+            color="#2b2e34"
+            metalness={Math.max(metalness, 0.55)}
+            roughness={0.24}
+            envMapIntensity={1.4}
+          />
+        </mesh>
 
         {/* The black glass the display sits in. Without it the screen meets
             bare aluminium and the device reads as a printed card. */}
@@ -67,9 +57,8 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
             under the pixels. */}
         <ScreenGlass z={FACE_Z + 0.004} />
 
+        <CameraModule />
       </group>
     );
   },
 );
-
-useGLTF.preload(MODEL_URL);
