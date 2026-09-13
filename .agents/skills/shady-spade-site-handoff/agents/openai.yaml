@@ -1,0 +1,4 @@
+interface:
+  display_name: "Shady Spade Site Handoff"
+  short_description: "Resume and hand off the Vijay Goyal site safely"
+  default_prompt: "Use the Shady Spade site handoff to resume work from the latest checkpoint."
