@@ -3,6 +3,7 @@ import { Environment, Lightformer } from "@react-three/drei";
 import { QualityProvider, useTier } from "./QualityProvider";
 import { CameraRig } from "./CameraRig";
 import { ScrollRig } from "./ScrollRig";
+import { FrameProbe } from "./FrameProbe";
 import { TIER_SETTINGS } from "../lib/tier";
 import type { ProgressRef } from "../lib/progress";
 import { attachContextLossHandlers } from "./useContextLoss";
@@ -61,6 +62,7 @@ export function Stage({
               when it is turned away. */}
           <Lightformer intensity={2.2} position={[2, 1, -4]} scale={[5, 5, 1]} />
         </Environment>
+        <FrameProbe />
         <CameraRig progress={progress} />
         <ScrollRig progress={progress} />
       </QualityProvider>

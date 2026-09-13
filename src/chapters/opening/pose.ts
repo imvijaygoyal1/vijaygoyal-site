@@ -10,14 +10,14 @@ import { clamp01 } from "../../lib/progress";
 const START_ANGLE = (72 * Math.PI) / 180;
 
 /** Where the slab hangs at the start of the chapter. */
-const HANG = 1.05;
+const HANG = 1.5;
 
 /**
  * Where it settles. Deliberately above centre, not at it: the copy is pinned
  * to the lower third of the viewport, and a slab resting at y=0 overlaps the
  * headline -- white type on a light face, illegible exactly where it lands.
  */
-const REST = 0.52;
+const REST = 0.95;
 
 export interface OpeningPose {
   rotationY: number;

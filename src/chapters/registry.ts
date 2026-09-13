@@ -1,6 +1,10 @@
 import { assertValidRange, isActive, type ScrollRange } from "../lib/progress";
 import { validateKeyframes } from "../lib/keyframes";
+import { colophon } from "./colophon";
+import { craft } from "./craft";
 import { opening } from "./opening";
+import { shadyspade } from "./shadyspade";
+import { xbill } from "./xbill";
 import type { Chapter, RegisteredChapter } from "./types";
 
 export type { Chapter, ChapterSceneProps, RegisteredChapter } from "./types";
@@ -12,7 +16,7 @@ export const PRELOAD_MARGIN = 0.08;
  * section derives its height from this and the chapter's range, so a section
  * cannot come into view at a different scroll position than its scene.
  */
-export const TOTAL_VH = 180;
+export const TOTAL_VH = 560;
 
 export function sectionHeightVh(range: ScrollRange): number {
   return (range[1] - range[0]) * TOTAL_VH;
@@ -95,7 +99,16 @@ interface SequenceEntry {
   range: ScrollRange;
 }
 
-const SEQUENCE: readonly SequenceEntry[] = [{ chapter: opening, range: [0, 1] }];
+// Ranges live here, not in the chapter folders: the order of the narrative is
+// a property of the sequence, not of any one chapter. Section heights are
+// derived from these, so copy and scene can never drift apart.
+const SEQUENCE: readonly SequenceEntry[] = [
+  { chapter: opening, range: [0, 0.18] },
+  { chapter: xbill, range: [0.18, 0.45] },
+  { chapter: shadyspade, range: [0.45, 0.72] },
+  { chapter: craft, range: [0.72, 0.88] },
+  { chapter: colophon, range: [0.88, 1] },
+];
 
 export const CHAPTERS: readonly RegisteredChapter[] = SEQUENCE.map(
   ({ chapter, range }) => ({ ...chapter, range }),

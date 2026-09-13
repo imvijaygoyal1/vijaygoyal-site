@@ -15,7 +15,7 @@ vi.mock("./canvas/Stage", () => ({
 }));
 
 import { App } from "./App";
-import { TOTAL_VH } from "./chapters/registry";
+import { CHAPTERS, sectionHeightVh } from "./chapters/registry";
 
 describe("App", () => {
   let errorSpy: ReturnType<typeof vi.spyOn>;
@@ -52,10 +52,21 @@ describe("App", () => {
 
   it("derives each section's height from its chapter range, not a hard-coded value", () => {
     const { container } = render(<App />);
-    const section = container.querySelector<HTMLElement>("main > section");
-    expect(section).not.toBeNull();
-    // Opening spans the whole narrative today, so it gets all of TOTAL_VH.
-    expect(section!.style.minHeight).toBe(`${TOTAL_VH}vh`);
+    const sections = container.querySelectorAll<HTMLElement>("main > section");
+    expect(sections).toHaveLength(CHAPTERS.length);
+
+    // Every chapter, not just the first: a hard-coded height would pass a
+    // single-section check and desync the moment the sequence changed.
+    CHAPTERS.forEach((chapter, i) => {
+      const expected = `${sectionHeightVh(chapter.range)}vh`;
+      expect(sections[i]!.style.minHeight).toBe(expected);
+    });
+  });
+
+  it("gives the sections the chapter ids, in sequence order", () => {
+    const { container } = render(<App />);
+    const ids = [...container.querySelectorAll("main > section")].map((s) => s.id);
+    expect(ids).toEqual(CHAPTERS.map((c) => c.id));
   });
 
   it("renders the static route with no canvas when WebGL is unavailable", () => {

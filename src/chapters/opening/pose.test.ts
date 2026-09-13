@@ -17,19 +17,19 @@ describe("openingPose", () => {
   });
 
   it("hangs high at the start and settles lower", () => {
-    expect(openingPose(0).positionY).toBeCloseTo(1.05, 10);
-    expect(openingPose(1).positionY).toBeCloseTo(0.52, 10);
+    expect(openingPose(0).positionY).toBeCloseTo(1.5, 10);
+    expect(openingPose(1).positionY).toBeCloseTo(0.95, 10);
   });
 
   it("never settles at or below centre, where it would overlap the headline", () => {
     for (let p = 0; p <= 1.0001; p += 0.05) {
-      expect(openingPose(p).positionY).toBeGreaterThan(0.5);
+      expect(openingPose(p).positionY).toBeGreaterThan(0.9);
     }
   });
 
   it("interpolates linearly through the middle", () => {
     expect(openingPose(0.5).rotationY).toBeCloseTo(START_ANGLE / 2, 10);
-    expect(openingPose(0.5).positionY).toBeCloseTo((1.05 + 0.52) / 2, 10);
+    expect(openingPose(0.5).positionY).toBeCloseTo((1.5 + 0.95) / 2, 10);
     expect(openingPose(0.25).rotationY).toBeCloseTo(START_ANGLE * 0.75, 10);
   });
 
