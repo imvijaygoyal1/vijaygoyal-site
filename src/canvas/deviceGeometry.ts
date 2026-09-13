@@ -7,8 +7,8 @@ import { ExtrudeGeometry, Shape } from "three";
  * soap-bar shape — the reason the body stopped reading as a phone the moment
  * it turned. A phone is an extruded rounded rectangle: rounded corners in the
  * face plane, dead flat sides, and only a small chamfer where the rail meets
- * the glass. Extruding the same profile the display uses also makes body and
- * screen corners genuinely concentric rather than approximately so.
+ * the glass. Extruding the rounded profiles keeps the body and screen corners
+ * aligned rather than relying on a pill-shaped approximation.
  */
 export function deviceGeometry(
   width: number,

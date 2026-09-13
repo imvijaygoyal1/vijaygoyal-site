@@ -60,11 +60,11 @@ in a state its successor does not begin in, because they are the same object.
 for steps larger than the eased blend can produce.
 
 **Device geometry comes from Apple's published specs**, in millimetres, in
-`src/subject/dimensions.ts` with sources in the header. iPhone 18 Pro and 17 Pro
-share a body and display exactly (150.0 x 71.9 x 8.75 mm, 2622x1206 at 460 ppi).
-The bezel is derived from body minus display, not chosen. Only the corner radii
-are considered values — Apple publishes those in the Accessory Design
-Guidelines, not the tech specs — and they are marked as such in the file.
+`src/subject/dimensions.ts` with sources in the header. The site models the
+iPhone 17 Pro (150.0 x 71.9 x 8.75 mm, 2622x1206 at 460 ppi); its body and
+cover-glass radii are also taken from Apple's dimensional drawing. The public
+documents do not provide a product CAD mesh, so the camera lens barrels remain
+illustrative.
 
 Screens only draw when the display faces the viewer (`facing.ts`). That is
 physically right, and it hides the app swap, which happens while the device is

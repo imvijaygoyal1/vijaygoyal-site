@@ -1,17 +1,18 @@
 /**
  * Real device dimensions, in millimetres, from Apple's published tech specs.
  *
- * iPhone 18 Pro / 17 Pro (identical bodies and displays):
+ * iPhone 17 Pro:
  *   150.0 x 71.9 x 8.75 mm, 2622x1206 px at 460 ppi, 6.3-inch diagonal.
  *   https://support.apple.com/en-us/125090
- *   https://www.apple.com/iphone-18-pro/specs/
+ *   https://www.apple.com/iphone-17-pro/specs/
  *
  * Apple Watch Series 12, 43mm:
  *   43 x 37 x 9.7 mm (aluminium), 374x446 px.
  *   https://www.apple.com/apple-watch-series-12/specs/
  *
- * Everything below is derived from those figures rather than eyeballed, with
- * two exceptions noted at CORNER_RADIUS_MM.
+ * Everything below is derived from those figures rather than eyeballed. The
+ * public drawing does not expose a product CAD mesh, so camera lens barrels
+ * remain explicitly illustrative in CameraModule.tsx.
  */
 
 /** World units per millimetre. One unit is 65mm, so the phone is ~2.3 tall. */
@@ -45,20 +46,20 @@ export const BEZEL_MM =
 
 /**
  * The modelled display is the body inset by that uniform bezel, rather than the
- * implied size directly. A uniform bezel is the design intent; the 0.05mm
- * difference between the two axes is rounding in Apple's published millimetres,
- * and taking it literally would leave the screen fractionally off-centre.
+ * implied size directly. Apple publishes the display diagonal, pixel
+ * dimensions, and nominal ppi—not a separately dimensioned active-area
+ * rectangle—so this is the least-assumption reconstruction of its size.
  */
 export const SCREEN_W_MM = PHONE_W_MM - BEZEL_MM * 2;
 export const SCREEN_H_MM = PHONE_H_MM - BEZEL_MM * 2;
 
 /**
- * Body corner radius, read off Apple's iPhone 17 Pro dimensional drawing as
- * R12.00. The display radius stays concentric with it, inset by the bezel.
- * https://developer.apple.com/accessories/dimensional-drawings/
+ * Body and display corner radii from Apple's iPhone 17 Pro dimensional drawing.
+ * https://developer.apple.com/download/files/accessories/dimensional-drawings/iphone-17-pro.pdf
  */
 export const PHONE_R_MM = 12.0;
-export const SCREEN_R_MM = PHONE_R_MM - BEZEL_MM;
+/** Display/cover-glass radius: Apple drawing value R11.82. */
+export const SCREEN_R_MM = 11.82;
 
 export const SCREEN_ASPECT = SCREEN_PX_W / SCREEN_PX_H;
 

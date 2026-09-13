@@ -6,17 +6,16 @@ import { useTier } from "../canvas/QualityProvider";
 
 /**
  * The camera plateau, from Apple's iPhone 17 Pro dimensional drawing.
- * https://developer.apple.com/accessories/dimensional-drawings/
+ * https://developer.apple.com/download/files/accessories/dimensional-drawings/iphone-17-pro.pdf
  *
  * It is NOT a square module in a corner. It spans the full width of the back
  * and occupies the top third, with three lenses grouped on one side and the
  * flash and sensor on the other. The earlier corner square was wrong in kind,
  * not merely in position.
  *
- * Read directly off the drawing: the plateau's 58.01 mm height and the 12.00 R
- * corner radius. Lens centres were measured off the rasterised drawing and are
- * good to roughly a millimetre. Plateau protrusion is not dimensioned there, so
- * it stays a considered value.
+ * Apple publishes the plateau height and radius, but not a product CAD mesh.
+ * Lens centres and the visual lens/barrel sizes below are therefore explicitly
+ * measured/illustrative values rather than claimed exact geometry.
  */
 const PLATEAU_H_MM = 58.01;
 const PLATEAU_R_MM = 12.0;

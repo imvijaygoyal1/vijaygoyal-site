@@ -15,7 +15,7 @@ export const FACE_Z = BODY_D / 2 + 0.002;
 
 /**
  * The device body: an extruded rail with a black display recess inside a
- * uniform bezel, corners concentric with the body.
+ * uniform bezel, with the body and cover-glass corners aligned.
  *
  * The profile is extruded rather than a rounded box. A rounded box softens
  * every edge equally and reads as a soap bar the moment the device turns;

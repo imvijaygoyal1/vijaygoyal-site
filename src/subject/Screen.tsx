@@ -8,7 +8,8 @@ import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
 
 /**
- * One captured app screen, on a display with concentric rounded corners.
+ * One captured app screen, on a display with the published rounded-corner
+ * cover-glass radius.
  *
  * `meshBasicMaterial` with tone mapping off is deliberate: a screen emits
  * its own light, so it must not be shaded by the scene's lights or pulled

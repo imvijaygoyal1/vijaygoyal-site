@@ -42,8 +42,9 @@ describe("iPhone dimensions", () => {
     expect(BODY_H - SCREEN_H).toBeCloseTo(BEZEL * 2, 9);
   });
 
-  it("makes the corners concentric: body radius is screen radius plus bezel", () => {
-    expect(BODY_R / MM).toBeCloseTo(SCREEN_R_MM + BEZEL_MM, 6);
+  it("uses Apple's published body and cover-glass corner radii", () => {
+    expect(BODY_R / MM).toBeCloseTo(12.0, 6);
+    expect(SCREEN_R_MM).toBeCloseTo(11.82, 2);
   });
 
   it("keeps the screen radius inside the screen", () => {
