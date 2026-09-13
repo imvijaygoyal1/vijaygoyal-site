@@ -27,7 +27,9 @@ export function Stage({
 }) {
   return (
     <Canvas
-      dpr={[1, 2]}
+      // Start at the conservative end of the budget table; QualityProvider
+      // raises it once the tier is known and on every tier change after.
+      dpr={1}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       style={{ position: "fixed", inset: 0 }}
       onCreated={({ gl }) => attachContextLossHandlers(gl.domElement, onContextLost)}
