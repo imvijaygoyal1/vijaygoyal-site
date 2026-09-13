@@ -23,15 +23,16 @@ export const PRELOAD_MARGIN = 0.08;
  */
 const POSES: readonly SubjectState[] = [
   // 0 - arrival: turned away, high, screen dark.
-  subjectState({ rotationY: (72 * Math.PI) / 180, positionY: 1.5, screenOn: 0 }),
-  // 1 - facing the viewer, settled, screen awake. It lights during the turn,
-  //     the way a phone wakes when you pick it up. Ramping it across the whole
-  //     of the next chapter instead left the screen at a third of its opacity
-  //     for most of that beat, blended with the black recess -- which is what
-  //     made the app's colour look washed out.
-  subjectState({ rotationY: 0, positionY: 0.95, screenOn: 1 }),
-  // 2 - xBill: the screen comes on and the device turns slowly through it.
-  subjectState({ rotationY: -0.5, positionY: 0.95, screenOn: 1, screenMix: 0 }),
+  subjectState({ rotationY: (72 * Math.PI) / 180, positionY: 1.5, screenOn: 0, homeOn: 0 }),
+  // 1 - facing the viewer, settled, and the home screen wakes. A phone lights
+  //     when you pick it up; it does not open straight into an app.
+  subjectState({ rotationY: 0, positionY: 0.95, screenOn: 0, homeOn: 1, homeZoom: 0 }),
+  // 2 - xBill: the view dives into the xBill icon while the app dissolves in
+  //     behind it, the way iOS opens an app.
+  subjectState({
+    rotationY: -0.5, positionY: 0.95,
+    homeOn: 0, homeZoom: 1, screenOn: 1, screenMix: 0,
+  }),
   // 3 - Shady Spade: the screen changes, the Watch arrives, cards deal.
   subjectState({ rotationY: 0.3, positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1 }),
   // 4 - Craft: companions withdraw and the device turns to show its profile.

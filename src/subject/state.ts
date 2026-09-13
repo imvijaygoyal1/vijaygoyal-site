@@ -22,20 +22,25 @@ export interface SubjectState {
   cards: number;
   /** Screen brightness, 0..1. A dark device is simply screenOn: 0. */
   screenOn: number;
-  /** Which screen: 0 is xBill, 1 is The Shady Spade. */
+  /** Which screen: 0 is xBill, 1 is The Shady Spade. Also picks which icon
+   *  the home-screen zoom travels toward. */
   screenMix: number;
+  /** Home screen brightness, 0..1. */
+  homeOn: number;
+  /** 0 shows the whole home screen, 1 frames a single app icon. */
+  homeZoom: number;
 }
 
 export const SUBJECT_KEYS = [
   "rotationY", "tiltX", "positionY", "positionZ",
-  "scale", "companion", "cards", "screenOn", "screenMix",
+  "scale", "companion", "cards", "screenOn", "screenMix", "homeOn", "homeZoom",
 ] as const satisfies readonly (keyof SubjectState)[];
 
 /** The subject at rest: one solid slab, facing the viewer, screen dark. */
 export const NEUTRAL: SubjectState = {
   rotationY: 0, tiltX: 0,
   positionY: 0.95, positionZ: 0, scale: 1,
-  companion: 0, cards: 0, screenOn: 0, screenMix: 0,
+  companion: 0, cards: 0, screenOn: 0, screenMix: 0, homeOn: 0, homeZoom: 0,
 };
 
 export function subjectState(overrides: Partial<SubjectState>): SubjectState {

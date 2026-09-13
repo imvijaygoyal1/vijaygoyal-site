@@ -5,6 +5,7 @@ import { CHAPTERS } from "../chapters/registry";
 import { subjectStateAt } from "./sequence";
 import { Phone } from "./Phone";
 import { Screen } from "./Screen";
+import { applyHomeZoom, HomeScreen } from "./HomeScreen";
 import { WATCH_D, WATCH_H, WATCH_R, WATCH_W } from "./dimensions";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
@@ -57,6 +58,7 @@ export function Subject({ progress }: { progress: ProgressRef }) {
   const root = useRef<Group>(null);
   const watch = useRef<Group>(null);
   const cards = useRef<(Mesh | null)[]>([]);
+  const home = useRef<Group>(null);
   const screenA = useRef<Group>(null);
   const screenB = useRef<Group>(null);
   const { metalness } = TIER_SETTINGS[useTier()];
@@ -79,6 +81,11 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     g.position.set(0, s.positionY, s.positionZ);
     g.rotation.set(s.tiltX, s.rotationY, 0);
     g.scale.setScalar(s.scale);
+
+    // The home screen sits under the app screens and dives into an icon as
+    // the app dissolves in over it.
+    setOpacity(home.current, s.homeOn);
+    applyHomeZoom(home.current, s.homeZoom, s.screenMix);
 
     setOpacity(screenA.current, s.screenOn * (1 - s.screenMix));
     setOpacity(screenB.current, s.screenOn * s.screenMix);
@@ -103,6 +110,7 @@ export function Subject({ progress }: { progress: ProgressRef }) {
   return (
     <group ref={root}>
       <Phone>
+        <HomeScreen ref={home} />
         <group ref={screenA} visible={false}>
           <Screen url={xbillScreen} opacity={1} renderOrder={1} />
         </group>
