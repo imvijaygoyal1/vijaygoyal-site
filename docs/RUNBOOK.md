@@ -21,20 +21,34 @@ Run this before every deploy. **Do not read it and assume — execute it.**
     Expected: the scene comes back. If it does not, the site should still show all copy via
     the static route — never a black rectangle. See open items below.
 
-## Cloudflare Pages configuration
+## Deploying
 
-Set once, in the dashboard:
+`npm run deploy` (= `npm run build && wrangler deploy`). That is the whole
+deploy. **The repo is not Git-connected to Cloudflare — pushing to GitHub does
+not deploy anything.**
 
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Environment variable: `NODE_VERSION` = `22`
+`wrangler.jsonc` at the repo root IS the deployment. There is no Worker script:
+`assets.directory` points at `dist/`, `not_found_handling` is
+`single-page-application` so anchor URLs resolve, and `routes` declares
+`vijaygoyal.org` and `www.vijaygoyal.org` as custom domains — so attaching
+domains happens on deploy, not through a dashboard.
 
-Custom domains: `vijaygoyal.org` and `www.vijaygoyal.org`. Cloudflare writes the
-DNS records into the zone itself — a flattened CNAME at the apex to
-`<project>.pages.dev`, plus `www` redirecting to apex, and Universal SSL.
-**Never hand-create a DNS record for this site.** If `dig` comes back empty,
-wait out propagation (the zone's SOA minimum is 1800s) rather than adding
-records manually.
+Cloudflare account: `imvijaygoyal@gmail.com` (`d587fa5cfd86a7c2e0e2b8b6ed23d10f`).
+Auth is an existing OAuth token; if it expires, `wrangler login`.
+
+Cloudflare writes and owns the DNS records for the custom domains.
+**Never hand-create a DNS record for this site.** If `dig` comes back empty after
+a deploy, wait — a newly attached custom domain takes minutes to activate while
+its certificate is issued.
+
+### Do not re-run `wrangler pages project create`
+
+It edits tracked files without asking. On 2026-09-13 it rewrote `"preview"` to
+`wrangler dev` — which is exactly what Playwright's `webServer` invokes, so it
+would have broken all 12 e2e tests — added `@cloudflare/vite-plugin` that a
+static SPA does not need, and pinned both new dependencies with `^` ranges
+against this project's exact-pin rule. All reverted in `34e3424`. If you ever
+re-run it, `git diff` every tracked file before committing.
 
 ## Open items — do not mark these resolved because CI is green
 
