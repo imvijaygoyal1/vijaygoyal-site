@@ -20,19 +20,35 @@ function Lights() {
 
 export function Stage({
   progress,
+  hidden = false,
   onContextLost,
+  onContextRestored,
 }: {
   progress: ProgressRef;
+  /** True while a lost context is inside its restore window: kept in the
+   *  document so `webglcontextrestored` can still fire, but invisible, inert,
+   *  and not drawing frames. */
+  hidden?: boolean;
   onContextLost: () => void;
+  onContextRestored: () => void;
 }) {
   return (
     <Canvas
       // Start at the conservative end of the budget table; QualityProvider
       // raises it once the tier is known and on every tier change after.
       dpr={1}
+      frameloop={hidden ? "never" : "always"}
+      aria-hidden={hidden || undefined}
       gl={{ antialias: true, powerPreference: "high-performance" }}
-      style={{ position: "fixed", inset: 0 }}
-      onCreated={({ gl }) => attachContextLossHandlers(gl.domElement, onContextLost)}
+      style={{
+        position: "fixed",
+        inset: 0,
+        visibility: hidden ? "hidden" : "visible",
+        pointerEvents: hidden ? "none" : "auto",
+      }}
+      onCreated={({ gl }) =>
+        attachContextLossHandlers(gl.domElement, onContextLost, onContextRestored)
+      }
     >
       <QualityProvider>
         <Lights />
