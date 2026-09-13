@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { SubjectState } from "../subject/state";
 import type { ProgressRef, ScrollRange } from "../lib/progress";
 import type { Keyframe } from "../lib/keyframes";
 import type { Tier } from "../lib/tier";
@@ -25,12 +26,14 @@ export interface ChapterSceneProps {
 export interface Chapter {
   id: string;
   keyframes: readonly Keyframe[];
-  Scene: ComponentType<ChapterSceneProps>;
   Content: ComponentType;
   preload: () => void;
 }
 
 /** A chapter once the registry has assigned it its slice of global scroll. */
 export interface RegisteredChapter extends Chapter {
+  /** Subject pose entering and leaving this chapter. */
+  enter: SubjectState;
+  exit: SubjectState;
   range: ScrollRange;
 }

@@ -8,15 +8,17 @@ import {
   validateRegistry,
   type RegisteredChapter,
 } from "./registry";
+import { NEUTRAL } from "../subject/state";
 
 const Stub = () => null;
 const make = (id: string, range: readonly [number, number]): RegisteredChapter => ({
   id,
   range,
   keyframes: [{ at: 0, position: [0, 0, 5], lookAt: [0, 0, 0] }],
-  Scene: Stub,
   Content: Stub,
   preload: () => {},
+  enter: NEUTRAL,
+  exit: NEUTRAL,
 });
 
 describe("validateRegistry", () => {

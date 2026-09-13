@@ -6,10 +6,36 @@ import { opening } from "./opening";
 import { shadyspade } from "./shadyspade";
 import { xbill } from "./xbill";
 import type { Chapter, RegisteredChapter } from "./types";
+import { subjectState, type SubjectState } from "../subject/state";
+import { validateContinuity } from "../subject/sequence";
 
 export type { Chapter, ChapterSceneProps, RegisteredChapter } from "./types";
 
 export const PRELOAD_MARGIN = 0.08;
+
+/**
+ * The narrative as a sequence of poses.
+ *
+ * Chapter i runs from POSES[i] to POSES[i+1]. Continuity is therefore
+ * structural: a chapter cannot exit in a state its successor does not start
+ * in, because they are the same object. `validateContinuity` still runs as a
+ * belt-and-braces check.
+ */
+const POSES: readonly SubjectState[] = [
+  // 0 - arrival: turned away, high, screen dark.
+  subjectState({ rotationY: (72 * Math.PI) / 180, positionY: 1.5, screenOn: 0 }),
+  // 1 - facing the viewer, settled, still dark.
+  subjectState({ rotationY: 0, positionY: 0.95, screenOn: 0 }),
+  // 2 - xBill: the screen comes on and the bill divides.
+  subjectState({ rotationY: -0.42, positionY: 0.95, splitX: 1, screenOn: 1, screenMix: 0 }),
+  // 3 - Shady Spade: the split closes, the Watch arrives, the screen changes.
+  subjectState({ rotationY: 0.22, positionY: 0.95, splitX: 0, screenOn: 1, screenMix: 1, companion: 1, cards: 1 }),
+  // 4 - Craft: companions withdraw, the device separates into layers.
+  subjectState({ rotationY: 0, tiltX: -0.5, positionY: 0.95, layerY: 1, screenOn: 0.3, screenMix: 1, scale: 0.86 }),
+  // 5 - Colophon: everything closes and recedes.
+  subjectState({ rotationY: 0.4, positionY: 0.95, positionZ: -5, scale: 0.3, screenOn: 0 }),
+];
+
 
 /**
  * Total scrollable height of the narrative, in viewport heights. Every DOM
@@ -120,7 +146,13 @@ const SEQUENCE: readonly SequenceEntry[] = [
 ];
 
 export const CHAPTERS: readonly RegisteredChapter[] = SEQUENCE.map(
-  ({ chapter, range }) => ({ ...chapter, range }),
+  ({ chapter, range }, i) => ({
+    ...chapter,
+    range,
+    enter: POSES[i]!,
+    exit: POSES[i + 1]!,
+  }),
 );
 
 validateRegistry(CHAPTERS);
+validateContinuity(CHAPTERS);

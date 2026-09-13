@@ -1,0 +1,66 @@
+import { clamp01 } from "../lib/progress";
+import { easeInOutCubic } from "../lib/ease";
+
+/**
+ * Everything the one persistent object can be.
+ *
+ * The site used to mount a separate scene per chapter and crossfade between
+ * them, which ghosted: two devices in the same place at half opacity. There
+ * is now a single subject that never unmounts. Chapters do not own objects
+ * -- they own the state this one is in, and moving between chapters is an
+ * interpolation rather than a hand-off.
+ */
+export interface SubjectState {
+  /** Lateral separation of the three slabs: a bill splitting. */
+  splitX: number;
+  /** Vertical separation of the same three slabs: an exploded stack. */
+  layerY: number;
+  rotationY: number;
+  tiltX: number;
+  positionY: number;
+  positionZ: number;
+  scale: number;
+  /** Presence of the Watch, 0..1. */
+  companion: number;
+  /** Cards dealt, 0..1. */
+  cards: number;
+  /** Screen brightness, 0..1. A dark device is simply screenOn: 0. */
+  screenOn: number;
+  /** Which screen: 0 is xBill, 1 is The Shady Spade. */
+  screenMix: number;
+}
+
+export const SUBJECT_KEYS = [
+  "splitX", "layerY", "rotationY", "tiltX", "positionY", "positionZ",
+  "scale", "companion", "cards", "screenOn", "screenMix",
+] as const satisfies readonly (keyof SubjectState)[];
+
+/** The subject at rest: one solid slab, facing the viewer, screen dark. */
+export const NEUTRAL: SubjectState = {
+  splitX: 0, layerY: 0, rotationY: 0, tiltX: 0,
+  positionY: 0.95, positionZ: 0, scale: 1,
+  companion: 0, cards: 0, screenOn: 0, screenMix: 0,
+};
+
+export function subjectState(overrides: Partial<SubjectState>): SubjectState {
+  return { ...NEUTRAL, ...overrides };
+}
+
+/** Component-wise interpolation. Eased, so chapters do not start abruptly. */
+export function blendSubject(
+  from: SubjectState,
+  to: SubjectState,
+  t: number,
+): SubjectState {
+  const k = easeInOutCubic(clamp01(t));
+  const out = {} as SubjectState;
+  for (const key of SUBJECT_KEYS) {
+    out[key] = from[key] + (to[key] - from[key]) * k;
+  }
+  return out;
+}
+
+/** Whether two states are the same to within rounding. */
+export function sameSubject(a: SubjectState, b: SubjectState): boolean {
+  return SUBJECT_KEYS.every((k) => Math.abs(a[k] - b[k]) < 1e-9);
+}

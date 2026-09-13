@@ -2,7 +2,7 @@ import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { QualityProvider, useTier } from "./QualityProvider";
 import { CameraRig } from "./CameraRig";
-import { ScrollRig } from "./ScrollRig";
+import { Subject } from "../subject/Subject";
 import { FrameProbe } from "./FrameProbe";
 import { ScrollDriver } from "./ScrollDriver";
 import { TIER_SETTINGS } from "../lib/tier";
@@ -81,7 +81,7 @@ export function Stage({
         <ScrollDriver progress={progress} />
         <FrameProbe />
         <CameraRig progress={progress} />
-        <ScrollRig progress={progress} />
+        <Subject progress={progress} />
       </QualityProvider>
     </Canvas>
   );
