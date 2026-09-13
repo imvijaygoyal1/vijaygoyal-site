@@ -24,8 +24,12 @@ export const PRELOAD_MARGIN = 0.08;
 const POSES: readonly SubjectState[] = [
   // 0 - arrival: turned away, high, screen dark.
   subjectState({ rotationY: (72 * Math.PI) / 180, positionY: 1.5, screenOn: 0 }),
-  // 1 - facing the viewer, settled, still dark.
-  subjectState({ rotationY: 0, positionY: 0.95, screenOn: 0 }),
+  // 1 - facing the viewer, settled, screen awake. It lights during the turn,
+  //     the way a phone wakes when you pick it up. Ramping it across the whole
+  //     of the next chapter instead left the screen at a third of its opacity
+  //     for most of that beat, blended with the black recess -- which is what
+  //     made the app's colour look washed out.
+  subjectState({ rotationY: 0, positionY: 0.95, screenOn: 1 }),
   // 2 - xBill: the screen comes on and the device turns slowly through it.
   subjectState({ rotationY: -0.5, positionY: 0.95, screenOn: 1, screenMix: 0 }),
   // 3 - Shady Spade: the screen changes, the Watch arrives, cards deal.

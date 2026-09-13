@@ -5,6 +5,7 @@ import { roundedRectGeometry } from "../canvas/roundedRect";
 import {
   BODY_D, BODY_H, BODY_R, BODY_W, SCREEN_H, SCREEN_R, SCREEN_W,
 } from "./dimensions";
+import { ScreenGlass } from "./ScreenGlass";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
 
