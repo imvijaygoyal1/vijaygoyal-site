@@ -65,7 +65,7 @@ export function Subject({ progress }: { progress: ProgressRef }) {
   const { metalness } = TIER_SETTINGS[useTier()];
 
   const watchBody = useMemo(
-    () => deviceGeometry(WATCH_W, WATCH_H, WATCH_D, WATCH_R, 0.02),
+    () => deviceGeometry(WATCH_W, WATCH_H, WATCH_D, WATCH_R, 0.016),
     [],
   );
   const watchGlass = useMemo(
