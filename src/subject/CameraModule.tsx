@@ -8,10 +8,9 @@ import { useTier } from "../canvas/QualityProvider";
  * The camera plateau, from Apple's iPhone 17 Pro dimensional drawing.
  * https://developer.apple.com/download/files/accessories/dimensional-drawings/iphone-17-pro.pdf
  *
- * It is NOT a square module in a corner. It spans the full width of the back
- * and occupies the top third, with three lenses grouped on one side and the
- * flash and sensor on the other. The earlier corner square was wrong in kind,
- * not merely in position.
+ * It is NOT a square module in a corner. The drawing shows a full-width,
+ * 58.01mm-high plateau with a second inset camera island, three concentric
+ * lens assemblies grouped on one side, and the flash and sensor on the other.
  *
  * Apple publishes the plateau height and radius, but not a product CAD mesh.
  * Lens centres and the visual lens/barrel sizes below are therefore explicitly
@@ -20,9 +19,15 @@ import { useTier } from "../canvas/QualityProvider";
 const PLATEAU_H_MM = 58.01;
 const PLATEAU_R_MM = 12.0;
 const PLATEAU_PROUD_MM = 2.1;
+const CAMERA_ISLAND_W_MM = 57.65;
+const CAMERA_ISLAND_H_MM = 42.0;
+const CAMERA_ISLAND_R_MM = 11.82;
+const CAMERA_ISLAND_PROUD_MM = 0.65;
 
-const LENS_OUTER_MM = 8.0;
-const LENS_GLASS_MM = 5.9;
+/** Rear camera keepout diameters from the Pro drawing, not radii. */
+const LENS_KEEPOUT_DIAMETERS_MM = [11.30, 11.30, 8.86] as const;
+const LENS_RING_INSET_MM = 1.15;
+const LENS_GLASS_INSET_MM = 2.2;
 const LENS_PROUD_MM = 1.4;
 
 /**
@@ -63,10 +68,24 @@ export function CameraModule() {
       ),
     [],
   );
+  const cameraIsland = useMemo(
+    () =>
+      deviceGeometry(
+        CAMERA_ISLAND_W_MM * MM,
+        CAMERA_ISLAND_H_MM * MM,
+        CAMERA_ISLAND_PROUD_MM * MM * 2,
+        CAMERA_ISLAND_R_MM * MM,
+        0.004,
+      ),
+    [],
+  );
 
   // Plateau hangs from the top edge of the back.
   const plateauY = (PHONE_H_MM / 2 - PLATEAU_H_MM / 2) * MM;
-  const lensZ = BACK_Z - (PLATEAU_PROUD_MM + LENS_PROUD_MM / 2) * MM;
+  const islandY = (PHONE_H_MM / 2 - 24.5) * MM;
+  const lensZ =
+    BACK_Z -
+    (PLATEAU_PROUD_MM + CAMERA_ISLAND_PROUD_MM + LENS_PROUD_MM / 2) * MM;
   const barrel: [number, number, number] = [Math.PI / 2, 0, 0];
 
   return (
@@ -79,14 +98,26 @@ export function CameraModule() {
           envMapIntensity={1.3}
         />
       </mesh>
+      <mesh geometry={cameraIsland} position={[0, islandY, BACK_Z - PLATEAU_PROUD_MM * MM]}>
+        <meshStandardMaterial
+          color="#1c1e23"
+          metalness={Math.max(metalness, 0.6)}
+          roughness={0.25}
+          envMapIntensity={1.35}
+        />
+      </mesh>
 
       {LENSES_FROM_DRAWN_LEFT.map((p, i) => {
         const [x, y] = toObject(p);
+        const keepoutDiameter = LENS_KEEPOUT_DIAMETERS_MM[i as 0 | 1 | 2];
+        const outerRadius = keepoutDiameter / 2;
+        const ringRadius = Math.max(outerRadius - LENS_RING_INSET_MM, 0.8);
+        const glassRadius = Math.max(outerRadius - LENS_GLASS_INSET_MM, 0.7);
         return (
           <group key={i} position={[x, y, lensZ]}>
             <mesh rotation={barrel}>
               <cylinderGeometry
-                args={[LENS_OUTER_MM * MM, LENS_OUTER_MM * MM, LENS_PROUD_MM * MM, segments]}
+                args={[outerRadius * MM, outerRadius * MM, LENS_PROUD_MM * MM, segments]}
               />
               <meshStandardMaterial
                 color="#3b3e45"
@@ -95,10 +126,17 @@ export function CameraModule() {
                 envMapIntensity={1.5}
               />
             </mesh>
-            <mesh position={[0, 0, -LENS_PROUD_MM * MM * 0.6]} rotation={barrel}>
-              <cylinderGeometry
-                args={[LENS_GLASS_MM * MM, LENS_GLASS_MM * MM, 0.004, segments]}
+            <mesh position={[0, 0, -LENS_PROUD_MM * MM * 0.48]} rotation={barrel}>
+              <cylinderGeometry args={[ringRadius * MM, ringRadius * MM, 0.006, segments]} />
+              <meshStandardMaterial
+                color="#101219"
+                metalness={0.96}
+                roughness={0.14}
+                envMapIntensity={1.6}
               />
+            </mesh>
+            <mesh position={[0, 0, -LENS_PROUD_MM * MM * 0.6]} rotation={barrel}>
+              <cylinderGeometry args={[glassRadius * MM, glassRadius * MM, 0.004, segments]} />
               <meshStandardMaterial
                 color="#04050b"
                 metalness={0.95}
