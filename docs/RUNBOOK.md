@@ -50,6 +50,42 @@ static SPA does not need, and pinned both new dependencies with `^` ranges
 against this project's exact-pin rule. All reverted in `34e3424`. If you ever
 re-run it, `git diff` every tracked file before committing.
 
+## How the scene is built
+
+There is **one continuous subject**, not a scene per chapter. Chapters declare
+the *state* the device is in; `registry.ts` holds six poses and chapter i spans
+`POSES[i]` to `POSES[i+1]`, so continuity is structural — a chapter cannot exit
+in a state its successor does not begin in, because they are the same object.
+`validateContinuity` re-checks at import and a test samples the whole narrative
+for steps larger than the eased blend can produce.
+
+**Device geometry comes from Apple's published specs**, in millimetres, in
+`src/subject/dimensions.ts` with sources in the header. iPhone 18 Pro and 17 Pro
+share a body and display exactly (150.0 x 71.9 x 8.75 mm, 2622x1206 at 460 ppi).
+The bezel is derived from body minus display, not chosen. Only the corner radii
+are considered values — Apple publishes those in the Accessory Design
+Guidelines, not the tech specs — and they are marked as such in the file.
+
+Screens only draw when the display faces the viewer (`facing.ts`). That is
+physically right, and it hides the app swap, which happens while the device is
+turned away during the full rotation.
+
+## Refreshing the captures
+
+Build each app for the iOS 26.5 simulator (iPhone 17 Pro, UDID
+`CA2078AC-6559-4BF3-93CB-370CF27E92EA`), install, launch, then
+`xcrun simctl io <udid> screenshot`. Then crop, resize to 768 wide and save as
+progressive JPEG q80-82 into the chapter folder.
+
+- **Terminate the other app first.** Launching one app while another runs leaves
+  a "back to <app>" indicator in the status bar.
+- **The home screen capture needs the simulator tidied.** Uninstall
+  `*.uitests.xctrunner` and `com.vijaygoyal.darkicontest` or they appear on it.
+- **Icon rectangles** for the zoom live in `src/subject/iconZoom.ts`. If the home
+  screen is recaptured, re-measure them and verify by cropping the rect back out
+  and looking at it.
+- Textures are gated at 250 kB total; currently 218 kB.
+
 ## Open items — do not mark these resolved because CI is green
 
 - **No mid-range Android has ever run this.** That device class defines the
