@@ -1,93 +1,122 @@
 import { useMemo } from "react";
 import { deviceGeometry } from "../canvas/deviceGeometry";
-import { BODY_D, BODY_H, BODY_W } from "./dimensions";
+import { BODY_D, MM, PHONE_H_MM, PHONE_W_MM } from "./dimensions";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
 
-/** Plateau size, as a fraction of the body width. Roughly a Pro's proportions. */
-const PLATEAU = BODY_W * 0.46;
-const PLATEAU_D = 0.035;
-const LENS_R = PLATEAU * 0.19;
-const LENS_D = 0.024;
+/**
+ * The camera plateau, from Apple's iPhone 17 Pro dimensional drawing.
+ * https://developer.apple.com/accessories/dimensional-drawings/
+ *
+ * It is NOT a square module in a corner. It spans the full width of the back
+ * and occupies the top third, with three lenses grouped on one side and the
+ * flash and sensor on the other. The earlier corner square was wrong in kind,
+ * not merely in position.
+ *
+ * Read directly off the drawing: the plateau's 58.01 mm height and the 12.00 R
+ * corner radius. Lens centres were measured off the rasterised drawing and are
+ * good to roughly a millimetre. Plateau protrusion is not dimensioned there, so
+ * it stays a considered value.
+ */
+const PLATEAU_H_MM = 58.01;
+const PLATEAU_R_MM = 12.0;
+const PLATEAU_PROUD_MM = 2.1;
 
-/** Back face, plus the plateau standing proud of it. */
-const BACK_Z = -BODY_D / 2;
-
-/** Lens centres within the plateau, in the triangular Pro arrangement. */
-const LENSES: readonly [number, number][] = [
-  [-PLATEAU * 0.22, PLATEAU * 0.22],
-  [PLATEAU * 0.22, PLATEAU * 0.22],
-  [-PLATEAU * 0.22, -PLATEAU * 0.22],
-];
+const LENS_OUTER_MM = 8.0;
+const LENS_GLASS_MM = 5.9;
+const LENS_PROUD_MM = 1.4;
 
 /**
- * The camera plateau on the back of the phone.
+ * Measured from the drawing's rear view, in millimetres from the top-left of
+ * the back as drawn.
  *
- * The back is on screen for a real stretch of the narrative now that the
- * device turns a full circle, and a completely blank slab was the most obvious
- * thing missing. Built from primitives: a rounded plateau standing proud of the
- * back, three lens barrels with dark glass, a flash and a sensor.
+ * MIRRORED into object space below: the back faces -Z, so a viewer looking at
+ * it sees +X on their left. Placing these at negative X put the whole cluster
+ * on the wrong side of the phone, which is what the bare eye caught.
  */
+const LENSES_FROM_DRAWN_LEFT: readonly [number, number][] = [
+  [17.0, 16.0],
+  [17.0, 39.5],
+  [38.0, 27.8],
+];
+const FLASH_FROM_DRAWN_LEFT: [number, number] = [58.0, 16.5];
+const SENSOR_FROM_DRAWN_LEFT: [number, number] = [58.0, 30.0];
+
+/** Drawing coordinates (from top-left of the back) to object space. */
+function toObject([fromLeft, fromTop]: readonly [number, number]): [number, number] {
+  return [(PHONE_W_MM / 2 - fromLeft) * MM, (PHONE_H_MM / 2 - fromTop) * MM];
+}
+
+const BACK_Z = -BODY_D / 2;
+
 export function CameraModule() {
   const { metalness, smoothness } = TIER_SETTINGS[useTier()];
+  const segments = Math.max(14, smoothness * 12);
+
   const plateau = useMemo(
-    () => deviceGeometry(PLATEAU, PLATEAU, PLATEAU_D, PLATEAU * 0.3, 0.008),
+    () =>
+      deviceGeometry(
+        PHONE_W_MM * MM,
+        PLATEAU_H_MM * MM,
+        PLATEAU_PROUD_MM * MM * 2,
+        PLATEAU_R_MM * MM,
+        0.006,
+      ),
     [],
   );
 
-  // Barrels point along -z, so they stand out of the back.
-  const barrelRotation: [number, number, number] = [Math.PI / 2, 0, 0];
-  const segments = Math.max(12, smoothness * 10);
+  // Plateau hangs from the top edge of the back.
+  const plateauY = (PHONE_H_MM / 2 - PLATEAU_H_MM / 2) * MM;
+  const lensZ = BACK_Z - (PLATEAU_PROUD_MM + LENS_PROUD_MM / 2) * MM;
+  const barrel: [number, number, number] = [Math.PI / 2, 0, 0];
 
   return (
-    <group position={[-BODY_W * 0.235, BODY_H * 0.325, BACK_Z - PLATEAU_D / 2 + 0.001]}>
-      <mesh geometry={plateau}>
+    <group>
+      <mesh geometry={plateau} position={[0, plateauY, BACK_Z]}>
         <meshStandardMaterial
-          color="#25272c"
+          color="#24262b"
           metalness={Math.max(metalness, 0.55)}
-          roughness={0.26}
+          roughness={0.27}
           envMapIntensity={1.3}
         />
       </mesh>
 
-      {LENSES.map(([x, y], i) => (
-        <group key={i} position={[x, y, -PLATEAU_D / 2 - LENS_D / 2]}>
-          {/* Barrel ring */}
-          <mesh rotation={barrelRotation}>
-            <cylinderGeometry args={[LENS_R, LENS_R, LENS_D, segments]} />
-            <meshStandardMaterial
-              color="#3a3d44"
-              metalness={0.85}
-              roughness={0.22}
-              envMapIntensity={1.5}
-            />
-          </mesh>
-          {/* Glass */}
-          <mesh position={[0, 0, -LENS_D / 2 - 0.001]} rotation={barrelRotation}>
-            <cylinderGeometry args={[LENS_R * 0.78, LENS_R * 0.78, 0.004, segments]} />
-            <meshStandardMaterial
-              color="#05060b"
-              metalness={0.95}
-              roughness={0.06}
-              envMapIntensity={1.6}
-            />
-          </mesh>
-        </group>
-      ))}
+      {LENSES_FROM_DRAWN_LEFT.map((p, i) => {
+        const [x, y] = toObject(p);
+        return (
+          <group key={i} position={[x, y, lensZ]}>
+            <mesh rotation={barrel}>
+              <cylinderGeometry
+                args={[LENS_OUTER_MM * MM, LENS_OUTER_MM * MM, LENS_PROUD_MM * MM, segments]}
+              />
+              <meshStandardMaterial
+                color="#3b3e45"
+                metalness={0.88}
+                roughness={0.2}
+                envMapIntensity={1.5}
+              />
+            </mesh>
+            <mesh position={[0, 0, -LENS_PROUD_MM * MM * 0.6]} rotation={barrel}>
+              <cylinderGeometry
+                args={[LENS_GLASS_MM * MM, LENS_GLASS_MM * MM, 0.004, segments]}
+              />
+              <meshStandardMaterial
+                color="#04050b"
+                metalness={0.95}
+                roughness={0.05}
+                envMapIntensity={1.7}
+              />
+            </mesh>
+          </group>
+        );
+      })}
 
-      {/* Flash and sensor, in the corner the lenses leave free. */}
-      <mesh
-        position={[PLATEAU * 0.22, -PLATEAU * 0.22, -PLATEAU_D / 2 - 0.006]}
-        rotation={barrelRotation}
-      >
-        <cylinderGeometry args={[LENS_R * 0.42, LENS_R * 0.42, 0.012, segments]} />
-        <meshStandardMaterial color="#d8d2c2" metalness={0.3} roughness={0.35} />
+      <mesh position={[...toObject(FLASH_FROM_DRAWN_LEFT), lensZ]} rotation={barrel}>
+        <cylinderGeometry args={[3.4 * MM, 3.4 * MM, 0.008, segments]} />
+        <meshStandardMaterial color="#ded7c6" metalness={0.3} roughness={0.35} />
       </mesh>
-      <mesh
-        position={[PLATEAU * 0.22, -PLATEAU * 0.02, -PLATEAU_D / 2 - 0.004]}
-        rotation={barrelRotation}
-      >
-        <cylinderGeometry args={[LENS_R * 0.22, LENS_R * 0.22, 0.008, segments]} />
+      <mesh position={[...toObject(SENSOR_FROM_DRAWN_LEFT), lensZ]} rotation={barrel}>
+        <cylinderGeometry args={[2.0 * MM, 2.0 * MM, 0.006, segments]} />
         <meshStandardMaterial color="#0a0c12" metalness={0.6} roughness={0.3} />
       </mesh>
     </group>

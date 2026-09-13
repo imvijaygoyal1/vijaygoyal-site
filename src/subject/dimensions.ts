@@ -53,13 +53,12 @@ export const SCREEN_W_MM = PHONE_W_MM - BEZEL_MM * 2;
 export const SCREEN_H_MM = PHONE_H_MM - BEZEL_MM * 2;
 
 /**
- * The one figure Apple does not publish. Corner radii appear in the Accessory
- * Design Guidelines, not the tech specs, so this is a considered value rather
- * than a derived one: roughly 55pt of display radius at this density. The body
- * radius stays concentric with it.
+ * Body corner radius, read off Apple's iPhone 17 Pro dimensional drawing as
+ * R12.00. The display radius stays concentric with it, inset by the bezel.
+ * https://developer.apple.com/accessories/dimensional-drawings/
  */
-export const SCREEN_R_MM = 9.1;
-export const PHONE_R_MM = SCREEN_R_MM + BEZEL_MM;
+export const PHONE_R_MM = 12.0;
+export const SCREEN_R_MM = PHONE_R_MM - BEZEL_MM;
 
 export const SCREEN_ASPECT = SCREEN_PX_W / SCREEN_PX_H;
 
