@@ -13,11 +13,7 @@ import { useTier } from "../canvas/QualityProvider";
  * flash and sensor on the other. The earlier corner square was wrong in kind,
  * not merely in position.
  *
- * Apple publishes the plateau height and radius. The plateau uses the same
- * titanium finish as the rear shell, as shown in Apple's product imagery, not
- * the black plastic treatment used by the old placeholder.
- *
- * Apple does not publish a product CAD mesh.
+ * Apple publishes the plateau height and radius, but not a product CAD mesh.
  * Lens centres and the visual lens/barrel sizes below are therefore explicitly
  * measured/illustrative values rather than claimed exact geometry.
  */
@@ -77,7 +73,7 @@ export function CameraModule() {
     <group>
       <mesh geometry={plateau} position={[0, plateauY, BACK_Z]}>
         <meshStandardMaterial
-          color="#96999f"
+          color="#24262b"
           metalness={Math.max(metalness, 0.55)}
           roughness={0.27}
           envMapIntensity={1.3}
