@@ -7,11 +7,8 @@ import { Phone } from "./Phone";
 import { Screen } from "./Screen";
 import { applyHomeZoom, HomeScreen } from "./HomeScreen";
 import { facing } from "./facing";
-import { WATCH_D, WATCH_H, WATCH_R, WATCH_W } from "./dimensions";
 import { deviceGeometry } from "../canvas/deviceGeometry";
-import { roundedRectGeometry } from "../canvas/roundedRect";
-import { TIER_SETTINGS } from "../lib/tier";
-import { useTier } from "../canvas/QualityProvider";
+import { WatchHomeScreen } from "./WatchHomeScreen";
 import type { ProgressRef } from "../lib/progress";
 import xbillScreen from "../chapters/xbill/xbill-screen.webp";
 import spadeScreen from "../chapters/shadyspade/spade-screen.webp";
@@ -62,16 +59,6 @@ export function Subject({ progress }: { progress: ProgressRef }) {
   const home = useRef<Group>(null);
   const screenA = useRef<Group>(null);
   const screenB = useRef<Group>(null);
-  const { metalness } = TIER_SETTINGS[useTier()];
-
-  const watchBody = useMemo(
-    () => deviceGeometry(WATCH_W, WATCH_H, WATCH_D, WATCH_R, 0.016),
-    [],
-  );
-  const watchGlass = useMemo(
-    () => roundedRectGeometry(WATCH_W - 0.07, WATCH_H - 0.07, WATCH_R - 0.035),
-    [],
-  );
   const cardBody = useMemo(() => deviceGeometry(0.4, 0.58, 0.014, 0.045, 0.004), []);
 
   useFrame(() => {
@@ -125,20 +112,7 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       </Phone>
 
       <group ref={watch} visible={false}>
-        <mesh geometry={watchBody}>
-          <meshStandardMaterial
-            color="#2b2e34"
-            metalness={Math.max(metalness, 0.55)}
-            roughness={0.24}
-            envMapIntensity={1.4}
-          />
-        </mesh>
-        {/* Black glass, so the Watch is a device rather than a white block. It
-            carries no captured screen: that needs a paired watch simulator,
-            which is not wired up. */}
-        <mesh geometry={watchGlass} position={[0, 0, WATCH_D / 2 + 0.002]}>
-          <meshStandardMaterial color="#04050a" metalness={0.35} roughness={0.2} />
-        </mesh>
+        <WatchHomeScreen />
       </group>
 
       <group position={[-1.8, -0.2, 0.5]}>
