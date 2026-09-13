@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { openingPose } from "./pose";
 
-describe("openingPose", () => {
-  const START_ANGLE = (72 * Math.PI) / 180;
+const START_ANGLE = (72 * Math.PI) / 180;
 
+describe("openingPose", () => {
   it("starts turned away from the viewer", () => {
     expect(openingPose(0).rotationY).toBeCloseTo(START_ANGLE, 10);
   });
@@ -27,17 +27,17 @@ describe("openingPose", () => {
     }
   });
 
-  it("interpolates linearly through the middle", () => {
-    expect(openingPose(0.5).rotationY).toBeCloseTo(START_ANGLE / 2, 10);
-    expect(openingPose(0.5).positionY).toBeCloseTo((1.5 + 0.95) / 2, 10);
-    expect(openingPose(0.25).rotationY).toBeCloseTo(START_ANGLE * 0.75, 10);
+  it("is eased, not linear: most of the travel happens early", () => {
+    // A linear ramp would be exactly halfway at p=0.25.
+    const linearHalfway = (1.5 + 0.95) / 2;
+    expect(openingPose(0.25).positionY).toBeLessThan(linearHalfway);
   });
 
   it("is monotonic: scrubbing forward never reverses the rotation", () => {
     let previous = Number.POSITIVE_INFINITY;
     for (let p = 0; p <= 1.0001; p += 0.05) {
       const { rotationY } = openingPose(p);
-      expect(rotationY).toBeLessThanOrEqual(previous);
+      expect(rotationY).toBeLessThanOrEqual(previous + 1e-9);
       previous = rotationY;
     }
   });

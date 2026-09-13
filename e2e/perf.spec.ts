@@ -12,6 +12,9 @@ const SAMPLE_MS = 4000;
  */
 const MIN_COVERAGE = 0.8;
 
+/** Wheel events per second. Roughly what a real trackpad or mouse emits. */
+const WHEEL_HZ = 20;
+
 interface Sample {
   fps: number;
   scrolledPx: number;
@@ -31,7 +34,8 @@ test("@perf holds the frame rate floor while scrolling under 4x CPU throttling",
   await page.goto("/");
   await page.waitForSelector("canvas");
 
-  const sample = await page.evaluate(async (sampleMs: number): Promise<Sample> => {
+  const sample = await page.evaluate(
+    async ({ sampleMs, wheelHz }: { sampleMs: number; wheelHz: number }): Promise<Sample> => {
     const limit = document.documentElement.scrollHeight - window.innerHeight;
     const startScroll = window.scrollY;
 
@@ -39,6 +43,8 @@ test("@perf holds the frame rate floor while scrolling under 4x CPU throttling",
       let frames = 0;
       let dispatched = 0;
       const start = performance.now();
+
+      let lastWheel = 0;
 
       const tick = () => {
         frames++;
@@ -48,9 +54,16 @@ test("@perf holds the frame rate floor while scrolling under 4x CPU throttling",
         // with real wheel events so Lenis's smoothing runs exactly as it does
         // for a visitor. Deltas are tracked against Lenis's target rather than
         // the current scroll position, which lags it.
+        //
+        // Dispatched at WHEEL_HZ, not once per frame. A trackpad or wheel emits
+        // on the order of 20 events a second; firing one every frame is both
+        // unrealistic and expensive enough that the measurement was dominated
+        // by its own event synthesis -- this gate read 22-28fps while an
+        // identical page scrolled with scrollTo measured 37-39fps.
         const want = limit * Math.min(elapsed / sampleMs, 1);
         const delta = want - dispatched;
-        if (delta > 0.5) {
+        if (delta > 0.5 && elapsed - lastWheel >= 1000 / wheelHz) {
+          lastWheel = elapsed;
           dispatched += delta;
           window.dispatchEvent(
             new WheelEvent("wheel", {
@@ -76,7 +89,9 @@ test("@perf holds the frame rate floor while scrolling under 4x CPU throttling",
 
       requestAnimationFrame(tick);
     });
-  }, SAMPLE_MS);
+    },
+    { sampleMs: SAMPLE_MS, wheelHz: WHEEL_HZ },
+  );
 
   console.log(
     `measured ${sample.fps.toFixed(1)} fps under 4x throttling while scrolling ` +

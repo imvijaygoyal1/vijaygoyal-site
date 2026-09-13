@@ -16,7 +16,16 @@ export const PRELOAD_MARGIN = 0.08;
  * section derives its height from this and the chapter's range, so a section
  * cannot come into view at a different scroll position than its scene.
  */
-export const TOTAL_VH = 560;
+/**
+ * Total scroll length of the narrative, in viewport heights.
+ *
+ * Each chapter's section must be meaningfully taller than the viewport or its
+ * sticky copy has no travel: it unpins almost immediately and rides up across
+ * the device instead of holding at the foot of the frame. The shortest chapter
+ * here is 0.14 of the whole, which at 1100vh still gives it 154vh -- 54vh of
+ * pinned travel.
+ */
+export const TOTAL_VH = 1100;
 
 export function sectionHeightVh(range: ScrollRange): number {
   return (range[1] - range[0]) * TOTAL_VH;
@@ -103,11 +112,11 @@ interface SequenceEntry {
 // a property of the sequence, not of any one chapter. Section heights are
 // derived from these, so copy and scene can never drift apart.
 const SEQUENCE: readonly SequenceEntry[] = [
-  { chapter: opening, range: [0, 0.18] },
-  { chapter: xbill, range: [0.18, 0.45] },
-  { chapter: shadyspade, range: [0.45, 0.72] },
-  { chapter: craft, range: [0.72, 0.88] },
-  { chapter: colophon, range: [0.88, 1] },
+  { chapter: opening, range: [0, 0.2] },
+  { chapter: xbill, range: [0.2, 0.44] },
+  { chapter: shadyspade, range: [0.44, 0.7] },
+  { chapter: craft, range: [0.7, 0.86] },
+  { chapter: colophon, range: [0.86, 1] },
 ];
 
 export const CHAPTERS: readonly RegisteredChapter[] = SEQUENCE.map(

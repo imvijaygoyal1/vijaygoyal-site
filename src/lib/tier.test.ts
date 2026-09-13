@@ -41,6 +41,16 @@ describe("TIER_SETTINGS", () => {
     expect(TIER_SETTINGS.high.screen).toBe("video");
   });
 
+  it("actually degrades cost downward, not just labels", () => {
+    const order = [TIER_SETTINGS.low, TIER_SETTINGS.medium, TIER_SETTINGS.high];
+    for (let i = 1; i < order.length; i++) {
+      expect(order[i]!.smoothness).toBeGreaterThanOrEqual(order[i - 1]!.smoothness);
+      expect(order[i]!.envResolution).toBeGreaterThanOrEqual(order[i - 1]!.envResolution);
+      expect(order[i]!.metalness).toBeGreaterThanOrEqual(order[i - 1]!.metalness);
+      expect(order[i]!.dpr).toBeGreaterThanOrEqual(order[i - 1]!.dpr);
+    }
+  });
+
   it("never uses soft shadows below high tier", () => {
     expect(TIER_SETTINGS.medium.shadows).toBe("baked");
     expect(TIER_SETTINGS.low.shadows).toBe("baked");

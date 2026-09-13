@@ -1,9 +1,43 @@
 import { useFrame } from "@react-three/fiber";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useRef, useState, type ReactNode } from "react";
+import type { Group } from "three";
 import { activeChapters, activeIdsMatch, CHAPTERS } from "../chapters/registry";
 import { ChapterBoundary } from "../dom/ChapterBoundary";
 import { useTier } from "./QualityProvider";
-import type { ProgressRef } from "../lib/progress";
+import { isActive, type ProgressRef, type ScrollRange } from "../lib/progress";
+
+/**
+ * Shows a chapter's scene only while the playhead is inside its own range.
+ *
+ * Chapters mount with a margin either side so their assets are warm on
+ * arrival — but a mounted scene still *draws*. Every chapter puts its object
+ * at roughly the same place, so without this gate two chapters overlap in the
+ * margin and you see one device inside another. Visibility is set on the
+ * Object3D inside the render loop, never through React state.
+ */
+function ChapterSlot({
+  progress,
+  range,
+  children,
+}: {
+  progress: ProgressRef;
+  range: ScrollRange;
+  children: ReactNode;
+}) {
+  const group = useRef<Group>(null);
+
+  useFrame(() => {
+    const g = group.current;
+    if (!g) return;
+    g.visible = isActive(progress.current, range, 0);
+  });
+
+  return (
+    <group ref={group} visible={false}>
+      {children}
+    </group>
+  );
+}
 
 /**
  * Mounts and unmounts chapter scenes around the playhead.
@@ -33,10 +67,12 @@ export function ScrollRig({ progress }: { progress: ProgressRef }) {
         <ChapterBoundary key={id} id={id}>
           {/* Scenes that load a screen texture suspend on first mount. The
               boundary is outside, so a texture that fails to load costs that
-              chapter its scene and nothing else -- the copy is DOM and lives
+              chapter its scene and nothing else — the copy is DOM and lives
               outside the canvas entirely. */}
           <Suspense fallback={null}>
-            <Scene progress={progress} range={range} tier={tier} />
+            <ChapterSlot progress={progress} range={range}>
+              <Scene progress={progress} range={range} tier={tier} />
+            </ChapterSlot>
           </Suspense>
         </ChapterBoundary>
       ))}

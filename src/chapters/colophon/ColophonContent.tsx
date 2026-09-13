@@ -20,6 +20,7 @@ export function ColophonContent() {
 
   return (
     <div className="chapter-copy">
+      <p className="eyebrow">05 &mdash; Colophon</p>
       <h2>Get in touch.</h2>
       <p>
         I build iOS apps on my own, end to end &mdash; design, code, backend,
