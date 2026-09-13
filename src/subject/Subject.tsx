@@ -13,8 +13,8 @@ import { roundedRectGeometry } from "../canvas/roundedRect";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
 import type { ProgressRef } from "../lib/progress";
-import xbillScreen from "../chapters/xbill/xbill-screen.jpg";
-import spadeScreen from "../chapters/shadyspade/spade-screen.jpg";
+import xbillScreen from "../chapters/xbill/xbill-screen.webp";
+import spadeScreen from "../chapters/shadyspade/spade-screen.webp";
 
 /** How far the translucent copies travel at full split / full separation. */
 const CARDS = 5;

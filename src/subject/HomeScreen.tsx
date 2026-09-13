@@ -7,7 +7,7 @@ import { SCREEN_H, SCREEN_R, SCREEN_W } from "./dimensions";
 import { iconZoomWindow, SPADE_ICON, XBILL_ICON } from "./iconZoom";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
-import homeUrl from "./home-screen.jpg";
+import homeUrl from "./home-screen.webp";
 
 /**
  * The device's home screen, with a zoom that travels into one app icon.

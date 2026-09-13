@@ -1,5 +1,6 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
+import { useEffect } from "react";
 import { QualityProvider, useTier } from "./QualityProvider";
 import { CameraRig } from "./CameraRig";
 import { Subject } from "../subject/Subject";
@@ -8,6 +9,13 @@ import { ScrollDriver } from "./ScrollDriver";
 import { TIER_SETTINGS } from "../lib/tier";
 import type { ProgressSource } from "../lib/progress";
 import { attachContextLossHandlers } from "./useContextLoss";
+
+function ContextLossBridge({ onLost, onRestored }: { onLost: () => void; onRestored: () => void }) {
+  const canvas = useThree((s) => s.gl.domElement);
+
+  useEffect(() => attachContextLossHandlers(canvas, onLost, onRestored), [canvas, onLost, onRestored]);
+  return null;
+}
 
 function Lights() {
   const { lights } = TIER_SETTINGS[useTier()];
@@ -71,11 +79,9 @@ export function Stage({
         visibility: hidden ? "hidden" : "visible",
         pointerEvents: hidden ? "none" : "auto",
       }}
-      onCreated={({ gl }) =>
-        attachContextLossHandlers(gl.domElement, onContextLost, onContextRestored)
-      }
     >
       <QualityProvider>
+        <ContextLossBridge onLost={onContextLost} onRestored={onContextRestored} />
         <Lights />
         <BakedEnvironment />
         <ScrollDriver progress={progress} />

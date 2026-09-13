@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CHAPTERS, sectionHeightVh } from "./chapters/registry";
 import { ChapterBoundary } from "./dom/ChapterBoundary";
 import { StaticRoute } from "./dom/StaticRoute";
-import { Stage } from "./canvas/Stage";
 import { useReducedMotion } from "./hooks/useReducedMotion";
 import { hasWebGL } from "./lib/webgl";
+
+// Keep the DOM narrative in the first chunk. Three.js, R3F, and the scene
+// textures are only downloaded when the visitor can use WebGL.
+const Stage = lazy(() => import("./canvas/Stage").then(({ Stage }) => ({ default: Stage })));
 
 /**
  * How long a lost WebGL context stays mounted-but-hidden waiting for
@@ -37,20 +40,23 @@ export function App() {
 
   return (
     <>
+      <a className="skip-link" href="#opening">Skip to introduction</a>
       {canvasMounted && (
         <ChapterBoundary id="stage">
-          <Stage
-            progress={progress}
-            hidden={phase === "lost"}
-            onContextLost={() => setPhase("lost")}
-            onContextRestored={() => setPhase("live")}
-          />
+          <Suspense fallback={null}>
+            <Stage
+              progress={progress}
+              hidden={phase === "lost"}
+              onContextLost={() => setPhase("lost")}
+              onContextRestored={() => setPhase("live")}
+            />
+          </Suspense>
         </ChapterBoundary>
       )}
       {/* <main> stays outside the stage boundary: that is the whole "site is
           never blank" guarantee, and moving it inside would silently void it. */}
       {narrative ? (
-        <main>
+        <main id="main-content">
           {CHAPTERS.map(({ id, range, Content }) => (
             <section
               key={id}

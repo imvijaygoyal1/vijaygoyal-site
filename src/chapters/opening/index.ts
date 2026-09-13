@@ -1,5 +1,7 @@
 import type { Chapter } from "../types";
 import { OpeningContent } from "./OpeningContent";
+import homeScreen from "../../subject/home-screen.webp";
+import { preloadImage } from "../../lib/preload";
 
 export const opening: Chapter = {
   id: "opening",
@@ -9,5 +11,5 @@ export const opening: Chapter = {
     { at: 1, position: [0, 0.5, 2.35], lookAt: [0, 0.4, 0] },
   ],
   Content: OpeningContent,
-  preload: () => {},
+  preload: () => preloadImage(homeScreen),
 };

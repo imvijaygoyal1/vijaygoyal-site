@@ -197,6 +197,23 @@ main {
   outline-offset: 3px;
 }
 
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 10;
+  padding: 0.5rem 0.8rem;
+  color: var(--stage);
+  background: var(--ink);
+  border-radius: 0.35rem;
+  transform: translate(-50%, -180%);
+  transition: transform 160ms ease;
+}
+
+.skip-link:focus {
+  transform: translate(-50%, 0);
+}
+
 .noscript {
   padding: clamp(4rem, 14vh, 9rem) var(--edge);
   text-align: center;

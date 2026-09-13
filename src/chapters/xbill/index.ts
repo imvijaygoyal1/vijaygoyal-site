@@ -1,5 +1,7 @@
 import type { Chapter } from "../types";
 import { XBillContent } from "./XBillContent";
+import screen from "./xbill-screen.webp";
+import { preloadImage } from "../../lib/preload";
 
 export const xbill: Chapter = {
   id: "xbill",
@@ -11,5 +13,5 @@ export const xbill: Chapter = {
     { at: 1, position: [1.5, 0.7, 2.4], lookAt: [0, 0.4, 0] },
   ],
   Content: XBillContent,
-  preload: () => {},
+  preload: () => preloadImage(screen),
 };

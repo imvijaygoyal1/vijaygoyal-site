@@ -2,6 +2,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { computeProgress, isSettled, smoothToward } from "../lib/scroll";
 import type { ProgressSource } from "../lib/progress";
+import { CHAPTERS } from "../chapters/registry";
 
 /**
  * Turns native scroll into the site's single source of truth.
@@ -20,11 +21,21 @@ import type { ProgressSource } from "../lib/progress";
 export function ScrollDriver({ progress }: { progress: ProgressSource }) {
   const invalidate = useThree((s) => s.invalidate);
   const target = useRef(0);
+  const warmed = useRef(new Set<string>());
 
   useEffect(() => {
     const read = () => {
       const limit = document.documentElement.scrollHeight - window.innerHeight;
       target.current = computeProgress(window.scrollY, limit);
+      for (let i = 1; i < CHAPTERS.length; i++) {
+        const previous = CHAPTERS[i - 1]!;
+        const next = CHAPTERS[i]!;
+        const midpoint = (previous.range[0] + previous.range[1]) / 2;
+        if (target.current >= midpoint && !warmed.current.has(next.id)) {
+          warmed.current.add(next.id);
+          next.preload();
+        }
+      }
       // Wake the loop: with frameloop="demand" nothing renders otherwise.
       invalidate();
     };

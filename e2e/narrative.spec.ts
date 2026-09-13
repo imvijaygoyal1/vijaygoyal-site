@@ -19,3 +19,11 @@ test("body does not scroll horizontally", async ({ page }) => {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("keyboard users can skip directly to the introduction", async ({ page }) => {
+  await page.goto("/");
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Skip to introduction" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#opening")).toBeVisible();
+});

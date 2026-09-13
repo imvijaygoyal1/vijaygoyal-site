@@ -1,5 +1,7 @@
 import type { Chapter } from "../types";
 import { SpadeContent } from "./SpadeContent";
+import screen from "./spade-screen.webp";
+import { preloadImage } from "../../lib/preload";
 
 export const shadyspade: Chapter = {
   id: "shady-spade",
@@ -12,5 +14,5 @@ export const shadyspade: Chapter = {
     { at: 1, position: [0.3, 1.0, 4.0], lookAt: [0.35, -0.1, 0] },
   ],
   Content: SpadeContent,
-  preload: () => {},
+  preload: () => preloadImage(screen),
 };
