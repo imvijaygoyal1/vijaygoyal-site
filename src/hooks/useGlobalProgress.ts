@@ -1,8 +1,8 @@
 import Lenis from "lenis";
 import { useEffect, useRef } from "react";
-import { clamp01 } from "../lib/progress";
+import { clamp01, type ProgressRef } from "../lib/progress";
 
-export type ProgressRef = { current: number };
+export type { ProgressRef } from "../lib/progress";
 
 export function computeProgress(scrollY: number, limit: number): number {
   if (limit <= 0) return 0;

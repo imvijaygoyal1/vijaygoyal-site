@@ -1,47 +1,36 @@
 import { useFrame } from "@react-three/fiber";
-import { useState, type ComponentType } from "react";
-import { activeChapters, CHAPTERS } from "../chapters/registry";
-import type { ChapterSceneProps } from "../chapters/types";
-import { localProgress } from "../lib/progress";
-import type { Tier } from "../lib/tier";
+import { useRef, useState } from "react";
+import { activeChapters, activeIdsMatch, CHAPTERS } from "../chapters/registry";
 import { useTier } from "./QualityProvider";
-import type { ProgressRef } from "../hooks/useGlobalProgress";
+import type { ProgressRef } from "../lib/progress";
 
+/**
+ * Mounts and unmounts chapter scenes around the playhead.
+ *
+ * The one piece of React state here is the *mounted set*, which changes a
+ * handful of times per session — mount/unmount is React's job. Per-frame
+ * animation never touches it: scenes receive the progress box and read it
+ * themselves inside `useFrame`.
+ */
 export function ScrollRig({ progress }: { progress: ProgressRef }) {
   const tier = useTier();
-  const [activeIds, setActiveIds] = useState<readonly string[]>([CHAPTERS[0]!.id]);
+  const [activeIds, setActiveIds] = useState<readonly string[]>(() =>
+    activeChapters(CHAPTERS, 0).map((c) => c.id),
+  );
+  const activeIdsRef = useRef(activeIds);
 
   useFrame(() => {
-    const ids = activeChapters(CHAPTERS, progress.current).map((c) => c.id);
-    setActiveIds((prev) =>
-      prev.length === ids.length && prev.every((id, i) => id === ids[i]) ? prev : ids,
-    );
+    if (activeIdsMatch(activeIdsRef.current, CHAPTERS, progress.current)) return;
+    const next = activeChapters(CHAPTERS, progress.current).map((c) => c.id);
+    activeIdsRef.current = next;
+    setActiveIds(next);
   });
 
   return (
     <>
       {CHAPTERS.filter((c) => activeIds.includes(c.id)).map(({ id, range, Scene }) => (
-        <SceneSlot key={id} progress={progress} range={range} Scene={Scene} tier={tier} />
+        <Scene key={id} progress={progress} range={range} tier={tier} />
       ))}
     </>
   );
-}
-
-function SceneSlot({
-  progress,
-  range,
-  Scene,
-  tier,
-}: {
-  progress: ProgressRef;
-  range: readonly [number, number];
-  Scene: ComponentType<ChapterSceneProps>;
-  tier: Tier;
-}) {
-  const [local, setLocal] = useState(0);
-  useFrame(() => {
-    const next = localProgress(progress.current, range);
-    setLocal((prev) => (Math.abs(prev - next) < 0.001 ? prev : next));
-  });
-  return <Scene progress={local} tier={tier} />;
 }

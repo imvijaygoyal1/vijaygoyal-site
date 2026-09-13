@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CHAPTERS } from "./chapters/registry";
+import { CHAPTERS, sectionHeightVh } from "./chapters/registry";
 import { ChapterBoundary } from "./dom/ChapterBoundary";
 import { StaticRoute } from "./dom/StaticRoute";
 import { Stage } from "./canvas/Stage";
@@ -21,8 +21,12 @@ export function App() {
         <Stage progress={progress} onContextLost={() => setLost(true)} />
       </ChapterBoundary>
       <main>
-        {CHAPTERS.map(({ id, Content }) => (
-          <section key={id} id={id} style={{ minHeight: "180vh", position: "relative" }}>
+        {CHAPTERS.map(({ id, range, Content }) => (
+          <section
+            key={id}
+            id={id}
+            style={{ minHeight: `${sectionHeightVh(range)}vh`, position: "relative" }}
+          >
             <Content />
           </section>
         ))}

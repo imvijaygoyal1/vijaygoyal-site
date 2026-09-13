@@ -4,7 +4,7 @@ import { QualityProvider, useTier } from "./QualityProvider";
 import { CameraRig } from "./CameraRig";
 import { ScrollRig } from "./ScrollRig";
 import { TIER_SETTINGS } from "../lib/tier";
-import type { ProgressRef } from "../hooks/useGlobalProgress";
+import type { ProgressRef } from "../lib/progress";
 import { attachContextLossHandlers } from "./useContextLoss";
 
 function Lights() {
