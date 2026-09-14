@@ -55,15 +55,29 @@ One consequence for the footer: the apps already have their own homes and their
 own privacy policy. **The apex does not need to grow duplicates.** §64 is
 satisfied by linking out, not by rebuilding.
 
-### Still unverified — these block the sections that need them
+### Supplied by Vijay, 2026-09-14
 
-- **Shady Spade App Store URL.** No numeric ID appears anywhere in its
-  sources. `TODO: VERIFY WITH VIJAY`
-- **LinkedIn URL.** `TODO: VERIFY WITH VIJAY`
-- **Contact email.** §36's call to action has nothing to point at without it.
-  `TODO: VERIFY WITH VIJAY`
+| Fact | Value | Checked |
+| --- | --- | --- |
+| Shady Spade App Store | `https://apps.apple.com/app/id6760261655` | **200**, page title "The Shady Spade App" |
+| xBill App Store | `https://apps.apple.com/app/id6780284715` | **200**, page title "xBill: Split Bills & Expenses App" |
+| Contact email | `imvijaygoyal@gmail.com` | supplied for publication |
+| LinkedIn | `https://www.linkedin.com/in/vijay-goyal-a37892a/` | returns `999` — LinkedIn blocks automated requests, so **not machine-verified**; click it once before launch |
+
+**Both App Store links drop the `/us/` locale segment.** Vijay supplied the
+Shady Spade link as `/us/app/the-shady-spade/id…`; the locale-free form
+resolves identically and does not send a non-US visitor to the US storefront.
+The numeric id is the stable part — the slug is cosmetic and Apple rewrites it.
+
+The store also gives the apps their real listed names, worth using where the
+site names them formally: **xBill: Split Bills & Expenses** and
+**The Shady Spade**.
+
+### Still unverified — this blocks one section
+
 - **A photograph** for the About section. A generated portrait is forbidden by
-  `AD-14`. `TODO: VERIFY WITH VIJAY`
+  `AD-14`, so §35 cannot be completed without a real one.
+  `TODO: VERIFY WITH VIJAY`
 
 ---
 
@@ -88,8 +102,8 @@ moment and the footer.
 `CameraModule.tsx` are code, handled in Phase 4+. No copy is deleted outright;
 the Craft paragraph is redistributed, not dropped.
 
-**NEEDS VIJAY'S INPUT** — the four unverified facts above, plus: does the live
-frame-rate and draw-call readout survive the repositioning? It is real
+**NEEDS VIJAY'S INPUT** — a photograph, the one fact still outstanding, plus:
+does the live frame-rate and draw-call readout survive the repositioning? It is real
 technical showmanship and unusual, and it may read oddly under a product-thinker
 framing. Recorded as a product call, not an architectural one.
 
@@ -152,7 +166,8 @@ Four beats. Each needs its own capture; only one exists today.
 balances and who is allowed to record a payment are both real decisions with
 reasons, and both are verifiable in the schema.*
 
-Links: App Store · `/work/xbill` · `xbill.vijaygoyal.org`
+Links: [App Store](https://apps.apple.com/app/id6780284715) · `/work/xbill` ·
+`xbill.vijaygoyal.org`
 
 ### 03 · The Shady Spade
 
@@ -170,8 +185,8 @@ Gameplay below is taken from the app's own rules screen — not inferred.
 | 3 | **Think strategically** | 250 points on the table. The three of spades alone is worth thirty. Make your bid and you score what your team caught; get set and you lose it. |
 | 4 | **Built independently** | Product, design, code and release — v1.10 is live on the App Store, and v2.0 brings an Apple Watch companion, a real-life scorekeeper and shareable scorecards. |
 
-Links: App Store `TODO: VERIFY WITH VIJAY` · `/work/shady-spade` ·
-`shadyspade.vijaygoyal.org`
+Links: [App Store](https://apps.apple.com/app/id6760261655) ·
+`/work/shady-spade` · `shadyspade.vijaygoyal.org`
 
 ### 04 · How I Build
 
@@ -223,9 +238,14 @@ Photograph: `TODO: VERIFY WITH VIJAY`
 >
 > I'd love to hear about it.
 
-Action: **Let's connect →**
-Destinations: email `TODO: VERIFY WITH VIJAY` · LinkedIn
-`TODO: VERIFY WITH VIJAY` · [GitHub](https://github.com/imvijaygoyal1)
+Action: **Let's connect →** → `mailto:imvijaygoyal@gmail.com`
+Destinations: [Email](mailto:imvijaygoyal@gmail.com) ·
+[LinkedIn](https://www.linkedin.com/in/vijay-goyal-a37892a/) ·
+[GitHub](https://github.com/imvijaygoyal1)
+
+*A plain `mailto:` on a public page is readable by address harvesters. That is
+the normal trade for a personal site and it is what was asked for; noting it
+once so the choice is on the record rather than assumed.*
 
 ### 08 · Footer
 
@@ -234,6 +254,7 @@ VIJAY GOYAL
 
 WORK          xBill · The Shady Spade
 CONNECT       LinkedIn · GitHub · Email
+APP STORE     xBill · The Shady Spade
 APPS          xbill.vijaygoyal.org · shadyspade.vijaygoyal.org
               The Shady Spade privacy policy
 ```
