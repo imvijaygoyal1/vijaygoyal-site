@@ -1,22 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { HAND, isRed, suitColor, suitGlyph, type Suit } from "./cardFace";
-
-const SUITS: readonly Suit[] = ["spade", "heart", "diamond", "club"];
+import { BRAND_GOLD, BRAND_GREEN, HAND } from "./cardFace";
+import { indexColor, isRed, PIPS, SUITS } from "./cardPips";
 
 describe("card faces", () => {
   it("reds are exactly hearts and diamonds", () => {
     expect(SUITS.filter(isRed)).toEqual(["heart", "diamond"]);
   });
 
-  it("gives every suit its own glyph", () => {
-    const glyphs = SUITS.map(suitGlyph);
-    expect(new Set(glyphs).size).toBe(SUITS.length);
+  it("draws every suit rather than typing it", () => {
+    // Unicode pips set in the UI font were the clearest tell that these were
+    // not cards; each suit now owns a drawn path.
+    for (const suit of SUITS) {
+      expect(typeof PIPS[suit]).toBe("function");
+    }
+    expect(new Set(Object.values(PIPS)).size).toBe(SUITS.length);
   });
 
-  it("colours the two suit groups apart", () => {
-    expect(suitColor("spade")).toBe(suitColor("club"));
-    expect(suitColor("heart")).toBe(suitColor("diamond"));
-    expect(suitColor("spade")).not.toBe(suitColor("heart"));
+  it("colours the two suit groups apart in the indices", () => {
+    expect(indexColor("spade")).toBe(indexColor("club"));
+    expect(indexColor("heart")).toBe(indexColor("diamond"));
+    expect(indexColor("spade")).not.toBe(indexColor("heart"));
+  });
+
+  it("uses the app's own green and gold", () => {
+    // Sampled from spade-screen.webp, which shares the frame with these cards.
+    expect(BRAND_GREEN).toBe("#1b3b2a");
+    expect(BRAND_GOLD).toBe("#c9a94b");
   });
 
   it("deals a hand of distinct cards", () => {

@@ -122,7 +122,10 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       if (!card) continue;
       const angle = (i - (CARDS - 1) / 2) * 0.26 * s.cards;
       card.rotation.z = angle;
-      card.position.set(Math.sin(angle) * 1.5, -Math.abs(angle) * 0.5, 0);
+      // Each card gets its own depth. They were all at z = 0, so overlapping
+      // cards in the fan were coplanar and z-fought -- the diagonal hatching
+      // across the faces was that, not a texture problem.
+      card.position.set(Math.sin(angle) * 1.5, -Math.abs(angle) * 0.5, i * 0.006);
       card.visible = s.cards > 0.02;
     }
   });
@@ -155,13 +158,17 @@ export function Subject({ progress }: { progress: ProgressRef }) {
             {/* The stock, which supplies the edge the face has no thickness
                 for. Paper, so barely any specular. */}
             <mesh geometry={cardBody}>
-              <meshStandardMaterial color="#e9e5db" metalness={0} roughness={0.72} />
+              <meshStandardMaterial color="#efece4" metalness={0} roughness={0.6} />
             </mesh>
+            {/* Roughness low enough to catch a highlight as the fan turns.
+                Fully matte stock is the other half of why these read cheap:
+                a real card has a linen finish, and on a dark stage that sheen
+                is most of what sells it. */}
             <mesh geometry={cardFace} position={[0, 0, CARD_D / 2 + 0.0015]}>
               <meshStandardMaterial
                 map={cardTextures[i]}
                 metalness={0}
-                roughness={0.6}
+                roughness={0.52}
               />
             </mesh>
           </group>
