@@ -101,6 +101,34 @@ opaque — do not move this rule onto `.chapter-copy` itself. It is also behind
 `@supports (animation-timeline: view())`, so a browser without scroll-driven
 animations simply gets the old behaviour rather than missing copy.
 
+## Why a lit object looks dull grey
+
+**R3F's renderer defaults to `ACESFilmicToneMapping`** (`flat` would turn it
+off, and the Canvas here does not set it). ACES compresses highlights hard, so
+white comes out grey and saturated colour comes out muted. The app screens
+never showed this because `Screen.tsx` sets `toneMapped={false}` — a screen
+emits its own light and must not be pulled down by the tone curve.
+
+The card faces did show it, and it was most of "the cards do not look bright or
+premium". Three things compounded:
+
+1. the stock had been *darkened* to `#eeebe3` to stop it out-shouting the phone;
+2. the scene's only `directionalLight` is at `x = +3` while the fan sits at
+   `x = -1.8`, so the cards were lit by little more than the 0.42 ambient;
+3. ACES then greyed what was left.
+
+The fix is at the material, not the artwork: `toneMapped={false}` plus an
+`emissiveMap` at ~0.34 so the face lifts off the dark stage wherever the lights
+do not reach it. **Brightness belongs to the material; darkening a texture to
+manage it is the wrong lever** — it was also why the monogram panel needed a
+compensated green, and once the material changed, two further attempts at
+compensating produced sage-grey and then charcoal. The panel now prints
+`BRAND_GREEN` directly and matches the phone.
+
+Cost: the faces went to 1024x1486 for clarity at the closest framing, which
+took the perf median from 46.2 to **40.6 fps** against a floor of 30. Budgeted
+deliberately; do not add more texture here without re-running the gate.
+
 ## The cards are drawn, not captured
 
 `cardFace.ts` draws each face to a canvas at build-free runtime and

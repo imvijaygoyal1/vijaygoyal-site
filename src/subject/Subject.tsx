@@ -158,17 +158,28 @@ export function Subject({ progress }: { progress: ProgressRef }) {
             {/* The stock, which supplies the edge the face has no thickness
                 for. Paper, so barely any specular. */}
             <mesh geometry={cardBody}>
-              <meshStandardMaterial color="#efece4" metalness={0} roughness={0.6} />
+              <meshStandardMaterial color="#f7f4ec" metalness={0} roughness={0.6} />
             </mesh>
-            {/* Roughness low enough to catch a highlight as the fan turns.
-                Fully matte stock is the other half of why these read cheap:
-                a real card has a linen finish, and on a dark stage that sheen
-                is most of what sells it. */}
+            {/* Why the faces read as dull grey paper rather than bright card:
+                R3F's renderer defaults to ACES filmic tone mapping, which
+                compresses white hard, and the scene's only directional light
+                is at x=+3 while the fan sits at x=-1.8 -- so these were lit by
+                little more than ambient and then greyed by the tone curve.
+
+                `toneMapped={false}` is the same opt-out the app screens use.
+                The emissive map lifts the face off the dark stage wherever the
+                lights do not reach it, so clarity no longer depends on the
+                card's angle. Roughness still leaves a highlight for the sheen
+                to travel across as the fan turns. */}
             <mesh geometry={cardFace} position={[0, 0, CARD_D / 2 + 0.0015]}>
               <meshStandardMaterial
                 map={cardTextures[i]}
+                emissive="#ffffff"
+                emissiveMap={cardTextures[i]}
+                emissiveIntensity={0.34}
+                toneMapped={false}
                 metalness={0}
-                roughness={0.52}
+                roughness={0.45}
               />
             </mesh>
           </group>

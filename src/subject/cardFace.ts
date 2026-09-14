@@ -13,14 +13,32 @@ export interface Card {
  * miss would read as a mistake.
  */
 export const BRAND_GREEN = "#1b3b2a";
-/** What actually gets printed. The panel is a lit material, not an unlit
- *  screen like the phone beside it, so printing the brand value directly came
- *  out milky once the scene's lights hit it. */
-export const PANEL_GREEN = "#122a1d";
 export const BRAND_GOLD = "#c9a94b";
-/** Slightly off pure white: at #f7f5f0 the stock out-shouted the phone,
- *  which is the hero of this frame. */
-export const CARD_STOCK = "#eeebe3";
+
+/*
+ * The monogram panel prints BRAND_GREEN directly, with no compensated value.
+ *
+ * A darker one existed while the face was tone-mapped: ACES pulled the printed
+ * green milky, so it was printed lower to land on the brand value. Once the
+ * face opted out of tone mapping and gained an emissive lift, the rendered
+ * result landed close to what is printed -- and two further attempts at
+ * compensating gave sage-grey and then charcoal. The card's green is now the
+ * phone's green, which is the point.
+ */
+
+/** Gold, though, still needs lifting: the phone's is an emissive screen pixel
+ *  and the card's is ink on lit stock, so the sampled token prints muddy. */
+export const CARD_GOLD = "#e2c163";
+/**
+ * Bright, very nearly white.
+ *
+ * This was darkened to #eeebe3 to stop the stock out-shouting the phone. That
+ * was the wrong lever: combined with ACES tone mapping and a scene whose only
+ * directional light is on the far side of the stage, it produced dull grey
+ * paper. Brightness is now controlled at the material, which opts out of tone
+ * mapping, so the stock can be the white a card actually is.
+ */
+export const CARD_STOCK = "#fdfcf9";
 
 /**
  * The hand on stage, spades led.
@@ -42,8 +60,8 @@ export const HAND: readonly Card[] = [
  *  simple is a worse trade than a few hundred bytes of canvas code. Sized for
  *  the closest framing in the narrative, where a card covers ~840 device
  *  pixels at 2x. */
-export const FACE_W = 768;
-export const FACE_H = 1114;
+export const FACE_W = 1024;
+export const FACE_H = 1486;
 
 function roundRect(
   ctx: CanvasRenderingContext2D,
@@ -126,7 +144,7 @@ export function drawCardFace(
 
   // Gold hairline, inset the way a printed card's rule is.
   const inset = w * 0.05;
-  ctx.strokeStyle = BRAND_GOLD;
+  ctx.strokeStyle = CARD_GOLD;
   ctx.lineWidth = Math.max(1, w * 0.0075);
   ctx.globalAlpha = 0.7;
   roundRect(ctx, inset, inset, w - inset * 2, h - inset * 2, w * 0.035);
@@ -147,17 +165,17 @@ export function drawCardFace(
     const ph = fh * 0.58;
     const px = fx + (fw - pw) / 2;
     const py = fy + (fh - ph) / 2;
-    ctx.fillStyle = PANEL_GREEN;
+    ctx.fillStyle = BRAND_GREEN;
     roundRect(ctx, px, py, pw, ph, w * 0.03);
     ctx.fill();
-    ctx.strokeStyle = BRAND_GOLD;
+    ctx.strokeStyle = CARD_GOLD;
     ctx.lineWidth = Math.max(1, w * 0.006);
     ctx.globalAlpha = 0.65;
     roundRect(ctx, px + w * 0.02, py + w * 0.02, pw - w * 0.04, ph - w * 0.04, w * 0.02);
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    ctx.fillStyle = BRAND_GOLD;
+    ctx.fillStyle = CARD_GOLD;
     ctx.textAlign = "center";
     ctx.textBaseline = "alphabetic";
     ctx.font = `600 ${Math.round(pw * 0.52)}px "Helvetica Neue", Helvetica, Arial, sans-serif`;

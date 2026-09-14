@@ -85,5 +85,7 @@ export function isRed(suit: Suit): boolean {
 /** Index colour. The centre field prints gold on green regardless of suit --
  *  the corner indices are where the suit's colour is actually told. */
 export function indexColor(suit: Suit): string {
-  return isRed(suit) ? "#b3282d" : "#14161a";
+  // Near-black and a clean vivid red. #b3282d read as brick once the scene's
+  // lighting and tone curve had been through it.
+  return isRed(suit) ? "#d81f2b" : "#0b0d10";
 }
