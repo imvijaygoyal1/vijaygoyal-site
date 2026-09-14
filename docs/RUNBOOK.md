@@ -4,7 +4,19 @@ Run this before every deploy. **Do not read it and assume — execute it.**
 
 ## Pre-deploy
 
-1. `npm test` — all unit and component tests pass (90 at time of writing)
+**Run `npm run build` LAST, after any change to a test file.** `npm test` does
+not typecheck; `npm run build` runs `tsc --noEmit` and does. On 2026-09-14 a
+new test file using `node:fs` passed `npm test`, size, e2e, perf and Lighthouse
+— and broke the build, which was only discovered at `npm run deploy`, after the
+commit was already pushed. Lighthouse reads the *existing* `dist/`, so it does
+not catch it either.
+
+**Also: vitest stubs CSS imports, `?raw` included.** A test that imports
+`./x.css?raw` receives an empty string and every assertion in it passes
+vacuously. Read CSS from disk with `node:fs`, and prove any file-reading test
+fails when you break the thing it checks.
+
+1. `npm test` — all unit and component tests pass (219 at time of writing)
 2. `npm run build` — no type errors
 3. `npm run size` — under 1.5 MB gzipped
 4. `npm run e2e` — narrative and fallback specs pass, both projects

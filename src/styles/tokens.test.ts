@@ -2,16 +2,24 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-// Resolved from the repo root, where vitest runs. `import.meta.url` is not a
-// file:// URL once Vite has transformed the module for the jsdom environment.
+/*
+ * Read from disk, not via Vite's `?raw`: vitest stubs CSS imports (`css:
+ * false` by default) and the stub applies to the raw query too, so `?raw`
+ * returns an empty string and every assertion here passes vacuously. Resolved
+ * from the repo root, where vitest runs — `import.meta.url` is not a file://
+ * URL after Vite transforms the module for jsdom.
+ */
 const read = (p: string) => readFileSync(resolve(process.cwd(), p), "utf8");
 const tokens = read("src/styles/tokens.css");
 const consumer = read("src/styles.css");
 
-/** Declarations in the consumer, with token definitions and comments excluded. */
+/** Declarations in the consumer, with comments excluded. */
 const declarations = consumer
   .split("\n")
-  .filter((line) => !line.trimStart().startsWith("*") && !line.trimStart().startsWith("/*"))
+  .filter((line) => {
+    const t = line.trimStart();
+    return !t.startsWith("*") && !t.startsWith("/*");
+  })
   .join("\n");
 
 describe("design tokens are the single styling authority", () => {
