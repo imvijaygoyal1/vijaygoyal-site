@@ -19,9 +19,11 @@ function spade(ctx: CanvasRenderingContext2D, x: number, y: number, s: number): 
   ctx.moveTo(...p(0.5, 0.02));
   ctx.bezierCurveTo(...p(0.5, 0.26), ...p(0.015, 0.36), ...p(0.015, 0.60));
   ctx.bezierCurveTo(...p(0.015, 0.79), ...p(0.21, 0.88), ...p(0.35, 0.78));
-  ctx.bezierCurveTo(...p(0.355, 0.89), ...p(0.31, 0.96), ...p(0.21, 1.0));
-  ctx.lineTo(...p(0.79, 1.0));
-  ctx.bezierCurveTo(...p(0.69, 0.96), ...p(0.645, 0.89), ...p(0.65, 0.78));
+  // Narrow stem base. Flared to 0.21/0.79 it merged with the two lobes at
+  // index size and the spade read as a club -- three lobes instead of two.
+  ctx.bezierCurveTo(...p(0.355, 0.89), ...p(0.345, 0.96), ...p(0.30, 1.0));
+  ctx.lineTo(...p(0.70, 1.0));
+  ctx.bezierCurveTo(...p(0.655, 0.96), ...p(0.645, 0.89), ...p(0.65, 0.78));
   ctx.bezierCurveTo(...p(0.79, 0.88), ...p(0.985, 0.79), ...p(0.985, 0.60));
   ctx.bezierCurveTo(...p(0.985, 0.36), ...p(0.5, 0.26), ...p(0.5, 0.02));
   ctx.closePath();

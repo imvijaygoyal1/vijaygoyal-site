@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fanShade, FAN_SHADE_FLOOR, fanTransform, FAN_STEP, PIVOT_R } from "./cardFan";
+import { fanOpen, fanShade, FAN_SHADE_FLOOR, fanTransform, FAN_STEP, PIVOT_R } from "./cardFan";
 
 const COUNT = 3;
 
@@ -93,5 +93,48 @@ describe("fan shading", () => {
 
   it("fully lights a single card, with no fan to occlude it", () => {
     expect(fanShade(0, 1)).toBe(1);
+  });
+});
+
+describe("the spread", () => {
+  it("is closed before the chapter and fully open early in it", () => {
+    expect(fanOpen(0)).toBe(0);
+    expect(fanOpen(0.07)).toBe(1);
+    expect(fanOpen(1)).toBe(1);
+  });
+
+  it("opens monotonically and never leaves 0..1", () => {
+    let previous = -1;
+    for (let c = 0; c <= 1; c += 0.005) {
+      const v = fanOpen(c);
+      expect(v).toBeGreaterThanOrEqual(previous);
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThanOrEqual(1);
+      previous = v;
+    }
+  });
+
+  it("curls the wings symmetrically, outward from the centre", () => {
+    const n = 5;
+    const left = fanTransform(0, n, 1);
+    const right = fanTransform(n - 1, n, 1);
+    const mid = fanTransform(2, n, 1);
+    expect(mid.tiltY).toBeCloseTo(0, 9);
+    expect(left.tiltY).toBeCloseTo(-right.tiltY, 9);
+    expect(Math.abs(left.tiltY)).toBeGreaterThan(Math.abs(fanTransform(1, n, 1).tiltY));
+  });
+
+  it("holds a five-card hand inside three card widths", () => {
+    const n = 5;
+    const xs = Array.from({ length: n }, (_, i) => fanTransform(i, n, 1).x);
+    const span = Math.max(...xs) - Math.min(...xs);
+    // Card width is 0.4; the old five-card scatter spanned 1.49.
+    expect(span).toBeLessThan(1.2);
+  });
+
+  it("gathers to a stack with no curl when closed", () => {
+    for (let i = 0; i < 5; i++) {
+      expect(fanTransform(i, 5, 0).tiltY).toBeCloseTo(0, 9);
+    }
   });
 });

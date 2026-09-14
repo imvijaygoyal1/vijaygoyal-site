@@ -5,6 +5,11 @@ export type { Suit } from "./cardPips";
 export interface Card {
   rank: string;
   suit: Suit;
+  /** Printed in gold rather than the suit's colour. The 3 of Spades is worth
+   *  30 in The Shady Spade against 10 for each of A/K/Q/J/10 and 5 for a five
+   *  -- the rule is on the phone screen beside these cards -- so it is the
+   *  one card in the deck that earns the brand's gold. */
+  gold?: boolean;
 }
 
 /**
@@ -30,6 +35,15 @@ export const BRAND_GOLD = "#c9a94b";
  *  and the card's is ink on lit stock, so the sampled token prints muddy. */
 export const CARD_GOLD = "#e2c163";
 /**
+ * Gold printed on white stock, rather than inside the green panel.
+ *
+ * The light gold works on green and disappears on white -- roughly 2.3:1
+ * against the stock, which left the 3 of Spades, the one card the gold is
+ * meant to single out, the hardest of the five to read. Same ink, different
+ * ground, different value.
+ */
+export const CARD_GOLD_ON_STOCK = "#ab8730";
+/**
  * Bright, very nearly white.
  *
  * This was darkened to #eeebe3 to stop the stock out-shouting the phone. That
@@ -41,21 +55,24 @@ export const CARD_GOLD = "#e2c163";
 export const CARD_STOCK = "#fdfcf9";
 
 /**
- * The hand on stage, spades led.
+ * The hand on stage: the game's own scoring table, dealt.
  *
- * The Shady Spade is a trick-taking game in which the highest bidder declares
- * trump, so a spade-led hand is the game's own subject matter rather than
- * arbitrary cards. The off-suit card is what makes it read as a hand and not
- * as a repeated texture.
+ * `3S = 30 . A/K/Q/J/10 = 10 . 5s = 5` is printed on the phone screen in the
+ * same frame, so these five are exactly the cards that score -- the 30, three
+ * of the tens, and a five -- with the 3 of Spades at the centre of the fan in
+ * gold because it is the one card worth 30. Three of the five are spades,
+ * which is the suit the game is named for.
  *
- * Three, not five. Five white rectangles were collectively wider than the
- * phone is tall and became the brightest thing in the frame, which inverts
- * the hierarchy -- the phone is the product.
+ * Five reads as a hand where three read as a sample. The earlier problem with
+ * five was never the count: it was that they were staged as a scatter across
+ * a third of the stage rather than as a fan held at one pivot.
  */
 export const HAND: readonly Card[] = [
   { rank: "A", suit: "spade" },
   { rank: "K", suit: "spade" },
+  { rank: "3", suit: "spade", gold: true },
   { rank: "Q", suit: "heart" },
+  { rank: "5", suit: "diamond" },
 ];
 
 /** Card faces are drawn, not downloaded: five more image requests for art this
@@ -103,6 +120,16 @@ function pipAt(
  */
 export function pipLayout(rank: string): readonly (readonly [number, number])[] {
   if (rank === "A") return [[0.5, 0.5]];
+  if (rank === "3") return [[0.5, 0.11], [0.5, 0.5], [0.5, 0.89]];
+  if (rank === "5") {
+    // Pulled in from 0.15/0.85: out there the outer pips sat almost against
+    // the index column and read as pairs with it.
+    return [
+      [0.24, 0.13], [0.76, 0.13],
+      [0.5, 0.5],
+      [0.24, 0.87], [0.76, 0.87],
+    ];
+  }
   if (rank === "10") {
     // The outer columns sit near the field's edges. At 0.36/0.64 they were
     // only a tenth of the card apart and the ten read as a zigzag.
@@ -161,7 +188,7 @@ export function drawCardFace(
   const fh = h * 0.77;
 
   ctx.fillStyle = ink;
-  if (isCourt(card.rank)) {
+  if (isCourt(card.rank) || card.gold) {
     // Monogram panel: the brand's green and gold, held to the centre.
     const pw = fw * 0.82;
     const ph = fh * 0.58;
@@ -178,16 +205,30 @@ export function drawCardFace(
     ctx.globalAlpha = 1;
 
     ctx.fillStyle = CARD_GOLD;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "alphabetic";
-    ctx.font = `600 ${Math.round(pw * 0.52)}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
-    ctx.fillText(card.rank, px + pw / 2, py + ph * 0.56);
-    pipAt(ctx, card.suit, px + pw / 2, py + ph * 0.775, pw * 0.24, false);
+    if (card.gold) {
+      // The gold card carries its pips on the panel rather than a monogram.
+      // Gold ink on white stock cannot win: the face material is emissive and
+      // opts out of tone mapping, so a darker gold is simply lifted back to
+      // bright, and the one card the gold exists to single out was the hardest
+      // of the five to read. On deep green it is unmistakable -- and the panel
+      // is already this deck's mark for a card that matters.
+      const pips = pipLayout(card.rank);
+      const size = pw * 0.3;
+      for (const [nx, ny] of pips) {
+        pipAt(ctx, card.suit, px + nx * pw, py + ny * ph, size, ny > 0.5);
+      }
+    } else {
+      ctx.textAlign = "center";
+      ctx.textBaseline = "alphabetic";
+      ctx.font = `600 ${Math.round(pw * 0.52)}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+      ctx.fillText(card.rank, px + pw / 2, py + ph * 0.56);
+      pipAt(ctx, card.suit, px + pw / 2, py + ph * 0.775, pw * 0.24, false);
+    }
   } else {
     const pips = pipLayout(card.rank);
     // One pip on an Ace fills the field; ten have to share it.
     const size = pips.length === 1 ? fw * 0.52 : fw * 0.2;
-    ctx.fillStyle = ink;
+    ctx.fillStyle = card.gold ? CARD_GOLD_ON_STOCK : ink;
     for (const [nx, ny] of pips) {
       pipAt(ctx, card.suit, fx + nx * fw, fy + ny * fh, size, ny > 0.5);
     }

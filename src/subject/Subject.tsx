@@ -12,8 +12,9 @@ import { swapOpacities } from "./screenSwap";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import { HAND } from "./cardFace";
-import { fanShade, fanTransform } from "./cardFan";
+import { fanOpen, fanShade, fanTransform } from "./cardFan";
 import { useCardTextures } from "./useCardTextures";
+import { GlossLayer } from "./GlossLayer";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
 import { WatchHomeScreen } from "./WatchHomeScreen";
@@ -81,8 +82,9 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     [],
   );
   const hardwareMax = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
+  const tier = useTier();
   const cardTextures = useCardTextures(
-    Math.min(TIER_SETTINGS[useTier()].anisotropy, hardwareMax),
+    Math.min(TIER_SETTINGS[tier].anisotropy, hardwareMax),
   );
 
   useFrame(() => {
@@ -122,10 +124,12 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     for (let i = 0; i < CARDS; i++) {
       const card = cards.current[i];
       if (!card) continue;
-      const t = fanTransform(i, CARDS, s.cards);
-      card.rotation.z = t.rotation;
+      // The hand spreads as the chapter comes into view, wings-first, rather
+      // than still opening at the end of it -- see fanOpen.
+      const t = fanTransform(i, CARDS, fanOpen(s.cards));
+      card.rotation.set(0, t.tiltY, t.rotation);
       card.position.set(t.x, t.y, t.z);
-      card.visible = s.cards > 0.02;
+      card.visible = s.cards > 0.002;
     }
   });
 
@@ -191,9 +195,17 @@ export function Subject({ progress }: { progress: ProgressRef }) {
                 emissiveIntensity={0.26 * shade}
                 toneMapped={false}
                 metalness={0}
-                roughness={0.45}
+                roughness={0.5}
               />
             </mesh>
+            {/* Above the print, so the highlight sits on the glass rather than
+                under the ink -- the same layer the phone's display uses. */}
+            <GlossLayer
+              geometry={cardFace}
+              z={CARD_D / 2 + 0.004}
+              opacity={0.3 * shade}
+              renderOrder={11}
+            />
           </group>
           );
         })}

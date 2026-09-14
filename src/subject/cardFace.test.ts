@@ -82,3 +82,30 @@ describe("face composition", () => {
     expect(new Set(sigs).size).toBe(HAND.length);
   });
 });
+
+describe("the gold card", () => {
+  it("is the 3 of Spades, and only that", () => {
+    const gold = HAND.filter((c) => c.gold);
+    expect(gold).toHaveLength(1);
+    expect(gold[0]!.rank).toBe("3");
+    expect(gold[0]!.suit).toBe("spade");
+  });
+
+  it("keeps its pip layout, so it is still read as a three", () => {
+    expect(pipLayout("3")).toHaveLength(3);
+  });
+
+  it("is the hand's highest scorer", () => {
+    // 3S = 30 against 10 for each of A/K/Q/J/10 and 5 for a five, per the
+    // rules printed on the phone screen in the same frame.
+    const points = (rank: string) =>
+      rank === "3" ? 30 : rank === "5" ? 5 : 10;
+    const best = HAND.reduce((a, c) => (points(c.rank) > points(a.rank) ? c : a));
+    expect(best.gold).toBe(true);
+  });
+
+  it("deals the scoring table: the 30, three tens and a five", () => {
+    expect(HAND.map((c) => c.rank)).toEqual(["A", "K", "3", "Q", "5"]);
+    expect(HAND.filter((c) => c.suit === "spade")).toHaveLength(3);
+  });
+});

@@ -14,16 +14,32 @@
  */
 
 /** Angle between neighbouring cards, radians. */
-export const FAN_STEP = 0.36;
+export const FAN_STEP = 0.24;
 /** Distance from a card's centre down to the shared pivot. */
-export const PIVOT_R = 1.3;
+export const PIVOT_R = 1.25;
 
 export interface CardTransform {
   x: number;
   y: number;
   z: number;
   rotation: number;
+  /** Yaw, so the outer cards angle away and the hand curves like a pair of
+   *  wings rather than sitting dead flat. It also swings each card's highlight
+   *  through a different angle as the fan opens, which is what makes the gloss
+   *  travel across the spread instead of sitting still. */
+  tiltY: number;
 }
+
+/** How much of the spread has happened. `screenMix`-style: the hand should be
+ *  open early in the chapter, as it comes into view, not still opening at the
+ *  end of it. `cards` is eased, so a small divisor completes the spread inside
+ *  roughly the first quarter. */
+export function fanOpen(cards: number): number {
+  return Math.min(1, Math.max(0, cards / 0.07));
+}
+
+/** Yaw per radian of fan angle. */
+export const WING_CURL = 0.42;
 
 export function fanTransform(
   index: number,
@@ -40,6 +56,7 @@ export function fanTransform(
     // Each card in front of the one before it. Coplanar cards z-fight.
     z: index * 0.006,
     rotation: theta,
+    tiltY: theta * WING_CURL,
   };
 }
 

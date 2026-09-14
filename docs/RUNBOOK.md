@@ -176,6 +176,23 @@ progressive JPEG q80-82 into the chapter folder.
   and looking at it.
 - Textures are gated at 250 kB total; currently 218 kB.
 
+## Generate textures off the critical path
+
+`useCardTextures` waits for `requestIdleCallback` (timeout fallback for Safari
+before 26) and calls `invalidate()` when the faces land, because the canvas
+renders on demand and would otherwise not redraw.
+
+Building them at mount cost **about 100ms of main-thread work at load** -- five
+canvases of 1024x1486 -- visible as Other 178 to 240ms, Rendering 9 to 31ms and
+GC 19 to 40ms, and it took Lighthouse performance from 0.90 to **0.85 against a
+0.90 floor**. It was also pure waste: the hand is not on stage until roughly
+44% of the way down the page. Deferring took TBT from 340ms to **250ms** and
+the median to 0.91.
+
+**Anything generated for a chapter the visitor has not reached yet belongs off
+the critical path.** The same argument applies to the `preload` member of the
+chapter contract, which is still declared and never invoked.
+
 ## The Lighthouse performance gate is marginal, not green
 
 **`categories:performance` has a `minScore` of 0.9 and the median sits on
@@ -184,8 +201,9 @@ exactly 0.90.** Observed back-to-back on 2026-09-13: `[0.86, 0.88, 0.97]`
 roughly a coin flip. Do not read a single green `npm run lh` as proof, and do
 not raise the threshold to make it stop -- the same rule as `FLOOR_FPS`.
 
-The cause is **Total Blocking Time**, 340 ms at score 0.74, and it is the only
-weak metric: LCP 1.2 s, FCP 1.2 s, Speed Index 1.2 s and CLS 0 all score ~1.0.
+The cause is **Total Blocking Time** -- 340ms at score 0.74 when first
+measured, 250ms after the card textures moved off the critical path -- and it
+is the only weak metric: LCP 1.2 s, FCP 1.2 s, Speed Index 1.2 s and CLS 0 all score ~1.0.
 TBT comes from **809 ms of script evaluation** -- the 959 kB three.js + R3F
 `Stage` chunk. Canvas texture generation is not implicated: Rendering is 9 ms.
 
