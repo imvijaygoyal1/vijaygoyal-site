@@ -35,16 +35,33 @@ const POSES: readonly SubjectState[] = [
   }),
   // 3 - Shady Spade: the screen changes, the Watch arrives, cards deal.
   subjectState({
-    // A full turn through this beat -- the device rotates all the way round,
-    // showing its back and rail, and arrives facing the viewer again.
-    rotationY: -0.42 + Math.PI * 2,
+    // A swing back through square and on past it. There is no phone shell to
+    // show, so the turn stays inside MAX_TURN and the display never leaves
+    // the viewer -- see MAX_TURN below.
+    rotationY: 0.55,
     positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1,
   }),
-  // 4 - Craft: companions withdraw and the device turns to show its profile.
-  subjectState({ rotationY: -0.42 + Math.PI * 2 + 1.3, tiltX: -0.38, positionY: 0.95, screenOn: 0.75, screenMix: 1, scale: 0.95 }),
+  // 4 - Craft: companions withdraw and the device leans into its deepest turn.
+  subjectState({ rotationY: 1.0, tiltX: -0.38, positionY: 0.95, screenOn: 0.75, screenMix: 1, scale: 0.95 }),
   // 5 - Colophon: it closes and recedes.
-  subjectState({ rotationY: -0.42 + Math.PI * 2 + 2.3, positionY: 0.95, positionZ: -6, scale: 0.28, screenOn: 0 }),
+  subjectState({ rotationY: 1.45, positionY: 0.95, positionZ: -6, scale: 0.28, screenOn: 0 }),
 ];
+
+/**
+ * The furthest the subject may ever turn from square, in radians.
+ *
+ * `Phone` renders the captured display and nothing else -- no shell, no rail,
+ * no camera. A screen-only subject therefore has no far side to show: past the
+ * angle where `facing` reaches zero there is simply nothing on stage, and the
+ * device reads as having vanished mid-scroll. It did exactly that, live,
+ * through the whole back half of a full rotation.
+ *
+ * `facing` fades out at acos(0.05), so every pose stays below that with room
+ * to spare, and `easeInOutCubic` does not overshoot -- which makes the bound
+ * over the poses a bound over the entire narrative. `rotationBudget.test.ts`
+ * samples the narrative and enforces it.
+ */
+export const MAX_TURN = 1.5;
 
 
 /**

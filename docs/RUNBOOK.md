@@ -67,8 +67,21 @@ documents do not provide a product CAD mesh, so the camera lens barrels remain
 illustrative.
 
 Screens only draw when the display faces the viewer (`facing.ts`). That is
-physically right, and it hides the app swap, which happens while the device is
-turned away during the full rotation.
+physically right, and — because `Phone` draws the captured display and nothing
+else — it is also a hard bound on the narrative. Past the angle where `facing`
+reaches zero there is no shell left to look at, so the subject simply vanishes.
+It did exactly that live: the Shady Spade chapter used to turn the device a
+full 360, and it disappeared for the whole back half of the turn.
+
+**Every pose therefore stays inside `MAX_TURN` (`registry.ts`), and
+`rotationBudget.test.ts` samples the whole narrative to enforce it.** If you
+add or move a pose, that test is the gate — do not raise `MAX_TURN` to make it
+pass, because the value is derived from where `facing` reaches zero.
+
+The app swap used to hide behind the turned-away display. Without the rotation
+it happens in plain view, so `screenSwap.ts` hands the screens over through
+black instead of crossfading them into a double exposure. Its window is tuned
+against the real narrative in `screenSwap.test.ts`, not against the constants.
 
 ## Refreshing the captures
 
