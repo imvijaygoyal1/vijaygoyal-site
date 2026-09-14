@@ -6,6 +6,7 @@ import { CameraRig } from "./CameraRig";
 import { Subject } from "../subject/Subject";
 import { FrameProbe } from "./FrameProbe";
 import { ScrollDriver } from "./ScrollDriver";
+import { CopyFade } from "./CopyFade";
 import { TIER_SETTINGS } from "../lib/tier";
 import type { ProgressSource } from "../lib/progress";
 import { attachContextLossHandlers } from "./useContextLoss";
@@ -85,6 +86,9 @@ export function Stage({
         <Lights />
         <BakedEnvironment />
         <ScrollDriver progress={progress} />
+        {/* After ScrollDriver: same useFrame priority, so order decides which
+            runs first and the clock must advance before it is read. */}
+        <CopyFade progress={progress} />
         <FrameProbe />
         <CameraRig progress={progress} />
         <Subject progress={progress} />

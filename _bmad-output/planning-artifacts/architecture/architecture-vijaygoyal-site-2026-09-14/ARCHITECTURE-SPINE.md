@@ -82,7 +82,7 @@ see AD-19, which makes them machine-checkable.
 
 - **Binds:** all
 - **Prevents:** a second scroll owner whose pinning changes the progress denominator and silently desynchronises copy from the subject
-- **Rule:** Only the engine's `ScrollDriver` may read scroll position as a *driver of subject or camera state*. GSAP, ScrollTrigger, Framer Motion and Lenis are forbidden. **The progress denominator is the narrative's own measured extent, never `documentElement.scrollHeight`** — so a footer or any out-of-sequence block cannot shift every chapter range. CSS scroll-driven animation is governed separately by AD-17.
+- **Rule:** **Only the engine's `ScrollDriver` may read scroll position. Nothing else, in any language.** GSAP, ScrollTrigger, Framer Motion and Lenis are forbidden, and so is CSS `view-timeline` / `animation-timeline` (see AD-17). **The progress denominator is the narrative's own measured extent, never `documentElement.scrollHeight`** — so a footer or any out-of-sequence block cannot shift every chapter range. Every animated value on the page, DOM included, is a pure function of the one clock.
 
 ### AD-3 — Vite stays; no framework migration [ADOPTED]
 
@@ -168,11 +168,11 @@ see AD-19, which makes them machine-checkable.
 - **Prevents:** a redesign that quietly trades away the qualities the current site already has
 - **Rule:** Lighthouse accessibility 1.0, Lighthouse performance ≥ 0.90, the 30 fps frame-rate floor, and the size budgets all remain enforced. **No threshold may be lowered to make a change pass.** The budgets are amended only by a decision recorded here.
 
-### AD-17 — CSS scroll-driven animation is bounded, not banned
+### AD-17 — CSS scroll-driven animation is forbidden
 
 - **Binds:** `src/styles.css`, every section's copy treatment
-- **Prevents:** a blanket ban that the codebase already violates, and equally a second scroll reader creeping into subject or camera state
-- **Rule:** CSS `view-timeline` / `animation-timeline` is permitted **only** for opacity and transform of DOM copy, and only where it cannot affect layout. It may never drive subject or camera state, never change document height, and never be the mechanism by which content becomes legible — the reduced-motion and no-JS paths must read correctly with every such animation absent. It is already in use for the chapter-copy fade; that use is ratified, not grandfathered.
+- **Prevents:** a second reader of scroll, and — the reason this was tightened from a carve-out to a ban — an animation that silently does nothing where the browser lacks the feature
+- **Rule:** CSS `view-timeline` / `animation-timeline` may not be used. Copy motion is derived from the engine's clock and written as a custom property (`CopyFade` → `--copy-opacity`), with the CSS fallback value keeping the static and reduced-motion routes fully opaque. **Amended 2026-09-14:** this AD originally permitted the chapter-copy fade as a bounded exception, ratifying shipped code. That was wrong on correctness, not just purity — the rule sat behind `@supports (animation-timeline: view())`, so in any browser without scroll-driven animations the fade did not run at all and the copy still crossed the subject. One clock fixes it in every browser and makes the fade assertable in jsdom.
 
 ### AD-18 — Every budget test runs at every breakpoint
 

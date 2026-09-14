@@ -90,16 +90,28 @@ while its section is in view, then unpins for the section's last viewport of
 scrolling and travels up **through** the subject — the headline rode over the
 card fan and then over the phone. The scene's layout was never the problem.
 
-A `view-timeline` on `.chapter-section` fades the block across exactly that
-travel (`contain 82%` → `exit 12%`). `contain` is the pinned phase for a
-section taller than the viewport, so the fade begins as pinning ends and
-finishes while the copy is still below the subject.
+**The fade is driven from the engine's clock**, not by CSS. `copyOpacity` in
+`src/chapters/copyFade.ts` is a pure function of scroll position; `CopyFade` in
+`src/canvas/` writes it to each section as `--copy-opacity`, and
+`.chapter-copy` reads `opacity: var(--copy-opacity, 1)`.
 
-**Scoped to `.chapter-section`, which only the narrative route renders.**
-`.static-route` has no scene to collide with and must keep its copy fully
-opaque — do not move this rule onto `.chapter-copy` itself. It is also behind
-`@supports (animation-timeline: view())`, so a browser without scroll-driven
-animations simply gets the old behaviour rather than missing copy.
+**The fallback value is what makes the quiet routes correct:** the static route
+mounts no canvas, so nothing writes the property and the copy stays fully
+opaque — right, where there is no scene to collide with.
+
+**`CopyFade` must stay mounted after `ScrollDriver`.** Both use `useFrame` at
+the default priority and R3F runs subscriptions in the order they were added,
+so the clock advances before it is read. A non-zero priority is not the fix: in
+R3F any priority above zero hands the render loop to the caller.
+
+This was a CSS `view-timeline` until 2026-09-14. It was removed for
+correctness, not purity: the rule sat behind
+`@supports (animation-timeline: view())`, so **in a browser without
+scroll-driven animations the fade never ran and the copy still crossed the
+subject.** The bug was only ever fixed in browsers that had the feature. The
+window (`FADE_START`/`FADE_END`) is tuned and verified by screenshot, not
+derived — where the copy sits inside its sticky block decides when it reaches
+the subject.
 
 ## Why a lit object looks dull grey
 

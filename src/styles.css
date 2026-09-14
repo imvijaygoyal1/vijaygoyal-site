@@ -184,47 +184,26 @@ main {
 /*
  * Copy leaves by fading, not by sliding across the subject.
  *
- * `.chapter-copy` is a 100vh sticky block pinned to the top of its section,
- * so it holds at the foot of the frame while the section is in view -- and
- * then, for the section's last viewport of scrolling, it unpins and travels
- * up THROUGH the scene. The headline rode straight over the card fan and then
+ * `.chapter-copy` is a 100vh sticky block pinned to the top of its section, so
+ * it holds at the foot of the frame while the section is in view -- and then,
+ * for the section's last viewport of scrolling, it unpins and travels up
+ * THROUGH the scene. The headline rode straight over the card fan and then
  * over the phone. Nothing was wrong with the scene's layout: the copy was
  * crossing it.
  *
- * A view timeline on the section fades the block out exactly across that
- * travel. `contain` is the pinned phase for a section taller than the
- * viewport, so the fade starts as `contain` ends and completes early in
- * `exit`, while the copy is still below the subject.
+ * The fade is driven from the engine's clock -- `CopyFade` writes
+ * `--copy-opacity` on each section and it inherits down to the copy. It was a
+ * CSS `view-timeline`, which was a second reader of scroll and, behind
+ * `@supports`, did nothing whatsoever in a browser without scroll-driven
+ * animations -- so the defect stayed unfixed there. One clock fixes it
+ * everywhere.
  *
- * Scoped to `.chapter-section`, which only the narrative route renders --
- * `.static-route` has no scene to collide with and must keep its copy at full
- * opacity.
+ * The fallback value is what makes the quiet routes correct: the static route
+ * renders no canvas, so nothing writes the property and the copy stays fully
+ * opaque, which is right where there is no scene to collide with.
  */
-.chapter-section {
-  view-timeline-name: --chapter;
-  view-timeline-axis: block;
-}
-
-@supports (animation-timeline: view()) {
-  .chapter-section > .chapter-copy {
-    animation: copy-exit linear both;
-    animation-timeline: --chapter;
-    animation-range: contain 82% exit 12%;
-  }
-
-  @keyframes copy-exit {
-    to {
-      opacity: 0;
-    }
-  }
-
-  /* The fade is the motion; without it the copy would simply vanish, so
-     reduced-motion keeps the copy legible and accepts the crossing. */
-  @media (prefers-reduced-motion: reduce) {
-    .chapter-section > .chapter-copy {
-      animation: none;
-    }
-  }
+.chapter-copy {
+  opacity: var(--copy-opacity, 1);
 }
 
 .static-route .chapter-copy {
