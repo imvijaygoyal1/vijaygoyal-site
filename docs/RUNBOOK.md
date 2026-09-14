@@ -262,6 +262,23 @@ also loads the machine enough to tip it -- run them apart.
   decision is cheapest before three more chapters exist, and `preload` is
   currently a declared but never-invoked member of the chapter contract.
 
-- **Nobody owns visual design.** `src/styles.css` is a deliberate minimum —
-  background, type scale, and a contrast scrim so copy is legible over the
-  scene. It is not a design system and was never reviewed as one.
+- **Design tokens own visual design** as of 2026-09-14 (`AD-23`).
+  `src/styles/tokens.css` is the single authority for surfaces, text, lines,
+  accent, spacing, type, radii, elevation, motion and layout;
+  `src/styles.css` consumes it and declares no raw colour, no raw type scale
+  and no magic clamp. `src/styles/tokens.test.ts` holds that true.
+
+  Three things to know before changing it. The type is the **system stack on
+  purpose** — SF Pro on Apple platforms, no request, no FOUT, on a page whose
+  Lighthouse median sits a point above its floor. The frame is **monochrome**:
+  no third brand hue exists, and a product section re-points `--accent` via
+  `[data-accent="xbill"|"spade"]` with hues sampled from the real captures.
+  The CSS easing **mirrors `src/lib/ease.ts`**, so DOM and scene motion share
+  a curve.
+
+  **Tokenising is a rename, not a redesign.** The first attempt silently
+  drifted three values — `--measure` 32→34rem, label tracking 0.18→0.16em, and
+  the document's 1.6 line-height folded into the copy's 1.62. A pixel diff saw
+  ~1% of pixels change but could not say why; **comparing computed styles
+  against production named all three in one pass.** Use that check, not your
+  eye, when a change is meant to be visually neutral.
