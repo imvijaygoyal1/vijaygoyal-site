@@ -44,16 +44,18 @@ export const CARD_STOCK = "#fdfcf9";
  * The hand on stage, spades led.
  *
  * The Shady Spade is a trick-taking game in which the highest bidder declares
- * trump, so a spade-led hand is the game's own subject matter rather than five
- * arbitrary cards. The off-suit two are what make it read as a hand and not as
- * a repeated texture.
+ * trump, so a spade-led hand is the game's own subject matter rather than
+ * arbitrary cards. The off-suit card is what makes it read as a hand and not
+ * as a repeated texture.
+ *
+ * Three, not five. Five white rectangles were collectively wider than the
+ * phone is tall and became the brightest thing in the frame, which inverts
+ * the hierarchy -- the phone is the product.
  */
 export const HAND: readonly Card[] = [
   { rank: "A", suit: "spade" },
   { rank: "K", suit: "spade" },
   { rank: "Q", suit: "heart" },
-  { rank: "J", suit: "spade" },
-  { rank: "10", suit: "diamond" },
 ];
 
 /** Card faces are drawn, not downloaded: five more image requests for art this

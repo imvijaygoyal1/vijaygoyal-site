@@ -1,5 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
+import { Color } from "three";
 import type { Group, Material, Mesh } from "three";
 import { CHAPTERS } from "../chapters/registry";
 import { subjectStateAt } from "./sequence";
@@ -11,6 +12,7 @@ import { swapOpacities } from "./screenSwap";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import { HAND } from "./cardFace";
+import { fanShade, fanTransform } from "./cardFan";
 import { useCardTextures } from "./useCardTextures";
 import { TIER_SETTINGS } from "../lib/tier";
 import { useTier } from "../canvas/QualityProvider";
@@ -120,12 +122,9 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     for (let i = 0; i < CARDS; i++) {
       const card = cards.current[i];
       if (!card) continue;
-      const angle = (i - (CARDS - 1) / 2) * 0.26 * s.cards;
-      card.rotation.z = angle;
-      // Each card gets its own depth. They were all at z = 0, so overlapping
-      // cards in the fan were coplanar and z-fought -- the diagonal hatching
-      // across the faces was that, not a texture problem.
-      card.position.set(Math.sin(angle) * 1.5, -Math.abs(angle) * 0.5, i * 0.006);
+      const t = fanTransform(i, CARDS, s.cards);
+      card.rotation.z = t.rotation;
+      card.position.set(t.x, t.y, t.z);
       card.visible = s.cards > 0.02;
     }
   });
@@ -146,8 +145,14 @@ export function Subject({ progress }: { progress: ProgressRef }) {
         <WatchHomeScreen />
       </group>
 
-      <group position={[-1.8, -0.2, 0.5]}>
-        {HAND.map((card, i) => (
+      {/* Pulled back from z = 0.5 to nearly the phone's own plane: out front
+          the fan was magnified and seen so obliquely that it read as lying on
+          a table while the phone stood upright -- two spatial logics in one
+          frame. Scaled down for the same reason the hand is three cards. */}
+      <group position={[-1.18, -0.26, 0.06]} scale={0.95}>
+        {HAND.map((card, i) => {
+          const shade = fanShade(i, CARDS);
+          return (
           <group
             key={`${card.rank}${card.suit}`}
             ref={(g) => {
@@ -158,7 +163,11 @@ export function Subject({ progress }: { progress: ProgressRef }) {
             {/* The stock, which supplies the edge the face has no thickness
                 for. Paper, so barely any specular. */}
             <mesh geometry={cardBody}>
-              <meshStandardMaterial color="#f7f4ec" metalness={0} roughness={0.6} />
+              <meshStandardMaterial
+                color="#f7f4ec"
+                metalness={0}
+                roughness={0.6}
+              />
             </mesh>
             {/* Why the faces read as dull grey paper rather than bright card:
                 R3F's renderer defaults to ACES filmic tone mapping, which
@@ -174,16 +183,20 @@ export function Subject({ progress }: { progress: ProgressRef }) {
             <mesh geometry={cardFace} position={[0, 0, CARD_D / 2 + 0.0015]}>
               <meshStandardMaterial
                 map={cardTextures[i]}
+                /* Back of the fan is the most occluded by the cards in front
+                   of it, so it is the dimmest -- see fanShade. */
+                color={new Color(shade, shade, shade)}
                 emissive="#ffffff"
                 emissiveMap={cardTextures[i]}
-                emissiveIntensity={0.34}
+                emissiveIntensity={0.26 * shade}
                 toneMapped={false}
                 metalness={0}
                 roughness={0.45}
               />
             </mesh>
           </group>
-        ))}
+          );
+        })}
       </group>
     </group>
   );

@@ -176,6 +176,25 @@ progressive JPEG q80-82 into the chapter folder.
   and looking at it.
 - Textures are gated at 250 kB total; currently 218 kB.
 
+## The Lighthouse performance gate is marginal, not green
+
+**`categories:performance` has a `minScore` of 0.9 and the median sits on
+exactly 0.90.** Observed back-to-back on 2026-09-13: `[0.86, 0.88, 0.97]`
+(median 0.88, **fails**) then `[0.85, 0.90, 0.92]` (median 0.90, passes). It is
+roughly a coin flip. Do not read a single green `npm run lh` as proof, and do
+not raise the threshold to make it stop -- the same rule as `FLOOR_FPS`.
+
+The cause is **Total Blocking Time**, 340 ms at score 0.74, and it is the only
+weak metric: LCP 1.2 s, FCP 1.2 s, Speed Index 1.2 s and CLS 0 all score ~1.0.
+TBT comes from **809 ms of script evaluation** -- the 959 kB three.js + R3F
+`Stage` chunk. Canvas texture generation is not implicated: Rendering is 9 ms.
+
+So the fix is bundle work, not scene work: the `Stage` chunk is already lazy
+behind a WebGL check, and the next lever is splitting three.js itself or
+deferring more of the scene's construction past first interaction. **Unresolved
+as of 2026-09-13.** Running the frame-rate gate immediately before `npm run lh`
+also loads the machine enough to tip it -- run them apart.
+
 ## Open items — do not mark these resolved because CI is green
 
 - **No mid-range Android has ever run this.** That device class defines the
