@@ -87,6 +87,23 @@ derived from anything in this repository:
 metrics, and "eight first-pass approvals" is exactly the kind of claim that
 needs to be right.
 
+## 3b. Superseded by Phase 3 — read `docs/CONTENT.md` first
+
+Two sections below were overtaken by verification on 2026-09-14 and are kept
+only as the record of what the audit could see from this repository alone:
+
+- **The four "claims that must be verified" were all checked and are all
+  true.** None was invented. Sources are in `docs/CONTENT.md` §1.
+- **Several "missing" facts were recovered** from the apps' own repositories
+  and from live DNS: xBill's App Store listing, both product subdomains, and
+  **a live privacy policy at `shadyspade.vijaygoyal.org/privacy`** — so §64 is
+  satisfied by linking out rather than by building pages here.
+
+**Also discovered, and not in this audit:**
+`shadyspade.vijaygoyal.org` serves `/.well-known/apple-app-site-association`
+for the shipped app's universal links. It is a separate Cloudflare deployment
+and the apex worker's routes do not reach it — **keep it that way.**
+
 ## 4. Links — a near-empty set
 
 The **only** outbound link on the entire site is
