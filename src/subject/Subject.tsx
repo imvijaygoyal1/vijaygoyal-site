@@ -1,4 +1,4 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import type { Group, Material, Mesh } from "three";
 import { CHAPTERS } from "../chapters/registry";
@@ -9,6 +9,11 @@ import { applyHomeZoom, HomeScreen } from "./HomeScreen";
 import { facing } from "./facing";
 import { swapOpacities } from "./screenSwap";
 import { deviceGeometry } from "../canvas/deviceGeometry";
+import { roundedRectGeometry } from "../canvas/roundedRect";
+import { HAND } from "./cardFace";
+import { useCardTextures } from "./useCardTextures";
+import { TIER_SETTINGS } from "../lib/tier";
+import { useTier } from "../canvas/QualityProvider";
 import { WatchHomeScreen } from "./WatchHomeScreen";
 import { watchOpacity } from "./watchPresentation";
 import type { ProgressRef } from "../lib/progress";
@@ -16,7 +21,11 @@ import xbillScreen from "../chapters/xbill/xbill-screen.webp";
 import spadeScreen from "../chapters/shadyspade/spade-screen.webp";
 
 /** How far the translucent copies travel at full split / full separation. */
-const CARDS = 5;
+const CARDS = HAND.length;
+const CARD_W = 0.4;
+const CARD_H = 0.58;
+const CARD_D = 0.014;
+const CARD_R = 0.045;
 
 function isMesh(o: unknown): o is Mesh {
   return (o as Mesh).isMesh === true;
@@ -57,11 +66,22 @@ function setOpacity(root: Group | null | undefined, opacity: number): void {
 export function Subject({ progress }: { progress: ProgressRef }) {
   const root = useRef<Group>(null);
   const watch = useRef<Group>(null);
-  const cards = useRef<(Mesh | null)[]>([]);
+  const cards = useRef<(Group | null)[]>([]);
   const home = useRef<Group>(null);
   const screenA = useRef<Group>(null);
   const screenB = useRef<Group>(null);
-  const cardBody = useMemo(() => deviceGeometry(0.4, 0.58, 0.014, 0.045, 0.004), []);
+  const cardBody = useMemo(
+    () => deviceGeometry(CARD_W, CARD_H, CARD_D, CARD_R, 0.004),
+    [],
+  );
+  const cardFace = useMemo(
+    () => roundedRectGeometry(CARD_W, CARD_H, CARD_R),
+    [],
+  );
+  const hardwareMax = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
+  const cardTextures = useCardTextures(
+    Math.min(TIER_SETTINGS[useTier()].anisotropy, hardwareMax),
+  );
 
   useFrame(() => {
     const g = root.current;
@@ -124,19 +144,27 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       </group>
 
       <group position={[-1.8, -0.2, 0.5]}>
-        {Array.from({ length: CARDS }, (_, i) => (
-          <mesh
-            key={i}
-            geometry={cardBody}
-            ref={(m) => {
-              cards.current[i] = m;
+        {HAND.map((card, i) => (
+          <group
+            key={`${card.rank}${card.suit}`}
+            ref={(g) => {
+              cards.current[i] = g;
             }}
             visible={false}
           >
-            {/* Face down and dark: white rectangles read as missing textures,
-                not as playing cards. */}
-            <meshStandardMaterial color="#1b2030" metalness={0.15} roughness={0.5} />
-          </mesh>
+            {/* The stock, which supplies the edge the face has no thickness
+                for. Paper, so barely any specular. */}
+            <mesh geometry={cardBody}>
+              <meshStandardMaterial color="#e9e5db" metalness={0} roughness={0.72} />
+            </mesh>
+            <mesh geometry={cardFace} position={[0, 0, CARD_D / 2 + 0.0015]}>
+              <meshStandardMaterial
+                map={cardTextures[i]}
+                metalness={0}
+                roughness={0.6}
+              />
+            </mesh>
+          </group>
         ))}
       </group>
     </group>

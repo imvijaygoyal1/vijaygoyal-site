@@ -23,9 +23,12 @@ export const Phone = forwardRef<Group, { children?: ReactNode }>(
 
     return (
       <group ref={ref}>
-        {/* Backing keeps the rounded display legible during screen fades. */}
+        {/* Backing keeps the rounded display legible during screen fades.
+            Barely reflective on purpose: at 0.35 metalness and 0.22 roughness
+            this caught so much of the environment at grazing angles that the
+            dark, screen-off device opened the site as a pale blade. */}
         <mesh geometry={recess} position={[0, 0, FACE_Z - 0.001]}>
-          <meshStandardMaterial color="#04050a" metalness={0.35} roughness={0.22} />
+          <meshStandardMaterial color="#04050a" metalness={0.08} roughness={0.5} />
         </mesh>
 
         <group position={[0, 0, FACE_Z]}>{children}</group>

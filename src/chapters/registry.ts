@@ -22,8 +22,10 @@ export const PRELOAD_MARGIN = 0.08;
  * belt-and-braces check.
  */
 const POSES: readonly SubjectState[] = [
-  // 0 - arrival: turned away, high, screen dark.
-  subjectState({ rotationY: (72 * Math.PI) / 180, positionY: 1.5, screenOn: 0, homeOn: 0 }),
+  // 0 - arrival: turned, high, screen dark. Not turned far: a screen-only
+  //     subject has no rail or back to present, so past about 45 degrees the
+  //     dark, screen-off device stops reading as a phone and becomes a blade.
+  subjectState({ rotationY: (38 * Math.PI) / 180, positionY: 1.5, screenOn: 0, homeOn: 0 }),
   // 1 - facing the viewer, settled, and the home screen wakes. A phone lights
   //     when you pick it up; it does not open straight into an app.
   subjectState({ rotationY: 0, positionY: 0.95, screenOn: 0, homeOn: 1, homeZoom: 0 }),

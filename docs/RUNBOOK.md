@@ -83,6 +83,19 @@ it happens in plain view, so `screenSwap.ts` hands the screens over through
 black instead of crossfading them into a double exposure. Its window is tuned
 against the real narrative in `screenSwap.test.ts`, not against the constants.
 
+## The cards are drawn, not captured
+
+`cardFace.ts` draws each face to a canvas at build-free runtime and
+`useCardTextures.ts` turns it into a texture — there is no card artwork to
+refresh and no extra image request. Edit `HAND` to change which cards are on
+stage.
+
+They were untextured slabs until 2026-09-13, dark on the theory that white
+ones "read as missing textures". They read as missing textures either way:
+five blank rounded rectangles, larger on screen than the phone beside them, in
+the chapter about a card game. The owner reported them twice as "blank boxes".
+**A blank primitive does not become a prop by being recoloured.**
+
 ## Refreshing the captures
 
 Build each app for the iOS 26.5 simulator (iPhone 17 Pro, UDID
