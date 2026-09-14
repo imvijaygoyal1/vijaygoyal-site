@@ -18,7 +18,9 @@ export const BRAND_GREEN = "#1b3b2a";
  *  out milky once the scene's lights hit it. */
 export const PANEL_GREEN = "#122a1d";
 export const BRAND_GOLD = "#c9a94b";
-export const CARD_STOCK = "#f7f5f0";
+/** Slightly off pure white: at #f7f5f0 the stock out-shouted the phone,
+ *  which is the hero of this frame. */
+export const CARD_STOCK = "#eeebe3";
 
 /**
  * The hand on stage, spades led.
@@ -56,14 +58,59 @@ function roundRect(
   ctx.closePath();
 }
 
+/** A pip centred on a point, inverted below the card's waist the way a real
+ *  face card's lower pips are. */
+function pipAt(
+  ctx: CanvasRenderingContext2D,
+  suit: Suit,
+  cx: number, cy: number, size: number, invert: boolean,
+): void {
+  ctx.save();
+  ctx.translate(cx, cy);
+  if (invert) ctx.rotate(Math.PI);
+  PIPS[suit](ctx, -size / 2, -size / 2, size);
+  ctx.restore();
+}
+
 /**
- * One card face: white stock, a deep green brand panel inset behind a gold
- * hairline, and a gold pip at its centre.
+ * Where the pips sit for a given rank, in normalised card space.
  *
- * The panel is why this reads as The Shady Spade's deck rather than as any
- * deck. It also solves the layout problem underneath the old faces, which put
- * one outsized glyph in the middle of every card -- right for an Ace, wrong
- * for a court card, and the visual signature of a placeholder either way.
+ * The Ace carries one; the ten carries ten in the standard arrangement --
+ * two outer columns of four with a pair down the middle. Getting this right
+ * is most of what separates a card from a rectangle with a symbol on it: the
+ * previous faces put one outsized pip at the centre of every rank, which is
+ * the grammar of a card *back*, not a face.
+ */
+export function pipLayout(rank: string): readonly (readonly [number, number])[] {
+  if (rank === "A") return [[0.5, 0.5]];
+  if (rank === "10") {
+    // The outer columns sit near the field's edges. At 0.36/0.64 they were
+    // only a tenth of the card apart and the ten read as a zigzag.
+    const cols = [0.15, 0.85];
+    const rows = [0.13, 0.37, 0.63, 0.87];
+    const out: [number, number][] = [];
+    for (const x of cols) for (const y of rows) out.push([x, y]);
+    out.push([0.5, 0.25], [0.5, 0.75]);
+    return out;
+  }
+  return [];
+}
+
+/** Court ranks get a monogram panel rather than pips -- the one place the
+ *  brand still prints, now that the face itself is white stock. */
+export function isCourt(rank: string): boolean {
+  return rank === "J" || rank === "Q" || rank === "K";
+}
+
+/**
+ * One card face: white stock, a gold hairline, a large suit-coloured index in
+ * two opposite corners, and a centre that depends on the rank.
+ *
+ * The first version printed a green panel with a centred emblem on every
+ * card. That is a Bicycle *back*, so the fan read as five face-down cards --
+ * and three of the five were indistinguishable, because the rank only
+ * appeared in a corner a few pixels tall. The rank is what makes a face a
+ * face, so it leads here.
  */
 export function drawCardFace(
   ctx: CanvasRenderingContext2D,
@@ -71,43 +118,69 @@ export function drawCardFace(
   w: number = FACE_W,
   h: number = FACE_H,
 ): void {
-  const pip = PIPS[card.suit];
   const ink = indexColor(card.suit);
 
   // Stock. The geometry cuts the corners, so the face fills its bounds.
   ctx.fillStyle = CARD_STOCK;
   ctx.fillRect(0, 0, w, h);
 
-  // Brand panel, inset so the white stock frames it the way a printed card does.
-  const px = w * 0.155;
-  const py = h * 0.145;
-  const pw = w - px * 2;
-  const ph = h - py * 2;
-  ctx.fillStyle = PANEL_GREEN;
-  roundRect(ctx, px, py, pw, ph, w * 0.045);
-  ctx.fill();
-
-  // Gold hairline, inset again inside the panel.
+  // Gold hairline, inset the way a printed card's rule is.
+  const inset = w * 0.05;
   ctx.strokeStyle = BRAND_GOLD;
-  ctx.lineWidth = Math.max(1, w * 0.006);
-  ctx.globalAlpha = 0.55;
-  const gx = px + w * 0.028;
-  const gy = py + w * 0.028;
-  roundRect(ctx, gx, gy, pw - w * 0.056, ph - w * 0.056, w * 0.03);
+  ctx.lineWidth = Math.max(1, w * 0.0075);
+  ctx.globalAlpha = 0.7;
+  roundRect(ctx, inset, inset, w - inset * 2, h - inset * 2, w * 0.035);
   ctx.stroke();
   ctx.globalAlpha = 1;
 
-  // Centre pip, gold on green.
-  const pipSize = pw * 0.46;
-  ctx.fillStyle = BRAND_GOLD;
-  pip(ctx, px + (pw - pipSize) / 2, py + (ph - pipSize) / 2, pipSize);
+  // The field the centre composition lives in, inside the rule and clear of
+  // the index columns.
+  const fx = w * 0.20;
+  const fy = h * 0.115;
+  const fw = w * 0.60;
+  const fh = h * 0.77;
 
-  // Indices in two opposite corners, as a real card carries them: rank above a
-  // small pip, in the suit's own colour on the white stock.
-  const rankSize = Math.round(w * 0.125);
-  const smallPip = w * 0.072;
-  const mx = w * 0.055;
-  const my = h * 0.038;
+  ctx.fillStyle = ink;
+  if (isCourt(card.rank)) {
+    // Monogram panel: the brand's green and gold, held to the centre.
+    const pw = fw * 0.82;
+    const ph = fh * 0.58;
+    const px = fx + (fw - pw) / 2;
+    const py = fy + (fh - ph) / 2;
+    ctx.fillStyle = PANEL_GREEN;
+    roundRect(ctx, px, py, pw, ph, w * 0.03);
+    ctx.fill();
+    ctx.strokeStyle = BRAND_GOLD;
+    ctx.lineWidth = Math.max(1, w * 0.006);
+    ctx.globalAlpha = 0.65;
+    roundRect(ctx, px + w * 0.02, py + w * 0.02, pw - w * 0.04, ph - w * 0.04, w * 0.02);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    ctx.fillStyle = BRAND_GOLD;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    ctx.font = `600 ${Math.round(pw * 0.52)}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+    ctx.fillText(card.rank, px + pw / 2, py + ph * 0.56);
+    pipAt(ctx, card.suit, px + pw / 2, py + ph * 0.775, pw * 0.24, false);
+  } else {
+    const pips = pipLayout(card.rank);
+    // One pip on an Ace fills the field; ten have to share it.
+    const size = pips.length === 1 ? fw * 0.52 : fw * 0.2;
+    ctx.fillStyle = ink;
+    for (const [nx, ny] of pips) {
+      pipAt(ctx, card.suit, fx + nx * fw, fy + ny * fh, size, ny > 0.5);
+    }
+  }
+
+  // Indices in two opposite corners: rank above a small pip, in the suit's
+  // own colour. Two-character ranks are set tighter so "10" does not crowd
+  // the rule.
+  const wide = card.rank.length > 1;
+  const rankSize = Math.round(w * (wide ? 0.125 : 0.15));
+  const smallPip = w * 0.078;
+  const cx = w * 0.113;
+  const my = h * 0.052;
   ctx.textAlign = "center";
   ctx.textBaseline = "top";
   for (const flipped of [false, true]) {
@@ -118,8 +191,8 @@ export function drawCardFace(
     }
     ctx.fillStyle = ink;
     ctx.font = `600 ${rankSize}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
-    ctx.fillText(card.rank, mx + smallPip / 2, my);
-    pip(ctx, mx, my + rankSize * 1.02, smallPip);
+    ctx.fillText(card.rank, cx, my);
+    pipAt(ctx, card.suit, cx, my + rankSize * 1.28, smallPip, false);
     ctx.restore();
   }
 }

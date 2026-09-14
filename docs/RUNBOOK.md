@@ -83,6 +83,24 @@ it happens in plain view, so `screenSwap.ts` hands the screens over through
 black instead of crossfading them into a double exposure. Its window is tuned
 against the real narrative in `screenSwap.test.ts`, not against the constants.
 
+## Copy leaves by fading, not by crossing the scene
+
+`.chapter-copy` is a 100vh sticky block. It holds at the foot of the frame
+while its section is in view, then unpins for the section's last viewport of
+scrolling and travels up **through** the subject — the headline rode over the
+card fan and then over the phone. The scene's layout was never the problem.
+
+A `view-timeline` on `.chapter-section` fades the block across exactly that
+travel (`contain 82%` → `exit 12%`). `contain` is the pinned phase for a
+section taller than the viewport, so the fade begins as pinning ends and
+finishes while the copy is still below the subject.
+
+**Scoped to `.chapter-section`, which only the narrative route renders.**
+`.static-route` has no scene to collide with and must keep its copy fully
+opaque — do not move this rule onto `.chapter-copy` itself. It is also behind
+`@supports (animation-timeline: view())`, so a browser without scroll-driven
+animations simply gets the old behaviour rather than missing copy.
+
 ## The cards are drawn, not captured
 
 `cardFace.ts` draws each face to a canvas at build-free runtime and
@@ -95,6 +113,24 @@ ones "read as missing textures". They read as missing textures either way:
 five blank rounded rectangles, larger on screen than the phone beside them, in
 the chapter about a card game. The owner reported them twice as "blank boxes".
 **A blank primitive does not become a prop by being recoloured.**
+
+Two further rounds were needed after that, both worth knowing:
+
+- **Pips must be drawn, not typed.** `cardPips.ts` holds a path per suit. Set
+  in the UI font they were the clearest tell that a card was not a card.
+- **A coloured panel with a centred emblem is a card *back*.** The first
+  branded attempt printed one on every rank, so the fan read as five face-down
+  cards — and A/K/J of the same suit were indistinguishable, the rank living
+  only in a corner. **The rank is what makes a face a face.** Faces are now
+  white stock with a large suit-coloured index, real pip layouts
+  (`pipLayout`), and the brand's green and gold held to the court monogram
+  and a hairline rule.
+- **Judge the artwork flat.** Rendering `drawCardFace` to a canvas and looking
+  at it found a squircle where a diamond should be and a zigzag where the
+  ten's columns should be — neither legible in the rotated 3D view.
+- **Cards need their own depth.** All five sat at `z = 0`, so overlapping
+  cards in the fan were coplanar and z-fought; the diagonal hatching across
+  the faces was that, not a texture problem.
 
 ## Refreshing the captures
 

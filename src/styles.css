@@ -181,6 +181,52 @@ main {
 
 /* The static route has no scene behind it, so the scrim and the full-viewport
    stickiness are both pointless there. */
+/*
+ * Copy leaves by fading, not by sliding across the subject.
+ *
+ * `.chapter-copy` is a 100vh sticky block pinned to the top of its section,
+ * so it holds at the foot of the frame while the section is in view -- and
+ * then, for the section's last viewport of scrolling, it unpins and travels
+ * up THROUGH the scene. The headline rode straight over the card fan and then
+ * over the phone. Nothing was wrong with the scene's layout: the copy was
+ * crossing it.
+ *
+ * A view timeline on the section fades the block out exactly across that
+ * travel. `contain` is the pinned phase for a section taller than the
+ * viewport, so the fade starts as `contain` ends and completes early in
+ * `exit`, while the copy is still below the subject.
+ *
+ * Scoped to `.chapter-section`, which only the narrative route renders --
+ * `.static-route` has no scene to collide with and must keep its copy at full
+ * opacity.
+ */
+.chapter-section {
+  view-timeline-name: --chapter;
+  view-timeline-axis: block;
+}
+
+@supports (animation-timeline: view()) {
+  .chapter-section > .chapter-copy {
+    animation: copy-exit linear both;
+    animation-timeline: --chapter;
+    animation-range: contain 82% exit 12%;
+  }
+
+  @keyframes copy-exit {
+    to {
+      opacity: 0;
+    }
+  }
+
+  /* The fade is the motion; without it the copy would simply vanish, so
+     reduced-motion keeps the copy legible and accepts the crossing. */
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-section > .chapter-copy {
+      animation: none;
+    }
+  }
+}
+
 .static-route .chapter-copy {
   position: static;
   min-height: 0;

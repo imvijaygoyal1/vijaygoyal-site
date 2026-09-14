@@ -61,6 +61,7 @@ export function App() {
             <section
               key={id}
               id={id}
+              className="chapter-section"
               style={{ minHeight: `${sectionHeightVh(range)}vh`, position: "relative" }}
             >
               <Content />
