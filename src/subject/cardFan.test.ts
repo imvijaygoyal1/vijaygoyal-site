@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fanOpen, fanPlacement, fanTransform, FAN_STEP, fanYaw, MAX_FAN_YAW, NARROW_ASPECT, PIVOT_R } from "./cardFan";
+import { fanOpen, fanPlacement, fanTransform, FAN_STEP, fanYaw, MAX_FAN_YAW, PIVOT_R } from "./cardFan";
 
 const COUNT = 3;
 
@@ -95,17 +95,16 @@ describe("fan orientation", () => {
 });
 
 describe("fan placement", () => {
-  it("tucks in toward the phone on a portrait frame instead of leaving it", () => {
-    const wide = fanPlacement(16 / 10);
-    const narrow = fanPlacement(393 / 852);
-    // Closer to the phone at x = 0, and smaller.
-    expect(Math.abs(narrow.position[0])).toBeLessThan(Math.abs(wide.position[0]));
-    expect(narrow.scale).toBeLessThan(wide.scale);
+  it("sits the hand to the left of the phone in both layouts", () => {
+    // Its centre, not its reach: the front card overlapping the phone's edge is
+    // intended. Whether the whole set fits the frame is portraitFraming.test.ts.
+    for (const layout of ["wide", "portrait"] as const) {
+      expect(fanPlacement(layout).position[0]).toBeLessThan(0);
+    }
   });
 
-  it("switches at the narrow threshold", () => {
-    expect(fanPlacement(NARROW_ASPECT - 0.01)).toEqual(fanPlacement(0.5));
-    expect(fanPlacement(NARROW_ASPECT)).toEqual(fanPlacement(1.6));
+  it("is a little smaller on portrait, where width is the tight dimension", () => {
+    expect(fanPlacement("portrait").scale).toBeLessThan(fanPlacement("wide").scale);
   });
 });
 

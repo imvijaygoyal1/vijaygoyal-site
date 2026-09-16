@@ -49,7 +49,7 @@ describe("validateRegistry", () => {
   it("rejects a camera that jumps at a chapter boundary", () => {
     const a = make("a", [0, 0.5]);
     const b = { ...make("b", [0.5, 1]), keyframes: [{ at: 0, position: [0, 0, 6] as const, lookAt: [0, 0, 0] as const }] };
-    expect(() => validateRegistry([a, b])).toThrow(/camera jumps between "a" and "b"/i);
+    expect(() => validateRegistry([a, b])).toThrow(/camera jumps between "a \(wide\)" and "b \(wide\)"/i);
   });
 
   it("rejects an empty registry", () => {
@@ -139,5 +139,50 @@ describe("the shipped registry", () => {
     for (const c of CHAPTERS) {
       expect(c.range).toBeDefined();
     }
+  });
+});
+
+describe("validateRegistry across layouts", () => {
+  const Stub = () => null;
+  const base = (id: string, range: readonly [number, number]): RegisteredChapter => ({
+    id,
+    range,
+    keyframes: [{ at: 0, position: [0, 0, 5], lookAt: [0, 0, 0] }],
+    Content: Stub,
+    preload: () => {},
+    enter: NEUTRAL,
+    exit: NEUTRAL,
+  });
+
+  it("rejects a seam that breaks on portrait frames alone", () => {
+    // Wide tracks agree; only the portrait track jumps. A check of the wide
+    // tracks alone passes this, which is how a phone-only jump ships (AD-18).
+    const a = { ...base("a", [0, 0.5]), portrait: [{ at: 0, position: [0, 0, 7] as const, lookAt: [0, 0, 0] as const }] };
+    const b = base("b", [0.5, 1]);
+    expect(() => validateRegistry([a, b])).toThrow(/camera jumps between "a \(portrait\)" and "b \(portrait\)"/i);
+  });
+
+  it("falls back to the wide track for a chapter with no portrait one", () => {
+    // b has no portrait track, so its portrait seam is its wide first frame:
+    // a portrait track ending there is continuous, one ending elsewhere is not.
+    const meets = [{ at: 0, position: [0, 0, 5] as const, lookAt: [0, 0, 0] as const }];
+    const misses = [{ at: 0, position: [0, 0, 9] as const, lookAt: [0, 0, 0] as const }];
+    const b = base("b", [0.5, 1]);
+    expect(b.portrait).toBeUndefined();
+    expect(() => validateRegistry([{ ...base("a", [0, 0.5]), portrait: meets }, b])).not.toThrow();
+    expect(() => validateRegistry([{ ...base("a", [0, 0.5]), portrait: misses }, b])).toThrow(/portrait/);
+  });
+
+  it("names the layout when a portrait track is itself invalid", () => {
+    const unsorted = [
+      { at: 0.8, position: [0, 0, 5] as const, lookAt: [0, 0, 0] as const },
+      { at: 0.2, position: [0, 0, 5] as const, lookAt: [0, 0, 0] as const },
+    ];
+    expect(() => validateRegistry([{ ...base("a", [0, 1]), portrait: unsorted }])).toThrow(/a \(portrait\)/);
+  });
+
+  it("validates the shipped registry's portrait tracks", () => {
+    expect(CHAPTERS.some((c) => c.portrait)).toBe(true);
+    expect(() => validateRegistry(CHAPTERS)).not.toThrow();
   });
 });

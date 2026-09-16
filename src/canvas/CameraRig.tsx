@@ -1,21 +1,10 @@
 import { useFrame } from "@react-three/fiber";
-import { localProgress, type ProgressRef } from "../lib/progress";
-import { sampleKeyframes } from "../lib/keyframes";
-import { easeInOutCubic } from "../lib/ease";
-import { CHAPTERS } from "../chapters/registry";
+import type { ProgressRef } from "../lib/progress";
+import { cameraPoseAt } from "./cameraPose";
 
 export function CameraRig({ progress }: { progress: ProgressRef }) {
-  useFrame(({ camera }) => {
-    const global = progress.current;
-    const chapter =
-      CHAPTERS.find((c) => global >= c.range[0] && global <= c.range[1]) ?? CHAPTERS[0]!;
-
-    // Eased: a camera that starts and stops abruptly is the clearest tell
-    // that a scene was never art-directed.
-    const pose = sampleKeyframes(
-      chapter.keyframes,
-      easeInOutCubic(localProgress(global, chapter.range)),
-    );
+  useFrame(({ camera, size }) => {
+    const pose = cameraPoseAt(progress.current, size.width / size.height);
     camera.position.set(...pose.position);
     camera.lookAt(...pose.lookAt);
   });

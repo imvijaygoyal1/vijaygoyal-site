@@ -3,6 +3,7 @@ import type { SubjectState } from "../subject/state";
 import type { ProgressRef, ScrollRange } from "../lib/progress";
 import type { Keyframe } from "../lib/keyframes";
 import type { Tier } from "../lib/tier";
+import type { Layout } from "../lib/layout";
 
 /**
  * What a chapter's 3D scene receives.
@@ -25,7 +26,11 @@ export interface ChapterSceneProps {
  */
 export interface Chapter {
   id: string;
+  /** The camera track for wide frames, and for any layout without its own. */
   keyframes: readonly Keyframe[];
+  /** The camera track for portrait frames, where the wide framing cannot fit
+   *  what the chapter stages (AD-13). Absent: portrait uses `keyframes`. */
+  portrait?: readonly Keyframe[];
   Content: ComponentType;
   preload: () => void;
 }
@@ -36,4 +41,12 @@ export interface RegisteredChapter extends Chapter {
   enter: SubjectState;
   exit: SubjectState;
   range: ScrollRange;
+}
+
+/** The camera track a chapter uses in a given layout. */
+export function keyframesFor(
+  chapter: Pick<Chapter, "keyframes" | "portrait">,
+  layout: Layout,
+): readonly Keyframe[] {
+  return layout === "portrait" ? (chapter.portrait ?? chapter.keyframes) : chapter.keyframes;
 }

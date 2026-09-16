@@ -208,10 +208,28 @@ full frames on desktop and mobile before touching anything:
   Thickening the stock to show an edge backfired once it turned: the sides
   catch none of the key light and read as grey slabs. It stays at 0.014.
 
-**Mobile is a compromise, not a solution.** A portrait frame leaves about a
-fifth of a unit beside the phone, so `fanPlacement` closes the hand up small
-over the empty green at the phone's upper left — clear of the copy and the
-app's UI, but small. Properly, this is per-breakpoint framing (AD-13).
+**Portrait frames get their own camera for this chapter (2026-09-16).** The
+round-6 placement tucked a tiny hand onto the phone and still got cut off on an
+iPhone 17 Pro; the Watch was cropped on every phone and the copy covered the
+phone's lower half. A portrait frame is ~1.4 units wide at the subject, so no
+prop placement could fix it -- the camera had to change (AD-13).
+`lib/layout.ts#layoutFor` is the one predicate; `Chapter.portrait` is an
+optional camera track (transition, shady-spade, process carry one) and the
+registry validates tracks and seams **per layout** (AD-18). Poses are shared.
+
+- **Test framing in WebKit at the iPhone 17 Pro profile**
+  (`devices["iPhone 17 Pro"]`, 402x681 -- Safari's toolbars included). The
+  earlier 393x852 check missed the problem because a taller frame has room the
+  real one does not. `npx playwright install webkit` if it is missing.
+- **`portraitFraming.test.ts` guards it** by projecting the phone, Watch and
+  every card corner through the real camera at five phone viewports across the
+  chapter. It fails against the pre-fix framing and against a pushed-in camera.
+  It rebuilds Subject's transform chain from the same pure functions, so a new
+  transform in `Subject` must be added there too.
+- Upright iPads (0.66-0.70) get the portrait framing on purpose.
+- A layout change mid-scroll (rotating the phone) cuts the camera to the other
+  track. Accepted: rotation reflows the whole page anyway, and blending would
+  add state outside the one scroll clock (AD-2).
 
 ## Refreshing the captures
 

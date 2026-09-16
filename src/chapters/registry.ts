@@ -8,7 +8,8 @@ import { shadyspade } from "./shadyspade";
 import { toolkit } from "./toolkit";
 import { transition } from "./transition";
 import { xbill } from "./xbill";
-import type { Chapter, RegisteredChapter } from "./types";
+import { keyframesFor, type Chapter, type RegisteredChapter } from "./types";
+import { LAYOUTS } from "../lib/layout";
 import { subjectState, type SubjectState } from "../subject/state";
 import { validateContinuity } from "../subject/sequence";
 
@@ -122,7 +123,11 @@ export function validateRegistry(chapters: readonly RegisteredChapter[]): void {
     if (ids.has(c.id)) throw new RangeError(`Duplicate chapter id: ${c.id}`);
     ids.add(c.id);
     assertValidRange(c.range, c.id);
-    validateKeyframes(c.keyframes, c.id);
+    // Every layout's track, not just the wide one: per-breakpoint framing is
+    // exactly where a seam could break on phones alone with CI green (AD-18).
+    for (const layout of LAYOUTS) {
+      validateKeyframes(keyframesFor(c, layout), `${c.id} (${layout})`);
+    }
   }
 
   if (first.range[0] !== 0) throw new RangeError("Registry must start at 0");
@@ -139,7 +144,14 @@ export function validateRegistry(chapters: readonly RegisteredChapter[]): void {
     if (next.range[0] < prev.range[1]) {
       throw new RangeError(`Overlap between "${prev.id}" and "${next.id}"`);
     }
-    validateSeam(prev.keyframes, next.keyframes, prev.id, next.id);
+    for (const layout of LAYOUTS) {
+      validateSeam(
+        keyframesFor(prev, layout),
+        keyframesFor(next, layout),
+        `${prev.id} (${layout})`,
+        `${next.id} (${layout})`,
+      );
+    }
   }
 }
 

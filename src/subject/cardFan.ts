@@ -13,6 +13,12 @@
  * which is exactly what makes an arc read as held.
  */
 
+import type { Layout } from "../lib/layout";
+
+/** A card's face, in scene units: poker proportions, sized against the phone. */
+export const CARD_W = 0.4;
+export const CARD_H = 0.58;
+
 /** Angle between neighbouring cards, radians. */
 export const FAN_STEP = 0.24;
 /** Distance from a card's centre down to the shared pivot. */
@@ -99,20 +105,18 @@ export interface FanPlacement {
 }
 
 /**
- * Where the hand sits beside the phone, by frame shape.
+ * Where the hand sits beside the phone, by layout.
  *
- * On a wide frame there is room to its left. On a portrait phone that same
- * spot is outside the frame: the hand was cut to two cards sliced by the
- * screen edge, which read as a mistake -- and the portrait frame leaves only a
- * fifth of a unit of stage beside the phone. There the hand closes up, shrinks
- * and comes forward over the empty green at the phone's upper left, beside the
- * app's spade -- clear of the copy below the phone, which a lower placement
- * sat on, and of the app's rules card and button.
+ * Portrait frames have their own camera, pulled back far enough that the hand
+ * fits beside the phone as it does on wide frames -- so it no longer has to
+ * climb onto the phone to stay in frame, which is what the round-6 placement
+ * did and still got cut off on an iPhone 17 Pro. A little closer and smaller,
+ * because the portrait frame's width is the tight dimension. In both layouts
+ * the front card overlaps the phone's edge a little, by design: a hand held
+ * against the device. `portraitFraming.test.ts` checks the set fits the frame.
  */
-export const NARROW_ASPECT = 0.8;
-
-export function fanPlacement(aspect: number): FanPlacement {
-  return aspect < NARROW_ASPECT
-    ? { position: [-0.34, 0.66, 0.3], scale: 0.36, step: 0.15 }
+export function fanPlacement(layout: Layout): FanPlacement {
+  return layout === "portrait"
+    ? { position: [-0.95, -0.28, 0.1], scale: 0.78, step: FAN_STEP }
     : { position: [-1.18, -0.26, 0.06], scale: 0.95, step: FAN_STEP };
 }

@@ -12,11 +12,12 @@ import { swapOpacities } from "./screenSwap";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import { HAND } from "./cardFace";
-import { fanOpen, fanPlacement, fanTransform, fanYaw } from "./cardFan";
+import { CARD_H, CARD_W, fanOpen, fanPlacement, fanTransform, fanYaw } from "./cardFan";
 import { drawCardShadow, SHADOW_SPREAD, SHADOW_W } from "./cardShadow";
 import { useCardTextures } from "./useCardTextures";
 import { GlossLayer } from "./GlossLayer";
 import { TIER_SETTINGS } from "../lib/tier";
+import { layoutFor } from "../lib/layout";
 import { useTier } from "../canvas/QualityProvider";
 import { WatchHomeScreen } from "./WatchHomeScreen";
 import { watchOpacity } from "./watchPresentation";
@@ -26,8 +27,6 @@ import spadeScreen from "../chapters/shadyspade/spade-screen.webp";
 
 /** How far the translucent copies travel at full split / full separation. */
 const CARDS = HAND.length;
-const CARD_W = 0.4;
-const CARD_H = 0.58;
 /** Thin. Thickened to 0.02 so the stock would show as an edge, the sides read
  *  as hard grey slabs once the hand turned toward the camera: they catch almost
  *  none of the key light, which is on the far side of the stage. */
@@ -142,7 +141,7 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       setOpacity(w, watchOpacity(s.companion, inShadySpade));
     }
 
-    const place = fanPlacement(size.width / size.height);
+    const place = fanPlacement(layoutFor(size.width / size.height));
     const fanStep = place.step;
     const h = hand.current;
     if (h && s.cards > 0.002) {
@@ -184,8 +183,8 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       {/* Pulled back from z = 0.5 to nearly the phone's own plane: out front
           the fan was magnified and seen so obliquely that it read as lying on
           a table while the phone stood upright -- two spatial logics in one
-          frame. Where it sits, how big, and which way it faces are set per
-          frame from the frame's shape and the camera -- see fanPlacement. */}
+          frame. Where it sits and how big come from the layout, and which way
+          it faces from the camera -- see fanPlacement and fanYaw. */}
       <group ref={hand} position={[-1.18, -0.26, 0.06]} scale={0.95}>
         {HAND.map((card, i) => (
           <group
