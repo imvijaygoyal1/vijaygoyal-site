@@ -184,6 +184,35 @@ Two further rounds were needed after that, both worth knowing:
   cards in the fan were coplanar and z-fought; the diagonal hatching across
   the faces was that, not a texture problem.
 
+### Round six (2026-09-16): one system, real shadows, and an alphaMap trap
+
+The owner called the fan "raw". Four separate causes, found by looking at
+full frames on desktop and mobile before touching anything:
+
+- **Two card systems in one hand.** Pip cards on white stock sat beside court
+  cards carrying a dark-green inset panel with a yellow letter. Every face is
+  now white stock; J/Q/K are drawn double-ended in suit ink; the brand prints
+  only on the gold 3 of Spades (a gold frame and gold ink).
+- **Back cards were dimmed flat grey** to fake occlusion, which read as muddy
+  paper. Each card now casts a soft shadow (`cardShadow.ts`) onto the card
+  behind it. Without *some* edge, overlapping white cards merge completely —
+  the front card's ink appears to float on the one behind.
+- **`alphaMap` reads the GREEN channel, not alpha.** The first shadow mask was
+  white blurred onto a transparent canvas: green is 255 wherever anything was
+  drawn, so the blur lived only in alpha and every shadow rendered as a hard
+  grey band. Draw white on opaque black. Sample the channel flat before
+  judging it in the scene — two wrong diagnoses (shadow size, card thickness)
+  preceded that check.
+- **The fan was seen ~35° off its axis**, so the arc crowded unevenly.
+  `fanYaw` turns the hand most of the way toward the camera each frame.
+  Thickening the stock to show an edge backfired once it turned: the sides
+  catch none of the key light and read as grey slabs. It stays at 0.014.
+
+**Mobile is a compromise, not a solution.** A portrait frame leaves about a
+fifth of a unit beside the phone, so `fanPlacement` closes the hand up small
+over the empty green at the phone's upper left — clear of the copy and the
+app's UI, but small. Properly, this is per-breakpoint framing (AD-13).
+
 ## Refreshing the captures
 
 Build each app for the iOS 26.5 simulator (iPhone 17 Pro, UDID

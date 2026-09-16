@@ -39,7 +39,9 @@ export function fanOpen(cards: number): number {
 }
 
 /** Yaw per radian of fan angle. */
-export const WING_CURL = 0.42;
+/** Kept small: each card's shadow sits a hair above the card behind it, and a
+ *  stronger curl tilts those planes through the neighbouring faces. */
+export const WING_CURL = 0.1;
 
 export function fanTransform(
   index: number,
@@ -66,21 +68,51 @@ export function fanPivot(pivot: number = PIVOT_R): readonly [number, number] {
 }
 
 /**
- * How brightly card `index` is lit, 0..1, back of the fan to front.
+ * How far the hand turns to face the camera, in the root group's own yaw.
  *
- * There is no floor in this scene -- the phone floats too -- so a cast contact
- * shadow would have nothing to fall on, and adding one under the fan alone
- * would read as a smudge. What the fan was actually missing is the shadow the
- * cards throw on *each other*: every overlap was hard-edged and equally lit,
- * which is most of why three cards read as flat cut-outs stacked rather than a
- * hand with depth.
- *
- * The backmost card is the most occluded, so it is the dimmest.
+ * The fan sits to the left of the phone and the camera orbits to the right of
+ * it, so seen square-on to the phone the hand was viewed ~35 degrees off its
+ * own axis: the arc foreshortened unevenly and the middle cards crowded behind
+ * each other. Turning the hand most of the way toward the camera makes the arc
+ * read as even without billboarding it -- a little of the phone's turn still
+ * shows, which keeps the two feeling like one staged set.
  */
-export const FAN_SHADE_FLOOR = 0.74;
+export const FACE_CAMERA = 0.8;
+/** No further than this either way, so a camera swinging past never spins it. */
+export const MAX_FAN_YAW = 0.9;
 
-export function fanShade(index: number, count: number): number {
-  if (count <= 1) return 1;
-  const front = index / (count - 1);
-  return FAN_SHADE_FLOOR + (1 - FAN_SHADE_FLOOR) * front;
+export function fanYaw(
+  camX: number, camZ: number,
+  fanX: number, fanZ: number,
+  rootYaw: number,
+): number {
+  const toCamera = Math.atan2(camX - fanX, camZ - fanZ);
+  const local = (toCamera - rootYaw) * FACE_CAMERA;
+  return Math.max(-MAX_FAN_YAW, Math.min(MAX_FAN_YAW, local));
+}
+
+export interface FanPlacement {
+  position: readonly [number, number, number];
+  scale: number;
+  /** Angle between neighbouring cards. */
+  step: number;
+}
+
+/**
+ * Where the hand sits beside the phone, by frame shape.
+ *
+ * On a wide frame there is room to its left. On a portrait phone that same
+ * spot is outside the frame: the hand was cut to two cards sliced by the
+ * screen edge, which read as a mistake -- and the portrait frame leaves only a
+ * fifth of a unit of stage beside the phone. There the hand closes up, shrinks
+ * and comes forward over the empty green at the phone's upper left, beside the
+ * app's spade -- clear of the copy below the phone, which a lower placement
+ * sat on, and of the app's rules card and button.
+ */
+export const NARROW_ASPECT = 0.8;
+
+export function fanPlacement(aspect: number): FanPlacement {
+  return aspect < NARROW_ASPECT
+    ? { position: [-0.34, 0.66, 0.3], scale: 0.36, step: 0.15 }
+    : { position: [-1.18, -0.26, 0.06], scale: 0.95, step: FAN_STEP };
 }

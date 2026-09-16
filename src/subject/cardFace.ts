@@ -13,36 +13,15 @@ export interface Card {
 }
 
 /**
- * The Shady Spade's own colours, sampled from the app capture beside these
- * cards rather than picked by eye -- the two sit in the same frame, so a near
- * miss would read as a mistake.
- */
-export const BRAND_GREEN = "#1b3b2a";
-export const BRAND_GOLD = "#c9a94b";
-
-/*
- * The monogram panel prints BRAND_GREEN directly, with no compensated value.
+ * Gold printed on white stock.
  *
- * A darker one existed while the face was tone-mapped: ACES pulled the printed
- * green milky, so it was printed lower to land on the brand value. Once the
- * face opted out of tone mapping and gained an emissive lift, the rendered
- * result landed close to what is printed -- and two further attempts at
- * compensating gave sage-grey and then charcoal. The card's green is now the
- * phone's green, which is the point.
- */
-
-/** Gold, though, still needs lifting: the phone's is an emissive screen pixel
- *  and the card's is ink on lit stock, so the sampled token prints muddy. */
-export const CARD_GOLD = "#e2c163";
-/**
- * Gold printed on white stock, rather than inside the green panel.
- *
- * The light gold works on green and disappears on white -- roughly 2.3:1
+ * The app's own light gold (#c9a94b) disappears on white -- roughly 2.3:1
  * against the stock, which left the 3 of Spades, the one card the gold is
- * meant to single out, the hardest of the five to read. Same ink, different
- * ground, different value.
+ * meant to single out, the hardest of the five to read. Darker still than
+ * reads right flat: the face glows (emissive, not tone-mapped) and lifts gold
+ * toward pale yellow in the scene. Same brand, darker value for a lit ground.
  */
-export const CARD_GOLD_ON_STOCK = "#ab8730";
+export const CARD_GOLD_ON_STOCK = "#8f6b1c";
 /**
  * Bright, very nearly white.
  *
@@ -143,21 +122,26 @@ export function pipLayout(rank: string): readonly (readonly [number, number])[] 
   return [];
 }
 
-/** Court ranks get a monogram panel rather than pips -- the one place the
- *  brand still prints, now that the face itself is white stock. */
+/** J, Q and K: drawn as a double-ended court rather than pips. */
 export function isCourt(rank: string): boolean {
   return rank === "J" || rank === "Q" || rank === "K";
 }
 
+/** The court letter is set in a serif: it is the one large piece of type on a
+ *  face, and a grotesque at that size reads as a UI label rather than a card. */
+const COURT_FACE = `Georgia, "Times New Roman", serif`;
+const INDEX_FACE = `"Helvetica Neue", Helvetica, Arial, sans-serif`;
+
 /**
- * One card face: white stock, a gold hairline, a large suit-coloured index in
- * two opposite corners, and a centre that depends on the rank.
+ * One card face. Every rank shares one system: white stock, a large
+ * suit-coloured index in two opposite corners, and a centre that depends on
+ * the rank -- real pip layouts for number cards, a double-ended court for
+ * J/Q/K.
  *
- * The first version printed a green panel with a centred emblem on every
- * card. That is a Bicycle *back*, so the fan read as five face-down cards --
- * and three of the five were indistinguishable, because the rank only
- * appeared in a corner a few pixels tall. The rank is what makes a face a
- * face, so it leads here.
+ * Earlier versions mixed two systems in one hand: pip cards on white beside
+ * court cards carrying a dark-green inset panel with a yellow letter. Side by
+ * side the hand looked half-finished. The brand now prints in one place only,
+ * the gold card, which is how gold stays meaningful.
  */
 export function drawCardFace(
   ctx: CanvasRenderingContext2D,
@@ -171,58 +155,56 @@ export function drawCardFace(
   ctx.fillStyle = CARD_STOCK;
   ctx.fillRect(0, 0, w, h);
 
-  // Gold hairline, inset the way a printed card's rule is.
-  const inset = w * 0.05;
-  ctx.strokeStyle = CARD_GOLD;
-  ctx.lineWidth = Math.max(1, w * 0.0075);
-  ctx.globalAlpha = 0.7;
-  roundRect(ctx, inset, inset, w - inset * 2, h - inset * 2, w * 0.035);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  // The field the centre composition lives in, inside the rule and clear of
-  // the index columns.
-  const fx = w * 0.20;
+  // The field the centre composition lives in, clear of the index columns.
+  const fx = w * 0.2;
   const fy = h * 0.115;
-  const fw = w * 0.60;
+  const fw = w * 0.6;
   const fh = h * 0.77;
 
-  ctx.fillStyle = ink;
-  if (isCourt(card.rank) || card.gold) {
-    // Monogram panel: the brand's green and gold, held to the centre.
-    const pw = fw * 0.82;
-    const ph = fh * 0.58;
-    const px = fx + (fw - pw) / 2;
-    const py = fy + (fh - ph) / 2;
-    ctx.fillStyle = BRAND_GREEN;
-    roundRect(ctx, px, py, pw, ph, w * 0.03);
-    ctx.fill();
-    ctx.strokeStyle = CARD_GOLD;
-    ctx.lineWidth = Math.max(1, w * 0.006);
-    ctx.globalAlpha = 0.65;
-    roundRect(ctx, px + w * 0.02, py + w * 0.02, pw - w * 0.04, ph - w * 0.04, w * 0.02);
+  if (card.gold) {
+    // The 30-point card: a gold frame printed on the stock, the only rule on
+    // any face in the hand.
+    // Close to the edge, following the cut corner, so it frames the indices
+    // rather than running through them.
+    const inset = w * 0.028;
+    ctx.strokeStyle = CARD_GOLD_ON_STOCK;
+    ctx.lineWidth = w * 0.012;
+    roundRect(ctx, inset, inset, w - inset * 2, h - inset * 2, w * 0.085);
+    ctx.stroke();
+  }
+
+  if (isCourt(card.rank)) {
+    // Double-ended, as a court card is: the same figure above and below a
+    // waist, so the card reads the same held either way up. A thin frame in
+    // the suit's ink bounds the figure the way a court's illustration is.
+    ctx.strokeStyle = ink;
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = w * 0.005;
+    roundRect(ctx, fx, fy, fw, fh, w * 0.025);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(fx + fw * 0.12, fy + fh / 2);
+    ctx.lineTo(fx + fw * 0.88, fy + fh / 2);
     ctx.stroke();
     ctx.globalAlpha = 1;
 
-    ctx.fillStyle = CARD_GOLD;
-    if (card.gold) {
-      // The gold card carries its pips on the panel rather than a monogram.
-      // Gold ink on white stock cannot win: the face material is emissive and
-      // opts out of tone mapping, so a darker gold is simply lifted back to
-      // bright, and the one card the gold exists to single out was the hardest
-      // of the five to read. On deep green it is unmistakable -- and the panel
-      // is already this deck's mark for a card that matters.
-      const pips = pipLayout(card.rank);
-      const size = pw * 0.3;
-      for (const [nx, ny] of pips) {
-        pipAt(ctx, card.suit, px + nx * pw, py + ny * ph, size, ny > 0.5);
+    ctx.fillStyle = ink;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+    const letter = Math.round(fh * 0.24);
+    for (const flipped of [false, true]) {
+      ctx.save();
+      if (flipped) {
+        ctx.translate(fx + fw / 2, fy + fh / 2);
+        ctx.rotate(Math.PI);
+        ctx.translate(-(fx + fw / 2), -(fy + fh / 2));
       }
-    } else {
-      ctx.textAlign = "center";
-      ctx.textBaseline = "alphabetic";
-      ctx.font = `600 ${Math.round(pw * 0.52)}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
-      ctx.fillText(card.rank, px + pw / 2, py + ph * 0.56);
-      pipAt(ctx, card.suit, px + pw / 2, py + ph * 0.775, pw * 0.24, false);
+      ctx.font = `700 ${letter}px ${COURT_FACE}`;
+      // Letter high, pip low, with clear air between: a Q's tail reaches well
+      // below its baseline and ran into the pip when they sat closer.
+      ctx.fillText(card.rank, fx + fw / 2, fy + fh * 0.29);
+      pipAt(ctx, card.suit, fx + fw / 2, fy + fh * 0.405, fw * 0.15, false);
+      ctx.restore();
     }
   } else {
     const pips = pipLayout(card.rank);
@@ -234,9 +216,8 @@ export function drawCardFace(
     }
   }
 
-  // Indices in two opposite corners: rank above a small pip, in the suit's
-  // own colour. Two-character ranks are set tighter so "10" does not crowd
-  // the rule.
+  // Indices in two opposite corners: rank above a small pip. The gold card's
+  // index is gold too, so it is singled out even where the fan hides its centre.
   const wide = card.rank.length > 1;
   const rankSize = Math.round(w * (wide ? 0.125 : 0.15));
   const smallPip = w * 0.078;
@@ -250,8 +231,8 @@ export function drawCardFace(
       ctx.translate(w, h);
       ctx.rotate(Math.PI);
     }
-    ctx.fillStyle = ink;
-    ctx.font = `600 ${rankSize}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+    ctx.fillStyle = card.gold ? CARD_GOLD_ON_STOCK : ink;
+    ctx.font = `600 ${rankSize}px ${INDEX_FACE}`;
     ctx.fillText(card.rank, cx, my);
     pipAt(ctx, card.suit, cx, my + rankSize * 1.28, smallPip, false);
     ctx.restore();

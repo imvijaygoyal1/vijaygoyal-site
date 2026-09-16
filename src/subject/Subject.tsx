@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import { Color } from "three";
+import { CanvasTexture, Vector3 } from "three";
 import type { Group, Material, Mesh } from "three";
 import { CHAPTERS } from "../chapters/registry";
 import { subjectStateAt } from "./sequence";
@@ -12,7 +12,8 @@ import { swapOpacities } from "./screenSwap";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import { HAND } from "./cardFace";
-import { fanOpen, fanShade, fanTransform } from "./cardFan";
+import { fanOpen, fanPlacement, fanTransform, fanYaw } from "./cardFan";
+import { drawCardShadow, SHADOW_SPREAD, SHADOW_W } from "./cardShadow";
 import { useCardTextures } from "./useCardTextures";
 import { GlossLayer } from "./GlossLayer";
 import { TIER_SETTINGS } from "../lib/tier";
@@ -27,8 +28,19 @@ import spadeScreen from "../chapters/shadyspade/spade-screen.webp";
 const CARDS = HAND.length;
 const CARD_W = 0.4;
 const CARD_H = 0.58;
+/** Thin. Thickened to 0.02 so the stock would show as an edge, the sides read
+ *  as hard grey slabs once the hand turned toward the camera: they catch almost
+ *  none of the key light, which is on the far side of the stage. */
 const CARD_D = 0.014;
 const CARD_R = 0.045;
+/** The shadow each card casts on the one behind it: offset down and to the
+ *  right, away from the key light, and sitting just above that card's face. */
+const SHADOW_OFFSET = [0.012, -0.018] as const;
+const SHADOW_Z = CARD_D / 2 - 0.002;
+const SHADOW_PLANE_W = CARD_W * (1 + SHADOW_SPREAD * 2);
+const SHADOW_PLANE_H = CARD_H + CARD_W * SHADOW_SPREAD * 2;
+const SHADOW_OPACITY = 0.28;
+const handWorld = new Vector3();
 
 function isMesh(o: unknown): o is Mesh {
   return (o as Mesh).isMesh === true;
@@ -70,6 +82,7 @@ export function Subject({ progress }: { progress: ProgressRef }) {
   const root = useRef<Group>(null);
   const watch = useRef<Group>(null);
   const cards = useRef<(Group | null)[]>([]);
+  const hand = useRef<Group>(null);
   const home = useRef<Group>(null);
   const screenA = useRef<Group>(null);
   const screenB = useRef<Group>(null);
@@ -81,13 +94,21 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     () => roundedRectGeometry(CARD_W, CARD_H, CARD_R),
     [],
   );
+  const cardShadow = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = SHADOW_W;
+    canvas.height = Math.round(SHADOW_W * (SHADOW_PLANE_H / SHADOW_PLANE_W));
+    const ctx = canvas.getContext("2d");
+    if (ctx) drawCardShadow(ctx, canvas.width, canvas.height);
+    return new CanvasTexture(canvas);
+  }, []);
   const hardwareMax = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
   const tier = useTier();
   const cardTextures = useCardTextures(
     Math.min(TIER_SETTINGS[tier].anisotropy, hardwareMax),
   );
 
-  useFrame(() => {
+  useFrame(({ camera, size }) => {
     const g = root.current;
     if (!g) return;
     const s = subjectStateAt(progress.current, CHAPTERS);
@@ -121,12 +142,23 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       setOpacity(w, watchOpacity(s.companion, inShadySpade));
     }
 
+    const place = fanPlacement(size.width / size.height);
+    const fanStep = place.step;
+    const h = hand.current;
+    if (h && s.cards > 0.002) {
+      h.position.set(...place.position);
+      h.scale.setScalar(place.scale);
+      // Turned toward the camera so the arc reads evenly -- see fanYaw.
+      h.getWorldPosition(handWorld);
+      h.rotation.y = fanYaw(camera.position.x, camera.position.z, handWorld.x, handWorld.z, g.rotation.y);
+    }
+
     for (let i = 0; i < CARDS; i++) {
       const card = cards.current[i];
       if (!card) continue;
       // The hand spreads as the chapter comes into view, wings-first, rather
       // than still opening at the end of it -- see fanOpen.
-      const t = fanTransform(i, CARDS, fanOpen(s.cards));
+      const t = fanTransform(i, CARDS, fanOpen(s.cards), fanStep);
       card.rotation.set(0, t.tiltY, t.rotation);
       card.position.set(t.x, t.y, t.z);
       card.visible = s.cards > 0.002;
@@ -152,11 +184,10 @@ export function Subject({ progress }: { progress: ProgressRef }) {
       {/* Pulled back from z = 0.5 to nearly the phone's own plane: out front
           the fan was magnified and seen so obliquely that it read as lying on
           a table while the phone stood upright -- two spatial logics in one
-          frame. Scaled down for the same reason the hand is three cards. */}
-      <group position={[-1.18, -0.26, 0.06]} scale={0.95}>
-        {HAND.map((card, i) => {
-          const shade = fanShade(i, CARDS);
-          return (
+          frame. Where it sits, how big, and which way it faces are set per
+          frame from the frame's shape and the camera -- see fanPlacement. */}
+      <group ref={hand} position={[-1.18, -0.26, 0.06]} scale={0.95}>
+        {HAND.map((card, i) => (
           <group
             key={`${card.rank}${card.suit}`}
             ref={(g) => {
@@ -167,12 +198,24 @@ export function Subject({ progress }: { progress: ProgressRef }) {
             {/* The stock, which supplies the edge the face has no thickness
                 for. Paper, so barely any specular. */}
             <mesh geometry={cardBody}>
-              <meshStandardMaterial
-                color="#f7f4ec"
-                metalness={0}
-                roughness={0.6}
-              />
+              <meshStandardMaterial color="#f7f4ec" metalness={0} roughness={0.6} />
             </mesh>
+            {/* Cast onto the card behind. Inside this card's own body, so the
+                body hides it wherever the two overlap and it shows only past
+                this card's edge -- on the next card back, or on nothing. */}
+            {i > 0 && (
+              <mesh position={[SHADOW_OFFSET[0], SHADOW_OFFSET[1], SHADOW_Z]} renderOrder={9}>
+                <planeGeometry args={[SHADOW_PLANE_W, SHADOW_PLANE_H]} />
+                <meshBasicMaterial
+                  color="#000000"
+                  alphaMap={cardShadow}
+                  transparent
+                  opacity={SHADOW_OPACITY}
+                  depthWrite={false}
+                  toneMapped={false}
+                />
+              </mesh>
+            )}
             {/* Why the faces read as dull grey paper rather than bright card:
                 R3F's renderer defaults to ACES filmic tone mapping, which
                 compresses white hard, and the scene's only directional light
@@ -182,17 +225,15 @@ export function Subject({ progress }: { progress: ProgressRef }) {
                 `toneMapped={false}` is the same opt-out the app screens use.
                 The emissive map lifts the face off the dark stage wherever the
                 lights do not reach it, so clarity no longer depends on the
-                card's angle. Roughness still leaves a highlight for the sheen
-                to travel across as the fan turns. */}
+                card's angle. Every card is lit the same: the depth between
+                them now comes from the cast shadows, not from greying the
+                cards at the back. */}
             <mesh geometry={cardFace} position={[0, 0, CARD_D / 2 + 0.0015]}>
               <meshStandardMaterial
                 map={cardTextures[i]}
-                /* Back of the fan is the most occluded by the cards in front
-                   of it, so it is the dimmest -- see fanShade. */
-                color={new Color(shade, shade, shade)}
                 emissive="#ffffff"
                 emissiveMap={cardTextures[i]}
-                emissiveIntensity={0.26 * shade}
+                emissiveIntensity={0.26}
                 toneMapped={false}
                 metalness={0}
                 roughness={0.5}
@@ -200,15 +241,9 @@ export function Subject({ progress }: { progress: ProgressRef }) {
             </mesh>
             {/* Above the print, so the highlight sits on the glass rather than
                 under the ink -- the same layer the phone's display uses. */}
-            <GlossLayer
-              geometry={cardFace}
-              z={CARD_D / 2 + 0.004}
-              opacity={0.3 * shade}
-              renderOrder={11}
-            />
+            <GlossLayer geometry={cardFace} z={CARD_D / 2 + 0.004} opacity={0.3} renderOrder={11} />
           </group>
-          );
-        })}
+        ))}
       </group>
     </group>
   );

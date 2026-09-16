@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fanOpen, fanShade, FAN_SHADE_FLOOR, fanTransform, FAN_STEP, PIVOT_R } from "./cardFan";
+import { fanOpen, fanPlacement, fanTransform, FAN_STEP, fanYaw, MAX_FAN_YAW, NARROW_ASPECT, PIVOT_R } from "./cardFan";
 
 const COUNT = 3;
 
@@ -69,30 +69,43 @@ describe("card fan", () => {
   });
 });
 
-describe("fan shading", () => {
-  it("lights the front card fully and the back card least", () => {
-    expect(fanShade(COUNT - 1, COUNT)).toBeCloseTo(1, 9);
-    expect(fanShade(0, COUNT)).toBeCloseTo(FAN_SHADE_FLOOR, 9);
+describe("fan orientation", () => {
+  it("turns most of the way toward a camera off to one side", () => {
+    // Camera 2 right, 3 forward of the hand; root not turned.
+    const toCamera = Math.atan2(2, 3);
+    const yaw = fanYaw(2, 3, 0, 0, 0);
+    expect(yaw).toBeGreaterThan(toCamera * 0.6);
+    expect(yaw).toBeLessThan(toCamera);
   });
 
-  it("brightens monotonically toward the front of the fan", () => {
-    for (let i = 1; i < COUNT; i++) {
-      expect(fanShade(i, COUNT)).toBeGreaterThan(fanShade(i - 1, COUNT));
+  it("subtracts the phone's own turn, since the hand turns with it", () => {
+    expect(fanYaw(2, 3, 0, 0, 0.3)).toBeLessThan(fanYaw(2, 3, 0, 0, 0));
+  });
+
+  it("does not turn for a camera straight ahead", () => {
+    expect(fanYaw(0, 5, 0, 0, 0)).toBeCloseTo(0, 9);
+  });
+
+  it("never spins past its limit, wherever the camera swings", () => {
+    for (let a = -Math.PI; a <= Math.PI; a += 0.1) {
+      const yaw = fanYaw(Math.sin(a) * 4, Math.cos(a) * 4, 0, 0, 0);
+      expect(Math.abs(yaw)).toBeLessThanOrEqual(MAX_FAN_YAW);
     }
   });
+});
 
-  it("never darkens a card past the floor", () => {
-    for (let n = 1; n <= 8; n++) {
-      for (let i = 0; i < n; i++) {
-        const v = fanShade(i, n);
-        expect(v).toBeGreaterThanOrEqual(FAN_SHADE_FLOOR);
-        expect(v).toBeLessThanOrEqual(1);
-      }
-    }
+describe("fan placement", () => {
+  it("tucks in toward the phone on a portrait frame instead of leaving it", () => {
+    const wide = fanPlacement(16 / 10);
+    const narrow = fanPlacement(393 / 852);
+    // Closer to the phone at x = 0, and smaller.
+    expect(Math.abs(narrow.position[0])).toBeLessThan(Math.abs(wide.position[0]));
+    expect(narrow.scale).toBeLessThan(wide.scale);
   });
 
-  it("fully lights a single card, with no fan to occlude it", () => {
-    expect(fanShade(0, 1)).toBe(1);
+  it("switches at the narrow threshold", () => {
+    expect(fanPlacement(NARROW_ASPECT - 0.01)).toEqual(fanPlacement(0.5));
+    expect(fanPlacement(NARROW_ASPECT)).toEqual(fanPlacement(1.6));
   });
 });
 

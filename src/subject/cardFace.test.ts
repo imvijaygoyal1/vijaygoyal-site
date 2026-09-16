@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BRAND_GOLD, BRAND_GREEN, HAND, isCourt, pipLayout } from "./cardFace";
+import { CARD_GOLD_ON_STOCK, HAND, isCourt, pipLayout } from "./cardFace";
 import { indexColor, isRed, PIPS, SUITS } from "./cardPips";
 
 describe("card faces", () => {
@@ -22,10 +22,10 @@ describe("card faces", () => {
     expect(indexColor("spade")).not.toBe(indexColor("heart"));
   });
 
-  it("uses the app's own green and gold", () => {
-    // Sampled from spade-screen.webp, which shares the frame with these cards.
-    expect(BRAND_GREEN).toBe("#1b3b2a");
-    expect(BRAND_GOLD).toBe("#c9a94b");
+  it("prints gold dark enough to read on white stock", () => {
+    // The light gold sampled from the app is ~2.3:1 on the stock; the one
+    // card gold exists to single out was the hardest of the five to read.
+    expect(CARD_GOLD_ON_STOCK).toBe("#8f6b1c");
   });
 
   it("deals a hand of distinct cards", () => {
@@ -69,7 +69,7 @@ describe("face composition", () => {
     for (const r of ["A", "10"]) expect(isCourt(r)).toBe(false);
   });
 
-  it("gives court ranks a monogram instead of pips", () => {
+  it("gives court ranks a figure instead of pips", () => {
     for (const r of ["J", "Q", "K"]) expect(pipLayout(r)).toHaveLength(0);
   });
 
