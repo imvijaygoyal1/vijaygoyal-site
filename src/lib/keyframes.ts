@@ -50,6 +50,36 @@ export function validateKeyframes(frames: readonly Keyframe[], label: string): v
   }
 }
 
+function sameVec3(a: Vec3, b: Vec3): boolean {
+  return a.every((v, i) => Math.abs(v - b[i]!) < 1e-9);
+}
+
+/**
+ * Throws unless one chapter's camera ends exactly where the next one starts.
+ *
+ * `validateKeyframes` checks a track on its own, so nothing looked across a
+ * chapter boundary: the seams agreed only because they were typed to agree,
+ * and a mistyped one is a visible camera jump (AD-20). A track holds its first
+ * and last frames outside their `at`, so the frames themselves are the seam.
+ */
+export function validateSeam(
+  previous: readonly Keyframe[],
+  next: readonly Keyframe[],
+  previousLabel: string,
+  nextLabel: string,
+): void {
+  const last = previous[previous.length - 1];
+  const first = next[0];
+  // An empty track is validateKeyframes' error to report, not this one's.
+  if (!last || !first) return;
+  if (!sameVec3(last.position, first.position) || !sameVec3(last.lookAt, first.lookAt)) {
+    throw new RangeError(
+      `Camera jumps between "${previousLabel}" and "${nextLabel}": ` +
+        `the first chapter's last keyframe must equal the second's first.`,
+    );
+  }
+}
+
 /**
  * Samples a validated keyframe track. Runs inside `CameraRig`'s `useFrame`, so
  * it does no validation and allocates only the two interpolated vectors.

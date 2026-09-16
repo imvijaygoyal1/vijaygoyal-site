@@ -136,6 +136,8 @@ previews. It needs replacing at roughly 1200×630.
 > Product manager and independent app builder. I design, build and ship my
 > own iOS apps, end to end.
 
+Eyebrow: `Vijay Goyal` — *added in Phase 5: the heading is a positioning line,
+so without it the first screen never says whose site this is.*
 Descriptor: `PRODUCT · DESIGN · TECHNOLOGY · AI`
 Primary action: **View my work** · Secondary: **Get in touch**
 
@@ -166,7 +168,7 @@ Four beats. Each needs its own capture; only one exists today.
 balances and who is allowed to record a payment are both real decisions with
 reasons, and both are verifiable in the schema.*
 
-Links: [App Store](https://apps.apple.com/app/id6780284715) · `/work/xbill` ·
+Links: [App Store](https://apps.apple.com/app/id6780284715) · `/work/xbill` *(links once the case-study route exists)* ·
 `xbill.vijaygoyal.org`
 
 ### 03 · The Shady Spade
@@ -186,7 +188,7 @@ Gameplay below is taken from the app's own rules screen — not inferred.
 | 4 | **Built independently** | Product, design, code and release — v1.10 is live on the App Store, and v2.0 brings an Apple Watch companion, a real-life scorekeeper and shareable scorecards. |
 
 Links: [App Store](https://apps.apple.com/app/id6760261655) ·
-`/work/shady-spade` · `shadyspade.vijaygoyal.org`
+`/work/shady-spade` *(links once the case-study route exists)* · `shadyspade.vijaygoyal.org`
 
 ### 04 · How I Build
 
@@ -261,6 +263,10 @@ APPS          xbill.vijaygoyal.org · shadyspade.vijaygoyal.org
 
 The apps own their own sites and their own privacy policy, so the footer links
 out rather than duplicating them here.
+
+Colophon line, kept from the previous site (owner's call, 2026-09-16):
+"Built with three.js and React. Right now you are getting {fps} fps at {calls}
+draw calls." — the live figures appear only while the scene is rendering.
 
 ---
 

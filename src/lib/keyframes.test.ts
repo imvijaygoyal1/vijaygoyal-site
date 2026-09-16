@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sampleKeyframes, validateKeyframes, type Keyframe } from "./keyframes";
+import { sampleKeyframes, validateKeyframes, validateSeam, type Keyframe } from "./keyframes";
 
 const frames: Keyframe[] = [
   { at: 0,   position: [0, 0, 10], lookAt: [0, 0, 0] },
@@ -68,5 +68,32 @@ describe("validateKeyframes", () => {
 
   it("names the chapter it rejected", () => {
     expect(() => validateKeyframes([], "colophon")).toThrow(/colophon/);
+  });
+});
+
+describe("validateSeam", () => {
+  const a: Keyframe[] = [
+    { at: 0, position: [0, 0, 5], lookAt: [0, 0, 0] },
+    { at: 1, position: [1, 2, 3], lookAt: [0, 1, 0] },
+  ];
+
+  it("accepts a track that starts where its predecessor ended", () => {
+    const b: Keyframe[] = [{ at: 0, position: [1, 2, 3], lookAt: [0, 1, 0] }];
+    expect(() => validateSeam(a, b, "a", "b")).not.toThrow();
+  });
+
+  it("rejects a camera position that jumps at the boundary", () => {
+    const b: Keyframe[] = [{ at: 0, position: [1, 2, 3.1], lookAt: [0, 1, 0] }];
+    expect(() => validateSeam(a, b, "a", "b")).toThrow(/camera jumps between "a" and "b"/i);
+  });
+
+  it("rejects a look-point that jumps even when the position agrees", () => {
+    const b: Keyframe[] = [{ at: 0, position: [1, 2, 3], lookAt: [0, 0, 0] }];
+    expect(() => validateSeam(a, b, "a", "b")).toThrow(/camera jumps/i);
+  });
+
+  it("treats a held first or last frame as the seam, since sampling holds it", () => {
+    const early: Keyframe[] = [{ at: 0.5, position: [1, 2, 3], lookAt: [0, 1, 0] }];
+    expect(() => validateSeam(a, early, "a", "b")).not.toThrow();
   });
 });

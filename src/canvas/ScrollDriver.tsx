@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { computeProgress, isSettled, smoothToward } from "../lib/scroll";
+import { isSettled, progressAt, smoothToward, type SectionSpan } from "../lib/scroll";
 import type { ProgressSource } from "../lib/progress";
 import { CHAPTERS } from "../chapters/registry";
 
@@ -24,9 +24,25 @@ export function ScrollDriver({ progress }: { progress: ProgressSource }) {
   const warmed = useRef(new Set<string>());
 
   useEffect(() => {
+    // Section spans in document coordinates. Cached rather than measured per
+    // scroll event: the copy fade writes styles every frame, so reading layout
+    // inside the scroll handler would force a recalc each time.
+    //
+    // Looked up by id on every measure, never held: a lost context swaps
+    // <main> for the static route and back while this stays mounted, and a
+    // held element would be detached and measure zero from then on.
+    let spans: SectionSpan[] = [];
+    const measure = () => {
+      spans = CHAPTERS.flatMap(({ id, range }) => {
+        const el = document.getElementById(id);
+        if (!el) return [];
+        const box = el.getBoundingClientRect();
+        return [{ top: box.top + window.scrollY, height: box.height, range }];
+      });
+    };
+
     const read = () => {
-      const limit = document.documentElement.scrollHeight - window.innerHeight;
-      target.current = computeProgress(window.scrollY, limit);
+      target.current = progressAt(window.scrollY, window.innerHeight, spans);
       for (let i = 1; i < CHAPTERS.length; i++) {
         const previous = CHAPTERS[i - 1]!;
         const next = CHAPTERS[i]!;
@@ -40,12 +56,23 @@ export function ScrollDriver({ progress }: { progress: ProgressSource }) {
       invalidate();
     };
 
-    read();
+    const remeasure = () => {
+      measure();
+      read();
+    };
+    // Section heights are in vh, fonts can still be settling, and <main> is
+    // replaced wholesale across a context loss -- none of which is a window
+    // resize. The body's size changes in every one of those cases.
+    const observer = new ResizeObserver(remeasure);
+    observer.observe(document.body);
+
+    remeasure();
     window.addEventListener("scroll", read, { passive: true });
-    window.addEventListener("resize", read, { passive: true });
+    window.addEventListener("resize", remeasure, { passive: true });
     return () => {
+      observer.disconnect();
       window.removeEventListener("scroll", read);
-      window.removeEventListener("resize", read);
+      window.removeEventListener("resize", remeasure);
     };
   }, [invalidate]);
 

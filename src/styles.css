@@ -89,7 +89,7 @@ main {
   position: absolute;
   inset: auto 0 0 0;
   z-index: -1;
-  height: 34%;
+  height: var(--scrim-copy);
   background: linear-gradient(
     to top,
     rgb(var(--stage-rgb) / 92%) 10%,
@@ -140,26 +140,299 @@ main {
   line-height: var(--leading-body);
 }
 
-.colophon-links {
+/* ---- Hero actions --------------------------------------------------- */
+
+.actions {
   list-style: none;
-  margin: 0.5rem 0 0;
+  margin: var(--space-sm) 0 0;
   padding: 0;
   display: flex;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
   justify-content: center;
 }
 
-.colophon-links a {
-  color: var(--text-primary);
-  text-decoration: none;
-  font-weight: 500;
-  border-bottom: 1px solid var(--line-strong);
-  padding-bottom: 3px;
-  transition: border-color 160ms ease;
+.actions-start {
+  justify-content: flex-start;
 }
 
-.colophon-links a:hover {
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-height: var(--target-min);
+  padding: 0 var(--space-md);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: var(--weight-medium);
+  transition: border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out);
+}
+
+.action:hover {
+  border-color: var(--text-primary);
+}
+
+.action-primary {
+  border-color: var(--text-primary);
+  background-color: var(--text-primary);
+  color: var(--surface-stage);
+}
+
+.action-primary:hover {
+  background-color: var(--text-secondary);
+  border-color: var(--text-secondary);
+}
+
+/* A label, not prose: the selector outranks `.chapter-copy p`, so it does not
+   take the copy paragraph's colour and size. */
+.chapter-copy p.descriptor {
+  margin-top: var(--space-xs);
+  font-size: var(--font-label);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  /* Secondary: on the static route there is no scrim behind it, and tertiary
+     at label size measures 4.32:1 on the bare stage. */
+  color: var(--text-secondary);
+}
+
+/* ---- Product stories, pinned over the scene -------------------------- */
+
+.chapter-copy-story::before {
+  height: var(--scrim-story);
+}
+
+.beats {
+  list-style: none;
+  margin: var(--space-sm) 0 0;
+  padding: 0;
+  width: 100%;
+  max-width: var(--measure-wide);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--column-min), 1fr));
+  gap: var(--space-sm) var(--space-md);
+  text-align: left;
+}
+
+.beat {
+  padding-left: var(--space-xs);
+  border-left: 2px solid var(--accent);
+}
+
+.beat h3 {
+  margin: 0 0 var(--space-3xs);
+  font-size: var(--font-copy);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-heading);
+  color: var(--text-primary);
+}
+
+.chapter-copy .beat p {
+  max-width: none;
+  font-size: var(--font-meta);
+  line-height: var(--leading-base);
+}
+
+/*
+ * Over the scene the beats take turns: CopyFade marks the list .beats-driven
+ * and writes --beat-opacity from the clock, so they share one grid cell and
+ * the block is only as tall as its longest beat. Only while it is driving --
+ * if the scene has not loaded, failed, or was torn down, the list is laid out
+ * in full rather than leaving three beats invisible. Between marking and the
+ * first write, only the first beat shows.
+ */
+.beats-driven {
+  max-width: var(--measure);
+  grid-template-columns: 1fr;
+}
+
+.beats-driven .beat {
+  grid-area: 1 / 1;
+  opacity: var(--beat-opacity, 0);
+}
+
+.beats-driven .beat:first-child {
+  opacity: var(--beat-opacity, 1);
+}
+
+/* ---- Link rows -------------------------------------------------------- */
+
+.link-row {
+  list-style: none;
+  margin: var(--space-xs) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-md);
+  justify-content: center;
+}
+
+.link-row-start {
+  justify-content: flex-start;
+}
+
+.link-row a,
+.site-footer a {
+  color: var(--text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--line-strong);
+  padding-bottom: 2px;
+  transition: border-color var(--duration-fast) var(--ease-out);
+}
+
+.link-row a:hover,
+.site-footer a:hover {
   border-bottom-color: var(--text-primary);
+}
+
+/* ---- The document half ------------------------------------------------ */
+
+/*
+ * How I Build, Toolkit, About and Contact. By the time these arrive the camera
+ * has tilted away from the device, so there is no scene to keep clear of and
+ * no reason to pin: they read as a document, left-aligned, in normal flow.
+ */
+.chapter-doc {
+  width: 100%;
+  max-width: var(--width-document);
+  margin-inline: auto;
+  padding: var(--pad-section) var(--edge);
+}
+
+/* Only where there is a scene to clear; the static route has none. */
+.chapter-section .chapter-doc-lead {
+  padding-top: var(--lead-quiet);
+}
+
+.chapter-doc-narrow > * {
+  max-width: var(--measure);
+}
+
+.chapter-doc h2 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-h2);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-h2);
+  line-height: var(--leading-heading);
+  text-wrap: balance;
+}
+
+.chapter-doc p {
+  margin: 0 0 var(--space-sm);
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.chapter-doc .doc-lede {
+  max-width: var(--measure);
+}
+
+.stages {
+  list-style: none;
+  margin: var(--space-xl) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--column-min), 1fr));
+  gap: var(--space-lg) var(--space-md);
+}
+
+.stage {
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--line-hairline);
+}
+
+/* Secondary, not tertiary: at label size on the bare stage, tertiary measures
+   4.32:1 and fails AA. Over the scene the scrim darkens behind it; here nothing
+   does. The same holds for the footer's labels below. */
+.stage-index {
+  display: block;
+  font-size: var(--font-label);
+  letter-spacing: var(--tracking-label);
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage h3,
+.toolkit dt {
+  margin: var(--space-3xs) 0 var(--space-2xs);
+  font-size: var(--font-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-heading);
+}
+
+.chapter-doc .stage p {
+  margin: 0;
+}
+
+.toolkit {
+  margin: var(--space-lg) 0 0;
+}
+
+.toolkit-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--column-min), 1fr));
+  gap: var(--space-2xs) var(--space-md);
+  padding: var(--space-md) 0;
+  border-top: 1px solid var(--line-hairline);
+}
+
+.toolkit dt {
+  margin: 0;
+}
+
+.toolkit dd {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+/* ---- Footer ----------------------------------------------------------- */
+
+.site-footer {
+  position: relative;
+  z-index: 1;
+  max-width: var(--width-document);
+  margin-inline: auto;
+  padding: var(--space-2xl) var(--edge) var(--space-xl);
+  border-top: 1px solid var(--line-hairline);
+}
+
+.footer-name {
+  margin: 0 0 var(--space-lg);
+  font-size: var(--font-label);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.footer-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--column-min), 1fr));
+  gap: var(--space-lg) var(--space-md);
+}
+
+.footer-group h2 {
+  margin: 0 0 var(--space-2xs);
+  font-size: var(--font-label);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.footer-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.site-footer .colophon-meta {
+  margin: var(--space-xl) 0 0;
+  color: var(--text-secondary);
 }
 
 .colophon-meta {

@@ -46,6 +46,12 @@ describe("validateRegistry", () => {
       .toThrow(/duplicate/i);
   });
 
+  it("rejects a camera that jumps at a chapter boundary", () => {
+    const a = make("a", [0, 0.5]);
+    const b = { ...make("b", [0.5, 1]), keyframes: [{ at: 0, position: [0, 0, 6] as const, lookAt: [0, 0, 0] as const }] };
+    expect(() => validateRegistry([a, b])).toThrow(/camera jumps between "a" and "b"/i);
+  });
+
   it("rejects an empty registry", () => {
     expect(() => validateRegistry([])).toThrow(/at least one/i);
   });

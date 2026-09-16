@@ -1,8 +1,11 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { CHAPTERS, sectionHeightVh } from "./chapters/registry";
 import { ChapterBoundary } from "./dom/ChapterBoundary";
+import { Footer } from "./dom/Footer";
 import { StaticRoute } from "./dom/StaticRoute";
+import { useAfterFirstPaint } from "./hooks/useAfterFirstPaint";
 import { useReducedMotion } from "./hooks/useReducedMotion";
+import { NARRATIVE_ID } from "./lib/scroll";
 import { hasWebGL } from "./lib/webgl";
 
 // Keep the DOM narrative in the first chunk. Three.js, R3F, and the scene
@@ -20,6 +23,7 @@ type CanvasPhase = "live" | "lost" | "abandoned";
 
 export function App() {
   const reduced = useReducedMotion();
+  const painted = useAfterFirstPaint();
   const webgl = useMemo(() => hasWebGL(), []);
   const [phase, setPhase] = useState<CanvasPhase>("live");
 
@@ -40,8 +44,8 @@ export function App() {
 
   return (
     <>
-      <a className="skip-link" href="#opening">Skip to introduction</a>
-      {canvasMounted && (
+      <a className="skip-link" href="#hero">Skip to introduction</a>
+      {canvasMounted && painted && (
         <ChapterBoundary id="stage">
           <Suspense fallback={null}>
             <Stage
@@ -56,7 +60,7 @@ export function App() {
       {/* <main> stays outside the stage boundary: that is the whole "site is
           never blank" guarantee, and moving it inside would silently void it. */}
       {narrative ? (
-        <main id="main-content">
+        <main id={NARRATIVE_ID}>
           {CHAPTERS.map(({ id, range, Content }) => (
             <section
               key={id}
@@ -71,6 +75,7 @@ export function App() {
       ) : (
         <StaticRoute />
       )}
+      <Footer />
     </>
   );
 }

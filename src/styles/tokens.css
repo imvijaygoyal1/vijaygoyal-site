@@ -135,6 +135,24 @@
 
   /* ---- Layout ---------------------------------------------------------- */
   --measure: 32rem;
+  /* Wider copy blocks: a product's four beats over the scene, and the
+     document half's grids. */
+  --measure-wide: 58rem;
+  --width-document: 68rem;
+  /* Narrowest a grid column may get before the grid drops a column. */
+  --column-min: 15rem;
+  /* Apple's minimum comfortable hit target. */
+  --target-min: 2.75rem;
+  /* The pinned story copy covers more of the frame than a single paragraph,
+     so its scrim reaches further up. */
+  --scrim-copy: 34%;
+  --scrim-story: 58%;
+  /* Clear stage above How I Build: room for the scene to leave the frame
+     before the document half's first heading arrives. */
+  --lead-quiet: 90vh;
+  /* Block padding between consecutive document sections: two of these meet
+     at every boundary, so it is half the gap a visitor sees. */
+  --pad-section: var(--space-2xl);
   --edge: clamp(1.25rem, 5vw, 3rem);
   /* Block padding for the document-style routes — the static fallback and the
      noscript block, which each had their own near-identical magic clamp. */

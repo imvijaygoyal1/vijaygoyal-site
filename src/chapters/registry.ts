@@ -1,9 +1,12 @@
 import { assertValidRange, isActive, type ScrollRange } from "../lib/progress";
-import { validateKeyframes } from "../lib/keyframes";
-import { colophon } from "./colophon";
-import { craft } from "./craft";
-import { opening } from "./opening";
+import { validateKeyframes, validateSeam } from "../lib/keyframes";
+import { about } from "./about";
+import { contact } from "./contact";
+import { hero } from "./hero";
+import { processChapter } from "./process";
 import { shadyspade } from "./shadyspade";
+import { toolkit } from "./toolkit";
+import { transition } from "./transition";
 import { xbill } from "./xbill";
 import type { Chapter, RegisteredChapter } from "./types";
 import { subjectState, type SubjectState } from "../subject/state";
@@ -14,7 +17,17 @@ export type { Chapter, ChapterSceneProps, RegisteredChapter } from "./types";
 export const PRELOAD_MARGIN = 0.08;
 
 /**
- * The narrative as a sequence of poses.
+ * The document half's resting state. No scale or tilt: shrinking the device to
+ * recede it would frame the shot twice (AD-22), and tilt is outside the turn
+ * budget `facing` enforces (AD-7). The turn alone carries the exit.
+ */
+const QUIET_POSE = subjectState({
+  rotationY: 1.15, positionY: 0.95, screenOn: 0, screenMix: 1,
+});
+
+/**
+ * The narrative as a sequence of poses. Each entry is the state chapter i-1
+ * exits in and chapter i enters in.
  *
  * Chapter i runs from POSES[i] to POSES[i+1]. Continuity is therefore
  * structural: a chapter cannot exit in a state its successor does not start
@@ -35,18 +48,28 @@ const POSES: readonly SubjectState[] = [
     rotationY: -0.42, positionY: 0.95,
     homeOn: 0, homeZoom: 1, screenOn: 1, screenMix: 0,
   }),
-  // 3 - Shady Spade: the screen changes, the Watch arrives, cards deal.
+  // 3 - transition: xBill still on screen, the device swings back through
+  //     square toward the Shady Spade side. The apps swap early in the next
+  //     chapter, where its copy arrives -- see screenSwap.ts.
   subjectState({
-    // A swing back through square and on past it. There is no phone shell to
-    // show, so the turn stays inside MAX_TURN and the display never leaves
-    // the viewer -- see MAX_TURN below.
+    rotationY: 0.05, positionY: 0.95,
+    homeOn: 0, homeZoom: 1, screenOn: 1, screenMix: 0,
+  }),
+  // 4 - Shady Spade: the screen changes, the Watch arrives, cards deal, and
+  //     the turn carries on past square. There is no phone shell to show, so
+  //     the turn stays inside MAX_TURN -- see below.
+  subjectState({
     rotationY: 0.55,
     positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1,
   }),
-  // 4 - Craft: companions withdraw and the device leans into its deepest turn.
-  subjectState({ rotationY: 1.0, tiltX: -0.38, positionY: 0.95, screenOn: 0.75, screenMix: 1, scale: 0.95 }),
-  // 5 - Colophon: it closes and recedes.
-  subjectState({ rotationY: 1.45, positionY: 0.95, positionZ: -6, scale: 0.28, screenOn: 0 }),
+  // 5..8 - How I Build, Toolkit, About, Contact: the device goes dark and
+  //     turns away while the camera tilts down past it (the camera owns
+  //     framing -- AD-22), then holds. It has left the frame by the middle of
+  //     How I Build, so the document half reads on a clear stage.
+  QUIET_POSE,
+  QUIET_POSE,
+  QUIET_POSE,
+  QUIET_POSE,
 ];
 
 /**
@@ -67,18 +90,14 @@ export const MAX_TURN = 1.5;
 
 
 /**
- * Total scrollable height of the narrative, in viewport heights. Every DOM
- * section derives its height from this and the chapter's range, so a section
- * cannot come into view at a different scroll position than its scene.
- */
-/**
  * Total scroll length of the narrative, in viewport heights.
  *
- * Each chapter's section must be meaningfully taller than the viewport or its
- * sticky copy has no travel: it unpins almost immediately and rides up across
- * the device instead of holding at the foot of the frame. The shortest chapter
- * here is 0.14 of the whole, which at 1100vh still gives it 154vh -- 54vh of
- * pinned travel.
+ * Each pinned chapter's section must be meaningfully taller than the viewport
+ * or its sticky copy has no travel: it unpins almost immediately and rides up
+ * across the device instead of holding at the foot of the frame. The shortest
+ * pinned chapter here (hero, 0.18) gets 198vh -- 98vh of pinned travel. The
+ * copy-less transition does not pin, and the document sections are sized by
+ * their content -- see SEQUENCE.
  */
 export const TOTAL_VH = 1100;
 
@@ -120,6 +139,7 @@ export function validateRegistry(chapters: readonly RegisteredChapter[]): void {
     if (next.range[0] < prev.range[1]) {
       throw new RangeError(`Overlap between "${prev.id}" and "${next.id}"`);
     }
+    validateSeam(prev.keyframes, next.keyframes, prev.id, next.id);
   }
 }
 
@@ -167,11 +187,19 @@ interface SequenceEntry {
 // a property of the sequence, not of any one chapter. Section heights are
 // derived from these, so copy and scene can never drift apart.
 const SEQUENCE: readonly SequenceEntry[] = [
-  { chapter: opening, range: [0, 0.2] },
-  { chapter: xbill, range: [0.2, 0.44] },
-  { chapter: shadyspade, range: [0.44, 0.7] },
-  { chapter: craft, range: [0.7, 0.86] },
-  { chapter: colophon, range: [0.86, 1] },
+  { chapter: hero, range: [0, 0.18] },
+  { chapter: xbill, range: [0.18, 0.435] },
+  { chapter: transition, range: [0.435, 0.51] },
+  { chapter: shadyspade, range: [0.51, 0.78] },
+  // The document half is sized by its content, not by these ranges: a
+  // section taller than its range simply takes longer to scroll through, and
+  // progressAt keeps every other chapter where it was. Process's range paces
+  // the camera's exit; the last three only need to exist, so they are kept
+  // small enough never to add empty space below their content.
+  { chapter: processChapter, range: [0.78, 0.9] },
+  { chapter: toolkit, range: [0.9, 0.93] },
+  { chapter: about, range: [0.93, 0.965] },
+  { chapter: contact, range: [0.965, 1] },
 ];
 
 export const CHAPTERS: readonly RegisteredChapter[] = SEQUENCE.map(
