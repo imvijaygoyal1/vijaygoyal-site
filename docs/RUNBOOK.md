@@ -231,6 +231,25 @@ registry validates tracks and seams **per layout** (AD-18). Poses are shared.
   track. Accepted: rotation reflows the whole page anyway, and blending would
   add state outside the one scroll clock (AD-2).
 
+### Flush layers need a polygon offset, not a depth gap
+
+**Blank white cards on a real iPhone 17 Pro, clean in every desktop and WebKit
+render (2026-09-16).** Each card face sat 0.0015 units in front of the white
+card body; the phone's screens sit 0.001 in front of the recess. Once the
+portrait camera pulled back to ~5.7 units, a phone GPU's depth buffer could not
+resolve that gap and the body won -- a white box where the face should be.
+
+- **Reproduce on a desktop by making depth coarse**: temporarily set
+  `camera={{ near: 0.001 }}` on the `<Canvas>` in `Stage.tsx`. Depth precision
+  scales with the near plane, so the faces break up into blotches at the
+  portrait distance and stay clean close up -- the same pattern as the device.
+  **Revert it after.**
+- **The fix is `polygonOffset` on anything printed flush on another surface**
+  (card faces, `Screen`, `HomeScreen`). It is resolved in window space and does
+  not depend on precision or distance. Do not "fix" it by widening the gap.
+- Any new camera that pulls back, or any new flush layer, should get the
+  coarse-depth check before it ships.
+
 ## Refreshing the captures
 
 Build each app for the iOS 26.5 simulator (iPhone 17 Pro, UDID

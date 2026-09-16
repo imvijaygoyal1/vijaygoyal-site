@@ -39,7 +39,16 @@ export const HomeScreen = forwardRef<Group>(function HomeScreen(_props, ref) {
   return (
     <group ref={ref} visible={false}>
       <mesh geometry={geometry} renderOrder={0}>
-        <meshBasicMaterial map={map} toneMapped={false} transparent depthWrite={false} />
+        <meshBasicMaterial
+          map={map}
+          toneMapped={false}
+          transparent
+          depthWrite={false}
+          // Flush on the recess: see Screen.tsx.
+          polygonOffset
+          polygonOffsetFactor={-1}
+          polygonOffsetUnits={-4}
+        />
       </mesh>
     </group>
   );

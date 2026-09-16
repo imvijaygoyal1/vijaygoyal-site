@@ -57,6 +57,13 @@ export function Screen({
         transparent
         opacity={opacity}
         depthWrite={false}
+        // Lies flush on the phone's recess (0.001 in front). On a phone GPU at
+        // the portrait camera's distance that gap is below depth precision and
+        // the recess broke through in patches; a polygon offset does not
+        // depend on precision -- the same fix as the card faces.
+        polygonOffset
+        polygonOffsetFactor={-1}
+        polygonOffsetUnits={-4}
       />
     </mesh>
   );

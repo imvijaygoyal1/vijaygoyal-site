@@ -236,6 +236,17 @@ export function Subject({ progress }: { progress: ProgressRef }) {
                 toneMapped={false}
                 metalness={0}
                 roughness={0.5}
+                /* Printed on the stock, so it must always win against it. The
+                   face sits 0.0015 units in front of the body's cap, and on a
+                   phone that separation is not something depth can resolve:
+                   with the portrait camera pulled back to ~5.7 units, the body
+                   won and the cards rendered as blank white boxes on an iPhone
+                   17 Pro while every desktop render was clean. A polygon offset
+                   is resolved in window space, so it does not depend on the
+                   GPU's depth precision or the camera's distance. */
+                polygonOffset
+                polygonOffsetFactor={-1}
+                polygonOffsetUnits={-4}
               />
             </mesh>
             {/* Above the print, so the highlight sits on the glass rather than
