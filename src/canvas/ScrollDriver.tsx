@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { isSettled, progressAt, smoothToward, type SectionSpan } from "../lib/scroll";
 import type { ProgressSource } from "../lib/progress";
 import { CHAPTERS } from "../chapters/registry";
+import { measureSpans } from "./measureSpans";
 
 /**
  * Turns native scroll into the site's single source of truth.
@@ -33,12 +34,7 @@ export function ScrollDriver({ progress }: { progress: ProgressSource }) {
     // held element would be detached and measure zero from then on.
     let spans: SectionSpan[] = [];
     const measure = () => {
-      spans = CHAPTERS.flatMap(({ id, range }) => {
-        const el = document.getElementById(id);
-        if (!el) return [];
-        const box = el.getBoundingClientRect();
-        return [{ top: box.top + window.scrollY, height: box.height, range }];
-      });
+      spans = measureSpans(CHAPTERS);
     };
 
     const read = () => {

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { fanOpen, fanPlacement, fanTransform, FAN_STEP, fanYaw, MAX_FAN_YAW, PIVOT_R } from "./cardFan";
+import { cardDeal, DEAL_AT, DEAL_DURATION, SPADE_BEATS, fanPlacement, fanTransform, FAN_STEP, fanYaw, handCardTransform, MAX_FAN_YAW, PIVOT_R } from "./cardFan";
+import { beatStart } from "../chapters/beats";
+import { BEATS as SPADE_COPY_BEATS } from "../chapters/shadyspade/SpadeContent";
+import { CHAPTERS } from "../chapters/registry";
+import { subjectStateAt } from "./sequence";
+import { easeInOutCubic } from "../lib/ease";
+import { HAND } from "./cardFace";
 
 const COUNT = 3;
 
@@ -109,23 +115,6 @@ describe("fan placement", () => {
 });
 
 describe("the spread", () => {
-  it("is closed before the chapter and fully open early in it", () => {
-    expect(fanOpen(0)).toBe(0);
-    expect(fanOpen(0.07)).toBe(1);
-    expect(fanOpen(1)).toBe(1);
-  });
-
-  it("opens monotonically and never leaves 0..1", () => {
-    let previous = -1;
-    for (let c = 0; c <= 1; c += 0.005) {
-      const v = fanOpen(c);
-      expect(v).toBeGreaterThanOrEqual(previous);
-      expect(v).toBeGreaterThanOrEqual(0);
-      expect(v).toBeLessThanOrEqual(1);
-      previous = v;
-    }
-  });
-
   it("curls the wings symmetrically, outward from the centre", () => {
     const n = 5;
     const left = fanTransform(0, n, 1);
@@ -148,5 +137,82 @@ describe("the spread", () => {
     for (let i = 0; i < 5; i++) {
       expect(fanTransform(i, 5, 0).tiltY).toBeCloseTo(0, 9);
     }
+  });
+});
+
+describe("the deal", () => {
+  const dealtAt = (local: number) =>
+    HAND.map((_, i) => handCardTransform(i, HAND.length, easeInOutCubic(local)).dealt);
+
+  it("deals nothing before the chapter", () => {
+    expect(dealtAt(0)).toEqual([false, false, false, false, false]);
+  });
+
+  it("lands the gold 3 of Spades last, on the third beat", () => {
+    const gold = HAND.findIndex((c) => c.gold);
+    const last = DEAL_AT.indexOf(Math.max(...DEAL_AT));
+    expect(last).toBe(gold);
+    expect(DEAL_AT[gold]).toBeGreaterThanOrEqual(beatStart(2, 4));
+    expect(DEAL_AT[gold]).toBeLessThan(beatStart(3, 4));
+  });
+
+  it("has every card down by the last beat", () => {
+    const lastBeat = beatStart(3, 4);
+    for (let i = 0; i < HAND.length; i++) {
+      expect(cardDeal(i, lastBeat)).toBe(1);
+      expect(DEAL_AT[i]! + DEAL_DURATION).toBeLessThanOrEqual(lastBeat);
+    }
+  });
+
+  it("puts a fully dealt card exactly in its fan slot", () => {
+    for (let i = 0; i < HAND.length; i++) {
+      const t = handCardTransform(i, HAND.length, 1);
+      const slot = fanTransform(i, HAND.length, 1);
+      expect(t.x).toBeCloseTo(slot.x, 9);
+      expect(t.y).toBeCloseTo(slot.y, 9);
+      expect(t.rotation).toBeCloseTo(slot.rotation, 9);
+      expect(t.scale).toBe(1);
+    }
+  });
+
+  it("follows the beats on the eased pose clock, not the eased value", () => {
+    // deal arrives eased; the ace must land at its linear time regardless.
+    const ace = 0;
+    const justAfter = DEAL_AT[ace]! + DEAL_DURATION + 0.001;
+    expect(handCardTransform(ace, HAND.length, easeInOutCubic(justAfter)).dealt).toBe(true);
+    expect(handCardTransform(ace, HAND.length, easeInOutCubic(DEAL_AT[ace]! - 0.001)).dealt).toBe(false);
+  });
+});
+
+describe("the deal, on the narrative's own clock", () => {
+  const spade = CHAPTERS.find((c) => c.id === "shady-spade")!;
+  const width = spade.range[1] - spade.range[0];
+  const dealAt = (global: number) =>
+    HAND.map((_, i) => handCardTransform(i, HAND.length, subjectStateAt(global, CHAPTERS).deal).dealt);
+
+  it("deals each card at its beat, read through the real poses", () => {
+    // Not a hand-eased stand-in: this is what the scene renders. It breaks if
+    // a pose, the blend curve, or the deal schedule moves.
+    expect(dealAt(spade.range[0])).toEqual([false, false, false, false, false]);
+    for (let i = 0; i < HAND.length; i++) {
+      const landed = spade.range[0] + (DEAL_AT[i]! + DEAL_DURATION + 0.002) * width;
+      const before = spade.range[0] + (DEAL_AT[i]! - 0.002) * width;
+      expect(dealAt(landed)[i], `card ${i} after its beat`).toBe(true);
+      expect(dealAt(before)[i], `card ${i} before its beat`).toBe(false);
+    }
+  });
+
+  it("keeps the hand dealt once the chapter is over", () => {
+    // QUIET_POSE carries deal: 1; without it the cards would slide back into
+    // the deck and shrink while they fade out through How I Build.
+    for (let g = spade.range[1]; g <= 1; g += 0.005) {
+      expect(subjectStateAt(g, CHAPTERS).deal).toBe(1);
+    }
+  });
+
+  it("covers every card in the hand, and follows the copy's beat count", () => {
+    expect(DEAL_AT).toHaveLength(HAND.length);
+    expect(SPADE_BEATS).toBe(SPADE_COPY_BEATS.length);
+    for (const at of DEAL_AT) expect(at + DEAL_DURATION).toBeLessThanOrEqual(beatStart(SPADE_BEATS, SPADE_BEATS));
   });
 });

@@ -258,6 +258,50 @@ main {
   opacity: var(--beat-opacity, 1);
 }
 
+/*
+ * The beat rail: one segment per beat, the one on screen filling with the
+ * clock. Absent unless CopyFade is driving it -- a rail that never moves is
+ * worse than none.
+ */
+/* Laid out in both states and only revealed when driven: switching it in from
+   display:none shifted every beat list down once the scene loaded (CLS). */
+.beat-rail {
+  display: flex;
+  gap: var(--space-3xs);
+  width: 100%;
+  max-width: var(--measure);
+  margin: var(--space-sm) 0 0;
+  visibility: hidden;
+}
+
+.beat-rail.rail-driven {
+  visibility: visible;
+}
+
+/* Nothing to reserve on the static route: the beats are a full list there and
+   no clock will ever drive a rail. */
+.static-route .beat-rail {
+  display: none;
+}
+
+.beat-rail-seg {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--line-strong);
+}
+
+.beat-rail-seg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(var(--seg-fill, 0));
+  transform-origin: left center;
+}
+
 /* ---- Link rows -------------------------------------------------------- */
 
 .link-row {
@@ -340,8 +384,28 @@ main {
 }
 
 .stage {
+  position: relative;
   padding-top: var(--space-sm);
   border-top: 1px solid var(--line-hairline);
+}
+
+/*
+ * The progress line: each stage's hairline fills left to right as the visitor
+ * reaches it, in reading order (CopyFade writes --stage-fill from the clock).
+ * Only while driven: undriven -- static route, reduced motion, no scene -- the
+ * stages look exactly as they did before there was a clock to follow, a plain
+ * hairline and a secondary index.
+ */
+.stages-driven .stage::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--text-primary);
+  transform: scaleX(var(--stage-fill, 0));
+  transform-origin: left center;
 }
 
 /* Secondary, not tertiary: at label size on the bare stage, tertiary measures
@@ -353,6 +417,16 @@ main {
   letter-spacing: var(--tracking-label);
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
+}
+
+/* Brightens to primary as its line fills, from the same fallback as the line
+   so the two cannot disagree before the first frame. Both ends pass AA. */
+.stages-driven .stage-index {
+  color: color-mix(
+    in srgb,
+    var(--text-primary) calc(var(--stage-fill, 0) * 100%),
+    var(--text-secondary)
+  );
 }
 
 .stage h3,

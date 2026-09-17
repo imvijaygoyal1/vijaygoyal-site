@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { easeInOutCubic, easeOutBack, easeOutCubic } from "./ease";
+import { easeInOutCubic, easeOutBack, easeOutCubic, inverseEaseInOutCubic } from "./ease";
 
 /** Curves that only ever move forward. easeOutBack is deliberately excluded:
  *  it overshoots past 1 and settles back, which is the point of it. */
@@ -57,5 +57,18 @@ describe("easing curves", () => {
       if (before > 1e-9 && after < -1e-9) reversals++;
     }
     expect(reversals).toBe(1);
+  });
+});
+
+describe("inverseEaseInOutCubic", () => {
+  it("undoes easeInOutCubic across the whole range", () => {
+    for (let t = 0; t <= 1; t += 0.01) {
+      expect(inverseEaseInOutCubic(easeInOutCubic(t))).toBeCloseTo(t, 9);
+    }
+  });
+
+  it("clamps outside 0..1", () => {
+    expect(inverseEaseInOutCubic(-1)).toBe(0);
+    expect(inverseEaseInOutCubic(2)).toBe(1);
   });
 });

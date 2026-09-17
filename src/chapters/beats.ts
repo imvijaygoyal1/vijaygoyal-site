@@ -26,10 +26,36 @@ export function beatOpacity(
 ): number {
   if (count <= 1) return 1;
   const t = localProgress(global, range);
-  const slot = FADE_START / count;
-  const start = index * slot;
-  const end = (index + 1) * slot;
+  const start = beatStart(index, count);
+  const end = beatStart(index + 1, count);
   const rise = index === 0 ? 1 : clamp01((t - start) / BEAT_HANDOVER);
   const fall = index === count - 1 ? 1 : clamp01((end - t) / BEAT_HANDOVER);
   return Math.min(rise, fall);
+}
+
+/** How much of the chapter's local progress one beat holds the block. */
+export function beatSlot(count: number): number {
+  return FADE_START / Math.max(count, 1);
+}
+
+/** Where beat `index` of `count` takes over, in the chapter's local progress.
+ *  The beats, the rail and the deal all read this, so they cannot drift. */
+export function beatStart(index: number, count: number): number {
+  return index * beatSlot(count);
+}
+
+/**
+ * How full segment `index` of a beat rail is, 0..1: it fills across its own
+ * beat's slot, so the segment filling is the beat on screen and every earlier
+ * one is full.
+ */
+export function segmentFill(
+  global: number,
+  range: ScrollRange,
+  index: number,
+  count: number,
+): number {
+  return clamp01(
+    (localProgress(global, range) - beatStart(index, count)) / beatSlot(count),
+  );
 }

@@ -14,6 +14,9 @@
  */
 
 import type { Layout } from "../lib/layout";
+import { clamp01 } from "../lib/progress";
+import { easeOutCubic, inverseEaseInOutCubic } from "../lib/ease";
+import { beatStart } from "../chapters/beats";
 
 /** A card's face, in scene units: poker proportions, sized against the phone. */
 export const CARD_W = 0.4;
@@ -34,14 +37,6 @@ export interface CardTransform {
    *  through a different angle as the fan opens, which is what makes the gloss
    *  travel across the spread instead of sitting still. */
   tiltY: number;
-}
-
-/** How much of the spread has happened. `screenMix`-style: the hand should be
- *  open early in the chapter, as it comes into view, not still opening at the
- *  end of it. `cards` is eased, so a small divisor completes the spread inside
- *  roughly the first quarter. */
-export function fanOpen(cards: number): number {
-  return Math.min(1, Math.max(0, cards / 0.07));
 }
 
 /** Yaw per radian of fan angle. */
@@ -119,4 +114,72 @@ export function fanPlacement(layout: Layout): FanPlacement {
   return layout === "portrait"
     ? { position: [-0.95, -0.28, 0.1], scale: 0.78, step: FAN_STEP }
     : { position: [-1.18, -0.26, 0.06], scale: 0.95, step: FAN_STEP };
+}
+
+/** The four beats of The Shady Spade's story, which the deal follows. A test
+ *  holds this to the copy's own beat list, so a beat added there cannot leave
+ *  the deal running on the old timing. */
+export const SPADE_BEATS = 4;
+/** How much of the chapter one card takes to land. */
+export const DEAL_DURATION = 0.05;
+
+/**
+ * When each card in `HAND` (A, K, 3, Q, 5) is dealt, in the chapter's local
+ * progress. The hand fills with the story: the ace and king arrive with "The
+ * game", the queen and five with "Play together", and the 3 of Spades -- the
+ * 30-point card, gold -- lands alone on "Think strategically", the beat that
+ * says what it is worth.
+ */
+export const DEAL_AT: readonly number[] = [
+  beatStart(0, SPADE_BEATS) + 0.02, // A
+  beatStart(0, SPADE_BEATS) + 0.07, // K
+  beatStart(2, SPADE_BEATS) + 0.04, // 3 of Spades
+  beatStart(1, SPADE_BEATS) + 0.02, // Q
+  beatStart(1, SPADE_BEATS) + 0.07, // 5
+];
+
+/** How far card `index` has been dealt, 0..1, at the chapter's local progress. */
+export function cardDeal(index: number, local: number): number {
+  const at = DEAL_AT[index] ?? 0;
+  return easeOutCubic(clamp01((local - at) / DEAL_DURATION));
+}
+
+/** Where an undealt card waits: stacked below the hand, square to it. */
+// Grows from almost nothing, so a card arriving reads as being dealt rather
+// than as a 70%-size card popping into view below the hand.
+const DECK = { x: 0, y: -0.55, scale: 0.05 } as const;
+
+export interface HandCard extends CardTransform {
+  scale: number;
+  /** Whether the card is on stage at all yet. */
+  dealt: boolean;
+}
+
+/**
+ * Card `index`'s full transform in the hand, from the subject's `deal` state.
+ *
+ * `deal` is a pose field, so it arrives eased; turning it back into linear
+ * progress puts each card on the same clock the copy's beats run on. A dealt
+ * card slides up from the deck into its place in the fan and grows to size.
+ * `Subject` and `portraitFraming.test.ts` both call this, so the test checks
+ * the transform the scene renders.
+ */
+export function handCardTransform(
+  index: number,
+  count: number,
+  deal: number,
+  step: number = FAN_STEP,
+): HandCard {
+  const d = cardDeal(index, inverseEaseInOutCubic(deal));
+  const slot = fanTransform(index, count, 1, step);
+  const lerp = (a: number, b: number) => a + (b - a) * d;
+  return {
+    x: lerp(DECK.x, slot.x),
+    y: lerp(DECK.y, slot.y),
+    z: slot.z,
+    rotation: lerp(0, slot.rotation),
+    tiltY: lerp(0, slot.tiltY),
+    scale: lerp(DECK.scale, 1),
+    dealt: d > 0.001,
+  };
 }

@@ -23,6 +23,14 @@ export interface OutboundLink {
 export function StoryBeats({ beats, links }: { beats: readonly Beat[]; links: readonly OutboundLink[] }) {
   return (
     <>
+      {/* Which beat is up, filling with the clock. Decorative -- the beats
+          themselves carry the content -- and shown only while the clock
+          drives it; see RAIL_DRIVEN. */}
+      <div className="beat-rail" aria-hidden="true">
+        {beats.map((beat) => (
+          <span key={beat.heading} className="beat-rail-seg" />
+        ))}
+      </div>
       <ol className="beats">
         {beats.map((beat) => (
           <li key={beat.heading} className="beat">

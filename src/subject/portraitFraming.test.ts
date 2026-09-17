@@ -4,7 +4,7 @@ import { CHAPTERS } from "../chapters/registry";
 import { cameraPoseAt } from "../canvas/cameraPose";
 import { layoutFor } from "../lib/layout";
 import { subjectStateAt } from "./sequence";
-import { CARD_H, CARD_W, fanOpen, fanPlacement, fanTransform, fanYaw } from "./cardFan";
+import { CARD_H, CARD_W, fanPlacement, fanYaw, handCardTransform } from "./cardFan";
 import { BODY_H, BODY_W, WATCH_H, WATCH_W } from "./dimensions";
 import { HAND } from "./cardFace";
 
@@ -18,7 +18,7 @@ import { HAND } from "./cardFace";
  * real phone viewports, across the whole chapter.
  *
  * It rebuilds `Subject`'s transform chain from the same pure functions
- * (`subjectStateAt`, `fanPlacement`, `fanYaw`, `fanTransform`) rather than
+ * (`subjectStateAt`, `fanPlacement`, `fanYaw`, `handCardTransform`) rather than
  * mounting the scene. If `Subject` gains a transform, this must gain it too.
  */
 
@@ -71,13 +71,15 @@ export function projectSet(global: number, aspect: number) {
   const handWorld = hand.getWorldPosition(new Vector3());
   hand.rotation.y = fanYaw(camera.position.x, camera.position.z, handWorld.x, handWorld.z, s.rotationY);
 
-  const cards = HAND.map((_, i) => {
-    const t = fanTransform(i, HAND.length, fanOpen(s.cards), place.step);
+  const cards = HAND.flatMap((_, i) => {
+    const t = handCardTransform(i, HAND.length, s.deal, place.step);
+    if (!t.dealt) return [];
     const card = new Object3D();
     card.position.set(t.x, t.y, t.z);
     card.rotation.set(0, t.tiltY, t.rotation);
+    card.scale.setScalar(t.scale);
     hand.add(card);
-    return card;
+    return [card];
   });
   root.updateMatrixWorld(true);
 

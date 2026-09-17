@@ -18,13 +18,18 @@ export interface SubjectState {
   scale: number;
   /** Presence of the Watch, 0..1. */
   companion: number;
-  /** Cards dealt, 0..1. */
+  /** Whether the hand is on stage at all, 0..1 -- a presence gate. Which of
+   *  its cards are down is `deal`. */
   cards: number;
   /** Screen brightness, 0..1. A dark device is simply screenOn: 0. */
   screenOn: number;
   /** Which screen: 0 is xBill, 1 is The Shady Spade. Also picks which icon
    *  the home-screen zoom travels toward. */
   screenMix: number;
+  /** How far the hand has been dealt, 0..1, eased like every field. The
+   *  subject turns it back into the chapter's linear progress to deal each
+   *  card on its beat -- see `cardDeal`. */
+  deal: number;
   /** Home screen brightness, 0..1. */
   homeOn: number;
   /** 0 shows the whole home screen, 1 frames a single app icon. */
@@ -33,14 +38,14 @@ export interface SubjectState {
 
 export const SUBJECT_KEYS = [
   "rotationY", "tiltX", "positionY", "positionZ",
-  "scale", "companion", "cards", "screenOn", "screenMix", "homeOn", "homeZoom",
+  "scale", "companion", "cards", "deal", "screenOn", "screenMix", "homeOn", "homeZoom",
 ] as const satisfies readonly (keyof SubjectState)[];
 
 /** The subject at rest: one solid slab, facing the viewer, screen dark. */
 export const NEUTRAL: SubjectState = {
   rotationY: 0, tiltX: 0,
   positionY: 0.95, positionZ: 0, scale: 1,
-  companion: 0, cards: 0, screenOn: 0, screenMix: 0, homeOn: 0, homeZoom: 0,
+  companion: 0, cards: 0, deal: 0, screenOn: 0, screenMix: 0, homeOn: 0, homeZoom: 0,
 };
 
 export function subjectState(overrides: Partial<SubjectState>): SubjectState {

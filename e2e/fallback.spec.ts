@@ -23,6 +23,27 @@ test.describe("reduced motion", () => {
     }
     await expect(page.locator("footer")).toBeVisible();
   });
+
+  test("leaves nothing to the clock: no beat rail, every stage line full", async ({ page }) => {
+    await page.goto("/");
+    const rails = await page.locator(".beat-rail").all();
+    expect(rails.length).toBeGreaterThan(1);
+    for (const rail of rails) await expect(rail).toBeHidden();
+
+    // No progress line at all here, and the index keeps its secondary colour:
+    // undriven stages look as they did before there was a clock to follow.
+    const stages = await page.locator("#process .stage").evaluateAll((els) =>
+      els.map((el) => ({
+        line: getComputedStyle(el, "::before").content,
+        index: getComputedStyle(el.querySelector(".stage-index")!).color,
+      })),
+    );
+    expect(stages.length).toBe(6);
+    for (const s of stages) {
+      expect(s.line).toBe("none");
+      expect(s.index).toBe("rgb(168, 176, 191)");
+    }
+  });
 });
 
 test("content still renders when WebGL is unavailable", async ({ page }) => {

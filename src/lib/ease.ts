@@ -30,3 +30,14 @@ export function easeOutBack(t: number, overshoot = 1.12): number {
   const c3 = overshoot + 1;
   return 1 + c3 * Math.pow(x - 1, 3) + overshoot * Math.pow(x - 1, 2);
 }
+
+/**
+ * The inverse of `easeInOutCubic`: given an eased value, the time that
+ * produced it. Poses blend with `easeInOutCubic`, so a pose field that runs
+ * 0 -> 1 across a chapter can be turned back into that chapter's linear local
+ * progress -- which is what the copy's beat timing is written in.
+ */
+export function inverseEaseInOutCubic(y: number): number {
+  const v = clamp01(y);
+  return v < 0.5 ? Math.cbrt(v / 4) : 1 - Math.cbrt(2 * (1 - v)) / 2;
+}

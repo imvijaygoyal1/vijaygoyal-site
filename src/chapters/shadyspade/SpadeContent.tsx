@@ -2,7 +2,7 @@ import { StoryBeats, type Beat } from "../StoryBeats";
 import { LINKS } from "../../lib/links";
 
 // Gameplay is taken from the app's own rules screen, not inferred.
-const BEATS: readonly Beat[] = [
+export const BEATS: readonly Beat[] = [
   {
     heading: "The game",
     copy: "Six players, no fixed teams. The highest bidder declares trump and calls two secret partners — so you learn who you are playing with by playing.",

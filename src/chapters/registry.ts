@@ -23,7 +23,7 @@ export const PRELOAD_MARGIN = 0.08;
  * budget `facing` enforces (AD-7). The turn alone carries the exit.
  */
 const QUIET_POSE = subjectState({
-  rotationY: 1.15, positionY: 0.95, screenOn: 0, screenMix: 1,
+  rotationY: 1.15, positionY: 0.95, screenOn: 0, screenMix: 1, deal: 1,
 });
 
 /**
@@ -61,7 +61,7 @@ const POSES: readonly SubjectState[] = [
   //     the turn stays inside MAX_TURN -- see below.
   subjectState({
     rotationY: 0.55,
-    positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1,
+    positionY: 0.95, screenOn: 1, screenMix: 1, companion: 1, cards: 1, deal: 1,
   }),
   // 5..8 - How I Build, Toolkit, About, Contact: the device goes dark and
   //     turns away while the camera tilts down past it (the camera owns

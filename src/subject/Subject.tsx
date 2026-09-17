@@ -12,7 +12,7 @@ import { swapOpacities } from "./screenSwap";
 import { deviceGeometry } from "../canvas/deviceGeometry";
 import { roundedRectGeometry } from "../canvas/roundedRect";
 import { HAND } from "./cardFace";
-import { CARD_H, CARD_W, fanOpen, fanPlacement, fanTransform, fanYaw } from "./cardFan";
+import { CARD_H, CARD_W, fanPlacement, fanYaw, handCardTransform } from "./cardFan";
 import { drawCardShadow, SHADOW_SPREAD, SHADOW_W } from "./cardShadow";
 import { useCardTextures } from "./useCardTextures";
 import { GlossLayer } from "./GlossLayer";
@@ -155,12 +155,12 @@ export function Subject({ progress }: { progress: ProgressRef }) {
     for (let i = 0; i < CARDS; i++) {
       const card = cards.current[i];
       if (!card) continue;
-      // The hand spreads as the chapter comes into view, wings-first, rather
-      // than still opening at the end of it -- see fanOpen.
-      const t = fanTransform(i, CARDS, fanOpen(s.cards), fanStep);
+      // Dealt one at a time with the chapter's beats -- see handCardTransform.
+      const t = handCardTransform(i, CARDS, s.deal, fanStep);
       card.rotation.set(0, t.tiltY, t.rotation);
       card.position.set(t.x, t.y, t.z);
-      card.visible = s.cards > 0.002;
+      card.scale.setScalar(t.scale);
+      card.visible = s.cards > 0.002 && t.dealt;
     }
   });
 
