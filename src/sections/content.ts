@@ -29,6 +29,9 @@ export interface Product {
 
 export const OPENING = {
   heading: "I turn ideas into products.",
+  /** The same sentence, split where it already wraps, so each half can lift
+   *  into place on load. Joined back together for any text comparison. */
+  lines: ["I turn ideas ", "into products."],
   rows: [
     {
       label: "What I do",

@@ -24,6 +24,29 @@ lessons — tone mapping, alphaMap channels, flush-layer depth fights, portrait
 framing — live in git history and in the session memory. Recover them from
 `7d68f29` or earlier if a 3D idea ever returns.
 
+## Motion
+
+Three pieces, all CSS, added 2026-09-17: the opening lifts in once on load,
+links sweep an underline on hover, and each section's rule draws itself as the
+section arrives (`animation-timeline: view()`).
+
+**The resting state is the finished state.** Every animation lives inside
+`@media (prefers-reduced-motion: no-preference)` and uses `backwards` fill, so
+an element is fully visible whenever the animation does not run — reduced
+motion, an older browser, a stylesheet that failed. This site previously
+shipped the opposite (copy hidden behind an animation that silently never
+ran), and `e2e/fallback.spec.ts` now fails if it returns: it asserts zero
+animations and full opacity under reduced motion.
+
+**Scroll-driven rules degrade to a lighter rule, never to none.** Each
+`.section-head` carries a real hairline of its own; the animated full-ink line
+is an overlay on top. Without `animation-timeline` support the section still
+has a rule.
+
+**Do not await `document.getAnimations()` wholesale in a test.** A
+scroll-driven animation never finishes, so `Promise.all(... .finished)` hangs
+until the test times out. Filter to `a.timeline instanceof DocumentTimeline`.
+
 ## Pre-deploy
 
 **Run `npm run build` LAST, after any change to a test file.** `npm test` does

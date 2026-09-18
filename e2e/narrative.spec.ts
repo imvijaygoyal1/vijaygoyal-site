@@ -74,3 +74,53 @@ test("footer and contact links point at the sourced destinations", async ({ page
     "https://shadyspade.vijaygoyal.org/privacy",
   );
 });
+
+test("the opening lifts in once, then rests fully visible", async ({ page }) => {
+  await page.goto("/");
+  // Running at load...
+  const running = await page.evaluate(() =>
+    document.getAnimations().filter((a) => a.playState === "running").length,
+  );
+  expect(running).toBeGreaterThan(0);
+  // ...and finished, with nothing left displaced or faded. Only the
+  // time-driven ones: a scroll-driven animation never finishes, by design.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((a) => a.timeline instanceof DocumentTimeline)
+        .map((a) => a.finished.catch(() => {})),
+    ),
+  );
+  const rest = await page.locator("#opening h1 .line, #opening .row").evaluateAll((els) =>
+    els.map((el) => {
+      const s = getComputedStyle(el);
+      return { opacity: s.opacity, transform: s.transform };
+    }),
+  );
+  expect(rest.length).toBeGreaterThan(2);
+  for (const r of rest) {
+    expect(Number(r.opacity)).toBe(1);
+    expect(r.transform === "none" || r.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
+  }
+});
+
+test("section rules are drawn once their section has been passed", async ({ page }) => {
+  await page.goto("/");
+  await page.locator("#toolkit").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(600);
+  const drawn = await page.locator("#work .section-head").evaluate((el) => {
+    const t = getComputedStyle(el, "::after").transform;
+    return t === "none" ? 1 : Number(t.replace(/matrix\(([^,]+),.*/, "$1"));
+  });
+  expect(drawn).toBeCloseTo(1, 2);
+});
+
+test("every section keeps a rule even where nothing animates", async ({ page }) => {
+  await page.goto("/");
+  const widths = await page.locator(".section-head").evaluateAll((els) =>
+    els.map((el) => getComputedStyle(el).borderBottomWidth),
+  );
+  expect(widths.length).toBeGreaterThan(2);
+  for (const w of widths) expect(w).toBe("1px");
+});

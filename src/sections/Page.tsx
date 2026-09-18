@@ -21,7 +21,15 @@ function Masthead() {
 function Opening() {
   return (
     <section className="opening" id="opening" aria-labelledby="opening-heading">
-      <h1 id="opening-heading">{OPENING.heading}</h1>
+      <h1 id="opening-heading">
+        {/* Two lines, so they can lift in turn. They still wrap naturally at
+            any width -- the spans are inline. */}
+        {OPENING.lines.map((line) => (
+          <span className="line" key={line}>
+            {line}
+          </span>
+        ))}
+      </h1>
       <div className="rows">
         {OPENING.rows.map((row) => (
           <div className="row" key={row.label}>

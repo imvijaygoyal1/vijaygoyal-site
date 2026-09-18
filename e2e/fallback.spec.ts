@@ -25,3 +25,17 @@ test("keeps its content when JavaScript never runs", async ({ browser }) => {
   await expect(page.getByRole("link", { name: "The Shady Spade on the App Store" })).toBeVisible();
   await context.close();
 });
+
+test.describe("reduced motion, again", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("runs no animation at all, and hides nothing", async ({ page }) => {
+    await page.goto("/");
+    expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    const rest = await page.locator("#opening h1 .line, #opening .row").evaluateAll((els) =>
+      els.map((el) => getComputedStyle(el).opacity),
+    );
+    expect(rest.length).toBeGreaterThan(2);
+    for (const opacity of rest) expect(Number(opacity)).toBe(1);
+  });
+});

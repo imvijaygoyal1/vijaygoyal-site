@@ -95,6 +95,7 @@
   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
   --duration-fast: 140ms;
   --duration-base: 260ms;
+  --duration-slow: 480ms;
 
   color-scheme: light;
 }
