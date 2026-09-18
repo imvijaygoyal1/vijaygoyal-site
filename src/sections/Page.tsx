@@ -26,7 +26,7 @@ function Opening() {
             any width -- the spans are inline. */}
         {OPENING.lines.map((line) => (
           <span className="line" key={line}>
-            {line}
+            <span className="line-inner">{line}</span>
           </span>
         ))}
       </h1>

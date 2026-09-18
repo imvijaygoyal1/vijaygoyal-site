@@ -26,9 +26,17 @@ framing — live in git history and in the session memory. Recover them from
 
 ## Motion
 
-Three pieces, all CSS, added 2026-09-17: the opening lifts in once on load,
-links sweep an underline on hover, and each section's rule draws itself as the
-section arrives (`animation-timeline: view()`).
+Four pieces, all CSS: the opening's lines rise out of their own clipping
+boxes on load, work/stages/toolkit/closing arrive as they are reached, each
+product screenshot wipes up into view, and links sweep an underline on hover.
+The scroll-linked three use `animation-timeline: view()` — no scroll listener,
+no IntersectionObserver.
+
+**Restraint is not the same as invisibility.** The first version (12px fade,
+1px rule) was imperceptible on a phone, where there is no hover at all and the
+load animation happens once: the owner reported seeing no animation. Judge
+motion on a phone, mid-scroll, with numbers — sample `getComputedStyle`
+opacity/transform at several scroll offsets — not from a still.
 
 **The resting state is the finished state.** Every animation lives inside
 `@media (prefers-reduced-motion: no-preference)` and uses `backwards` fill, so

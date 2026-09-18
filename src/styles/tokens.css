@@ -96,6 +96,7 @@
   --duration-fast: 140ms;
   --duration-base: 260ms;
   --duration-slow: 480ms;
+  --duration-slower: 720ms;
 
   color-scheme: light;
 }

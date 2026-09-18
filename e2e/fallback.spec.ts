@@ -32,10 +32,20 @@ test.describe("reduced motion, again", () => {
   test("runs no animation at all, and hides nothing", async ({ page }) => {
     await page.goto("/");
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
-    const rest = await page.locator("#opening h1 .line, #opening .row").evaluateAll((els) =>
-      els.map((el) => getComputedStyle(el).opacity),
-    );
-    expect(rest.length).toBeGreaterThan(2);
-    for (const opacity of rest) expect(Number(opacity)).toBe(1);
+    // Everything the clock would otherwise move: opening, work, stages,
+    // toolkit rows, screenshots.
+    const rest = await page
+      .locator("#opening h1 .line-inner, #opening .row, #xbill > div, #xbill img, .stage, .toolkit div")
+      .evaluateAll((els) =>
+        els.map((el) => {
+          const s = getComputedStyle(el);
+          return { opacity: Number(s.opacity), transform: s.transform };
+        }),
+      );
+    expect(rest.length).toBeGreaterThan(8);
+    for (const r of rest) {
+      expect(r.opacity).toBe(1);
+      expect(r.transform === "none" || r.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
+    }
   });
 });

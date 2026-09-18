@@ -124,3 +124,35 @@ test("every section keeps a rule even where nothing animates", async ({ page }) 
   expect(widths.length).toBeGreaterThan(2);
   for (const w of widths) expect(w).toBe("1px");
 });
+
+test("content arrives on scroll, and is fully visible once passed", async ({ page }) => {
+  await page.goto("/");
+  const hasViewTimeline = await page.evaluate(() => CSS.supports("animation-timeline: view()"));
+  const item = page.locator("#xbill > div");
+  const screen = page.locator("#xbill img");
+
+  if (hasViewTimeline) {
+    // Before its section is reached, the arrival is pending: the browser holds
+    // the from-state through `backwards` fill.
+    const pending = await item.evaluate((el) => getComputedStyle(el).opacity);
+    expect(Number(pending)).toBeLessThan(1);
+    const driven = await item.evaluate((el) =>
+      el.getAnimations().some((a) => a.constructor.name === "CSSAnimation" && !(a.timeline instanceof DocumentTimeline)),
+    );
+    expect(driven, "arrival is driven by the view timeline, not a script").toBe(true);
+  }
+
+  // Scrolled well past, nothing may be left faded or displaced. This is the
+  // failure this site shipped once: copy hidden behind an animation.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(600);
+  for (const target of [item, screen]) {
+    const rest = await target.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { opacity: Number(s.opacity), transform: s.transform, clip: s.clipPath };
+    });
+    expect(rest.opacity).toBe(1);
+    expect(rest.transform === "none" || rest.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
+    expect(rest.clip === "none" || rest.clip === "inset(0%)").toBe(true);
+  }
+});
