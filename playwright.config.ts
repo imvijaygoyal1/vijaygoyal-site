@@ -12,5 +12,10 @@ export default defineConfig({
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },
     { name: "mobile", use: { ...devices["Pixel 7"] } },
+    // WebKit and an iPhone profile, because testing only Chromium is exactly
+    // how motion that depended on a Chromium/WebKit-only CSS feature shipped
+    // as "verified" and then did nothing for the owner.
+    { name: "safari", use: { ...devices["Desktop Safari"] } },
+    { name: "iphone", use: { ...devices["iPhone 17 Pro"] } },
   ],
 });

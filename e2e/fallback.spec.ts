@@ -32,6 +32,8 @@ test.describe("reduced motion, again", () => {
   test("runs no animation at all, and hides nothing", async ({ page }) => {
     await page.goto("/");
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    // The reveal script leaves the root unmarked, so nothing is held back.
+    await expect(page.locator("html")).not.toHaveClass(/js-reveal/);
     // Everything the clock would otherwise move: opening, work, stages,
     // toolkit rows, screenshots.
     const rest = await page

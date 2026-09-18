@@ -20,7 +20,10 @@ test("body does not scroll horizontally, at desktop or phone width", async ({ pa
   }
 });
 
-test("keyboard users can skip to the introduction, then reach the work", async ({ page }) => {
+test("keyboard users can skip to the introduction, then reach the work", async ({ page, browserName }) => {
+  // Safari only tabs to links when macOS full keyboard access is on, which is
+  // a system setting rather than anything the page controls.
+  test.skip(browserName === "webkit", "Tab does not reach links in WebKit by default");
   await page.goto("/");
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "Skip to introduction" })).toBeFocused();
@@ -40,8 +43,12 @@ test("shows both products with their screenshots and store links", async ({ page
     await expect(item.getByRole("link", { name })).toBeVisible();
     const shot = item.locator("img");
     await expect(shot).toBeVisible();
-    // Loaded, not merely present: a broken path renders at zero height.
-    expect(await shot.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(100);
+    // Loaded, not merely present: a broken path would decode to nothing. The
+    // captures are lazy, so reach them the way a visitor does.
+    await shot.scrollIntoViewIfNeeded();
+    await expect
+      .poll(async () => shot.evaluate((img: HTMLImageElement) => img.naturalWidth), { timeout: 10_000 })
+      .toBeGreaterThan(100);
   }
 });
 
@@ -127,32 +134,37 @@ test("every section keeps a rule even where nothing animates", async ({ page }) 
 
 test("content arrives on scroll, and is fully visible once passed", async ({ page }) => {
   await page.goto("/");
-  const hasViewTimeline = await page.evaluate(() => CSS.supports("animation-timeline: view()"));
-  const item = page.locator("#xbill > div");
-  const screen = page.locator("#xbill img");
+  // The script marks the root only while it is actually driving the arrivals.
+  await expect(page.locator("html")).toHaveClass(/js-reveal/);
 
-  if (hasViewTimeline) {
-    // Before its section is reached, the arrival is pending: the browser holds
-    // the from-state through `backwards` fill.
-    const pending = await item.evaluate((el) => getComputedStyle(el).opacity);
-    expect(Number(pending)).toBeLessThan(1);
-    const driven = await item.evaluate((el) =>
-      el.getAnimations().some((a) => a.constructor.name === "CSSAnimation" && !(a.timeline instanceof DocumentTimeline)),
-    );
-    expect(driven, "arrival is driven by the view timeline, not a script").toBe(true);
-  }
+  // Something far down the page has not arrived yet, so it is held back.
+  const pending = await page.locator("#about [data-reveal]").first().evaluate((el) => ({
+    opacity: Number(getComputedStyle(el).opacity),
+    marked: el.classList.contains("is-in"),
+  }));
+  expect(pending.marked).toBe(false);
+  expect(pending.opacity).toBeLessThan(1);
 
-  // Scrolled well past, nothing may be left faded or displaced. This is the
-  // failure this site shipped once: copy hidden behind an animation.
+  // Scrolled to, it arrives...
+  await page.locator("#about").scrollIntoViewIfNeeded();
+  await expect
+    .poll(async () => page.locator("#about [data-reveal]").first().evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBe(1);
+
+  // ...and after the whole page has been passed, nothing anywhere is left
+  // faded, displaced or clipped. This is the failure this site shipped once.
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-  await page.waitForTimeout(600);
-  for (const target of [item, screen]) {
-    const rest = await target.evaluate((el) => {
+  await page.waitForTimeout(900);
+  const rest = await page.locator("[data-reveal]").evaluateAll((els) =>
+    els.map((el) => {
       const s = getComputedStyle(el);
       return { opacity: Number(s.opacity), transform: s.transform, clip: s.clipPath };
-    });
-    expect(rest.opacity).toBe(1);
-    expect(rest.transform === "none" || rest.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
-    expect(rest.clip === "none" || rest.clip === "inset(0%)").toBe(true);
+    }),
+  );
+  expect(rest.length).toBeGreaterThan(10);
+  for (const r of rest) {
+    expect(r.opacity).toBe(1);
+    expect(r.transform === "none" || r.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
+    expect(r.clip === "none" || r.clip === "inset(0%)" || r.clip === "inset(0px)").toBe(true);
   }
 });

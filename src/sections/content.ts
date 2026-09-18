@@ -8,6 +8,10 @@ import spadeScreen from "../assets/spade-screen.webp";
  * layout; this is what they lay out.
  */
 
+/** The captures' pixel size, so the page can reserve their space. */
+export const SCREEN_W = 768;
+export const SCREEN_H = 1670;
+
 export interface Beat {
   heading: string;
   copy: string;

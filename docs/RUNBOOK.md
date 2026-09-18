@@ -26,34 +26,40 @@ framing — live in git history and in the session memory. Recover them from
 
 ## Motion
 
-Four pieces, all CSS: the opening's lines rise out of their own clipping
-boxes on load, work/stages/toolkit/closing arrive as they are reached, each
-product screenshot wipes up into view, and links sweep an underline on hover.
-The scroll-linked three use `animation-timeline: view()` — no scroll listener,
-no IntersectionObserver.
+Four pieces, all driven from `src/lib/reveal.ts` and `styles.css`: the opening
+lines rise out of their clipping boxes on load, content arrives as it is
+reached, each screenshot wipes up, and links sweep an underline on hover.
 
-**Restraint is not the same as invisibility.** The first version (12px fade,
-1px rule) was imperceptible on a phone, where there is no hover at all and the
-load animation happens once: the owner reported seeing no animation. Judge
-motion on a phone, mid-scroll, with numbers — sample `getComputedStyle`
-opacity/transform at several scroll offsets — not from a still.
+**It has been rebuilt twice, both times because "verified" meant "verified in
+the engines that happen to agree with me".**
 
-**The resting state is the finished state.** Every animation lives inside
-`@media (prefers-reduced-motion: no-preference)` and uses `backwards` fill, so
-an element is fully visible whenever the animation does not run — reduced
-motion, an older browser, a stylesheet that failed. This site previously
-shipped the opposite (copy hidden behind an animation that silently never
-ran), and `e2e/fallback.spec.ts` now fails if it returns: it asserts zero
-animations and full opacity under reduced motion.
+1. First it was CSS `animation-timeline: view()` — tidy, no script, and
+   implemented **only in Chromium and WebKit**. Firefox has none of it, and a
+   Safari older than the one that shipped it has none either. The two engines
+   tested were the two that support it; the owner saw no motion at all.
+2. Then it was an `IntersectionObserver`, which fires only when an element
+   **crosses** the viewport edge. Jump to the bottom — End key, an anchor, a
+   restored scroll position — and everything jumped past never fires and stays
+   invisible for good.
 
-**Scroll-driven rules degrade to a lighter rule, never to none.** Each
-`.section-head` carries a real hairline of its own; the animated full-ink line
-is an overlay on top. Without `animation-timeline` support the section still
-has a rule.
+It is now a question about position, asked on scroll and batched in one rAF:
+anything at or above the trigger line has arrived, however it got there.
+`hasArrived` is a pure function with that case pinned in a unit test.
 
-**Do not await `document.getAnimations()` wholesale in a test.** A
-scroll-driven animation never finishes, so `Promise.all(... .finished)` hangs
-until the test times out. Filter to `a.timeline instanceof DocumentTimeline`.
+**Rules that still hold:**
+
+- **The resting state is the finished state.** The pre-state lives under
+  `.js-reveal`, added by the script only while it is driving and never under
+  reduced motion, so a page whose script failed shows everything.
+- **e2e runs on four projects** — Chrome desktop, Pixel, Desktop Safari and an
+  iPhone 17 Pro — because a single-engine pass is what let both failures ship.
+- **Judge motion on a phone, mid-scroll, with numbers** (`getComputedStyle`
+  opacity/transform at several scroll offsets), not from a still.
+- **Safari-specific:** a lazy `<img>` with no intrinsic size has **no box at
+  all** until it loads, so it is not merely invisible — it is not there.
+  Captures carry `width`/`height` and an `aspect-ratio`. Tab does not reach
+  links in Safari unless macOS full keyboard access is on; that test skips on
+  WebKit rather than pretending.
 
 ## Pre-deploy
 

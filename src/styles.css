@@ -297,6 +297,7 @@ a {
 .screen {
   width: 100%;
   height: auto;
+  aspect-ratio: 768 / 1670;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-screen);
   display: block;
@@ -605,63 +606,61 @@ a {
   transform-origin: left center;
 }
 
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    @keyframes draw {
-      from {
-        transform: scaleX(0);
-      }
-    }
+/*
+ * Arrivals, driven by an observer (lib/reveal.ts), not by a CSS scroll
+ * timeline: `animation-timeline: view()` exists only in Chromium and WebKit,
+ * so in Firefox — and in any Safari older than the one that shipped it — the
+ * arrivals did not happen at all.
+ *
+ * The pre-state lives under `.js-reveal`, which the script adds only when it
+ * is actually driving and never under reduced motion. So a page whose script
+ * failed, or a visitor who asked for less motion, sees the finished page.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .js-reveal [data-reveal] {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+      opacity var(--duration-slow) var(--ease-out),
+      transform var(--duration-slow) var(--ease-out);
+  }
 
-    @keyframes arrive {
-      from {
-        opacity: 0;
-        transform: translateY(26px);
-      }
-    }
+  /* A screen is a picture: it wipes up from a hair oversized rather than
+     sliding, the way a printed plate drops onto the page. */
+  .js-reveal .screen[data-reveal] {
+    opacity: 0.4;
+    transform: scale(1.03);
+    clip-path: inset(100% 0 0 0);
+    transition:
+      opacity var(--duration-slower) var(--ease-out),
+      transform var(--duration-slower) var(--ease-out),
+      clip-path var(--duration-slower) var(--ease-out);
+  }
 
-    /* A screen is a picture: it wipes up rather than fading, and settles from
-       a hair oversized, the way a printed plate drops onto the page. */
-    @keyframes plate {
-      from {
-        opacity: 0.4;
-        clip-path: inset(100% 0 0 0);
-        transform: scale(1.04);
-      }
-    }
+  /* A section's rule draws itself as the heading arrives. */
+  .js-reveal .section-head[data-reveal]::after {
+    transform: scaleX(0);
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
 
-    .section-head::after {
-      animation: draw var(--duration-slow) var(--ease-out) backwards;
-      animation-timeline: view();
-      animation-range: entry 10% cover 22%;
-    }
+  /* Columns in a row arrive in reading order rather than together. */
+  .js-reveal .stage:nth-child(3n + 2),
+  .js-reveal .toolkit div:nth-child(2n) {
+    transition-delay: 90ms;
+  }
 
-    .work-item > div,
-    .stage,
-    .toolkit div,
-    .about > div,
-    .about .photo-pending,
-    .contact > div {
-      animation: arrive var(--duration-slow) var(--ease-out) backwards;
-      animation-timeline: view();
-      animation-range: entry 0% cover 26%;
-    }
+  .js-reveal .stage:nth-child(3n) {
+    transition-delay: 180ms;
+  }
 
-    /* Within a row the columns arrive in reading order: each one starts its
-       own range a little later than its neighbour. */
-    .stage:nth-child(3n + 2),
-    .toolkit div:nth-child(2n) {
-      animation-range: entry 4% cover 30%;
-    }
+  .js-reveal [data-reveal].is-in,
+  .js-reveal .screen[data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 0 0 0);
+  }
 
-    .stage:nth-child(3n) {
-      animation-range: entry 8% cover 34%;
-    }
-
-    .screen {
-      animation: plate var(--duration-slower) var(--ease-out) backwards;
-      animation-timeline: view();
-      animation-range: entry 4% cover 40%;
-    }
+  .js-reveal .section-head[data-reveal].is-in::after {
+    transform: scaleX(1);
   }
 }

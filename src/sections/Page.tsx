@@ -1,4 +1,6 @@
-import { ABOUT, CONTACT, DESCRIPTOR, OPENING, PRODUCTS, STAGES, TOOLKIT, type Product } from "./content";
+import { useEffect } from "react";
+import { observeReveals } from "../lib/reveal";
+import { SCREEN_H, SCREEN_W, ABOUT, CONTACT, DESCRIPTOR, OPENING, PRODUCTS, STAGES, TOOLKIT, type Product } from "./content";
 import { LINKS } from "../lib/links";
 
 /** The masthead: who this is, and the page's own sections. */
@@ -54,7 +56,7 @@ function SectionHead({ id, title, note }: { id: string; title: string; note: str
 function WorkItem({ product }: { product: Product }) {
   return (
     <article className="work-item" id={product.id} data-accent={product.accent}>
-      <div>
+      <div data-reveal>
         <span className="work-eyebrow">{product.eyebrow}</span>
         <h3>{product.heading}</h3>
         <p>{product.lede}</p>
@@ -82,7 +84,20 @@ function WorkItem({ product }: { product: Product }) {
         </ul>
       </div>
       {/* Real captures, never a mockup (AD-14). Lazy: both sit below the fold. */}
-      <img className="screen" src={product.screen} alt={product.screenAlt} loading="lazy" decoding="async" />
+      {/* Intrinsic size given, so the column reserves the space before the
+          image loads: without it a lazy screenshot has zero height until it
+          arrives — a layout shift, and in Safari a box that is not there at
+          all until it loads. */}
+      <img
+        className="screen"
+        data-reveal
+        src={product.screen}
+        alt={product.screenAlt}
+        width={SCREEN_W}
+        height={SCREEN_H}
+        loading="lazy"
+        decoding="async"
+      />
     </article>
   );
 }
@@ -104,7 +119,7 @@ function Process() {
       <SectionHead id="process" title="How I build" note="Problem → store" />
       <ol className="stages">
         {STAGES.map(({ stage, copy, emphasis }, i) => (
-          <li className="stage" key={stage}>
+          <li className="stage" data-reveal key={stage}>
             <span className="stage-index" aria-hidden="true">
               {String(i + 1).padStart(2, "0")}
             </span>
@@ -129,7 +144,7 @@ function Toolkit() {
       <SectionHead id="toolkit" title="Toolkit" note="Verified, nothing aspirational" />
       <dl className="toolkit">
         {TOOLKIT.map(({ area, items }) => (
-          <div key={area}>
+          <div data-reveal key={area}>
             <dt>{area}</dt>
             <dd>{items}</dd>
           </div>
@@ -144,13 +159,13 @@ function About() {
     <section className="section" id="about" aria-labelledby="about-heading">
       <SectionHead id="about" title="About" note="Product thinker · builder · constant learner" />
       <div className="about">
-        <div>
+        <div data-reveal>
           <h3>{ABOUT.heading}</h3>
           {ABOUT.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-        <p className="photo-pending">Photograph</p>
+        <p className="photo-pending" data-reveal>Photograph</p>
       </div>
     </section>
   );
@@ -159,7 +174,7 @@ function About() {
 function Contact() {
   return (
     <section className="contact" id="contact" aria-labelledby="contact-heading">
-      <div>
+      <div data-reveal>
         <h2 id="contact-heading">{CONTACT.heading}</h2>
         <p>{CONTACT.copy}</p>
       </div>
@@ -193,6 +208,11 @@ function Footer() {
  * two products, and everything on it is here in the first render.
  */
 export function Page() {
+  // Arrivals are marked by an observer rather than by CSS scroll timelines:
+  // see lib/reveal.ts. The effect runs after the first paint, so nothing is
+  // hidden before it starts.
+  useEffect(() => observeReveals(), []);
+
   return (
     <div className="page">
       <a className="skip-link" href="#opening">Skip to introduction</a>
