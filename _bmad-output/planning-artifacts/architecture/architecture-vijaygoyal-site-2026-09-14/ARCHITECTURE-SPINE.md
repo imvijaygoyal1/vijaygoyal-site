@@ -5,7 +5,7 @@ purpose: build-substrate
 altitude: initiative
 paradigm: 'Deterministic scroll projection — one scalar clock, one pure projection, one persistent scene graph'
 scope: 'The vijaygoyal.org portfolio redesign: the homepage narrative, the two case-study routes, and the invariants every section must share'
-status: final
+status: amended
 created: '2026-09-14'
 updated: '2026-09-14'
 sources:
@@ -17,6 +17,30 @@ companions:
 ---
 
 # Architecture Spine — vijaygoyal.org redesign
+
+## Amendment — 2026-09-17: the WebGL narrative is retired
+
+The owner rejected the scroll-driven narrative outright ("overall I am not
+happy with the scroll animation... completely revamp"), and chose a light,
+typographic, case-study-led site. The paradigm below described a deterministic
+scroll projection; the site now has no clock, no scene and no motion.
+
+**Retired with the engine:** AD-1, AD-2, AD-4, AD-5, AD-6, AD-7, AD-12, AD-13,
+AD-17, AD-18, AD-20, AD-21, AD-22. Their code is deleted; the reasoning behind
+each is preserved in git history (`7d68f29` and earlier) and in the runbook's
+history note.
+
+**Still binding, and now doing more work:** AD-3 (Vite stays), AD-8 (case
+studies are canvas-free — trivially true), AD-9/AD-10 (router and prerender,
+one mechanism serving no-JS and SEO), AD-11 (unknown paths 404), AD-14 (real
+screenshots only, no generated portrait), AD-15 (no unverifiable claims),
+AD-16 (gates are a floor — the Lighthouse performance floor was *raised* to
+0.97 after the engine's removal took the score to 0.99), AD-19 (machine-checked
+import bans), AD-23 (tokens are the authority — re-authored in the light key),
+AD-24 (one owner for `<head>` and the sitemap).
+
+**New constraint:** the typeface is self-hosted and subset; no third-party font
+or script request is added to this site.
 
 ## Design Paradigm
 

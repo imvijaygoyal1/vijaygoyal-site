@@ -2,36 +2,57 @@
 
 Run this before every deploy. **Do not read it and assume — execute it.**
 
+## What this site is, since 2026-09-17
+
+A **static editorial page**: one document about two products. No canvas, no
+scroll engine, no animation — the owner rejected the scroll-driven WebGL
+narrative ("looks unpolished", after five rounds on the playing cards alone),
+and chose a typographic, case-study-led site instead.
+
+- `src/sections/content.ts` — every word and destination on the page, sourced
+  from `docs/CONTENT.md` (AD-15). Components lay out; they do not carry copy.
+- `src/sections/Page.tsx` — the whole page, rendered in one pass.
+- `src/styles/tokens.css` — the light "paper and ink" system (AD-23), with two
+  rule weights, one editorial accent and a hue per product.
+- Inter is **self-hosted and subset to latin** (`public/fonts/`), preloaded in
+  `index.html`. Do not swap it for a third-party font request.
+
+**The WebGL engine is gone**, not disabled: `src/canvas`, `src/subject`,
+`src/chapters`, the scroll driver, the quality tiers and about 280 tests were
+deleted, along with `three`, `@react-three/fiber` and `@react-three/drei`. Its
+lessons — tone mapping, alphaMap channels, flush-layer depth fights, portrait
+framing — live in git history and in the session memory. Recover them from
+`7d68f29` or earlier if a 3D idea ever returns.
+
 ## Pre-deploy
 
 **Run `npm run build` LAST, after any change to a test file.** `npm test` does
-not typecheck; `npm run build` runs `tsc --noEmit` and does. On 2026-09-14 a
-new test file using `node:fs` passed `npm test`, size, e2e, perf and Lighthouse
-— and broke the build, which was only discovered at `npm run deploy`, after the
-commit was already pushed. Lighthouse reads the *existing* `dist/`, so it does
-not catch it either.
+not typecheck; `npm run build` runs `tsc --noEmit` and does. A test file using
+`node:fs` once passed every gate and broke the build, discovered at deploy.
 
 **Also: vitest stubs CSS imports, `?raw` included.** A test that imports
 `./x.css?raw` receives an empty string and every assertion in it passes
 vacuously. Read CSS from disk with `node:fs`, and prove any file-reading test
 fails when you break the thing it checks.
 
-1. `npm test` — all unit and component tests pass (219 at time of writing)
-2. `npm run build` — no type errors
-3. `npm run size` — under 1.5 MB gzipped
-4. `npm run e2e` — narrative and fallback specs pass, both projects
-5. `npx playwright test e2e/perf.spec.ts --project=desktop --retries=1` — at or above 30 fps
-6. `npm run lh` — accessibility 1.0, performance and SEO at or above 0.9
+1. `npm test` — unit and component tests pass
+2. `npm run e2e` — narrative and fallback specs pass, desktop and mobile
+3. `npm run lh` — accessibility 1.0, performance ≥ 0.97, SEO ≥ 0.9
+4. `npm run build` — no type errors
+5. `npm run size` — initial payload under 120 kB gzipped
+
+**Look at the page.** Screenshot desktop and phone widths full-page and read
+them. Gates have passed on a blank screen here before.
 
 ## Post-deploy
 
-7. `curl -sI https://vijaygoyal.org | head -1` — returns `HTTP/2 200`
-8. `dig +short vijaygoyal.org A` — returns Cloudflare IPs, **never empty**
-9. Real-device pass: iPhone, and a mid-range Android
-10. Reduced motion: enable it in OS settings, reload, confirm content renders with no canvas
-11. **WebGL context loss:** on iOS Safari, background the tab for several minutes, then return.
-    Expected: the scene comes back. If it does not, the site should still show all copy via
-    the static route — never a black rectangle. See open items below.
+6. `curl -sI https://vijaygoyal.org | head -1` — `HTTP/2 200`
+7. `dig +short vijaygoyal.org A` — Cloudflare IPs, **never empty**
+8. Real-device pass: iPhone and an Android phone. The owner reads this site on
+   an **iPhone 17 Pro**; in Safari its visible viewport is 402x681, much
+   shorter than an emulator's default. Test narrow *and* short.
+9. Reduced motion: enable it in OS settings, reload, confirm the page is
+   unchanged (there is no motion to suppress, which is the point).
 
 ## Deploying
 
@@ -39,324 +60,39 @@ fails when you break the thing it checks.
 deploy. **The repo is not Git-connected to Cloudflare — pushing to GitHub does
 not deploy anything.**
 
-`wrangler.jsonc` at the repo root IS the deployment. There is no Worker script:
-`assets.directory` points at `dist/`, `not_found_handling` is
-`single-page-application` so anchor URLs resolve, and `routes` declares
-`vijaygoyal.org` and `www.vijaygoyal.org` as custom domains — so attaching
-domains happens on deploy, not through a dashboard.
+`wrangler.jsonc` at the repo root IS the deployment: no Worker script,
+`assets.directory` points at `dist/`, and `routes` declares `vijaygoyal.org`
+and `www.vijaygoyal.org` as custom domains, so attaching domains happens on
+deploy rather than in a dashboard.
 
 Cloudflare account: `imvijaygoyal@gmail.com` (`d587fa5cfd86a7c2e0e2b8b6ed23d10f`).
 Auth is an existing OAuth token; if it expires, `wrangler login`.
 
-Cloudflare writes and owns the DNS records for the custom domains.
-**Never hand-create a DNS record for this site.** If `dig` comes back empty after
-a deploy, wait — a newly attached custom domain takes minutes to activate while
-its certificate is issued.
+Cloudflare owns the DNS records for both custom domains. **Never hand-create a
+DNS record for this site.** `npx wrangler deployments list` shows versions;
+`npx wrangler rollback <version-id>` reverts.
 
 ### Do not re-run `wrangler pages project create`
 
-It edits tracked files without asking. On 2026-09-13 it rewrote `"preview"` to
-`wrangler dev` — which is exactly what Playwright's `webServer` invokes, so it
-would have broken all 12 e2e tests — added `@cloudflare/vite-plugin` that a
-static SPA does not need, and pinned both new dependencies with `^` ranges
-against this project's exact-pin rule. All reverted in `34e3424`. If you ever
-re-run it, `git diff` every tracked file before committing.
+It edits tracked files without asking — it once rewrote `"preview"` to
+`wrangler dev`, which is what Playwright's `webServer` invokes. All reverted in
+`34e3424`. If you ever re-run it, `git diff` every tracked file before
+committing.
 
-## How the scene is built
+### `shadyspade.` and `xbill.` are separate deployments
 
-There is **one continuous subject**, not a scene per chapter. Chapters declare
-the *state* the device is in; `registry.ts` holds six poses and chapter i spans
-`POSES[i]` to `POSES[i+1]`, so continuity is structural — a chapter cannot exit
-in a state its successor does not begin in, because they are the same object.
-`validateContinuity` re-checks at import and a test samples the whole narrative
-for steps larger than the eased blend can produce.
+`shadyspade.vijaygoyal.org` serves `/.well-known/apple-app-site-association`
+and **the shipped iOS app depends on it**. The apex worker's routes cover only
+the apex and `www`. **Never add those hostnames to the apex routes.**
 
-**Device geometry comes from Apple's published specs**, in millimetres, in
-`src/subject/dimensions.ts` with sources in the header. The site models the
-iPhone 17 Pro (150.0 x 71.9 x 8.75 mm, 2622x1206 at 460 ppi); its body and
-cover-glass radii are also taken from Apple's dimensional drawing. The public
-documents do not provide a product CAD mesh, so the camera lens barrels remain
-illustrative.
+## Open items
 
-Screens only draw when the display faces the viewer (`facing.ts`). That is
-physically right, and — because `Phone` draws the captured display and nothing
-else — it is also a hard bound on the narrative. Past the angle where `facing`
-reaches zero there is no shell left to look at, so the subject simply vanishes.
-It did exactly that live: the Shady Spade chapter used to turn the device a
-full 360, and it disappeared for the whole back half of the turn.
-
-**Every pose therefore stays inside `MAX_TURN` (`registry.ts`), and
-`rotationBudget.test.ts` samples the whole narrative to enforce it.** If you
-add or move a pose, that test is the gate — do not raise `MAX_TURN` to make it
-pass, because the value is derived from where `facing` reaches zero.
-
-The app swap used to hide behind the turned-away display. Without the rotation
-it happens in plain view, so `screenSwap.ts` hands the screens over through
-black instead of crossfading them into a double exposure. Its window is tuned
-against the real narrative in `screenSwap.test.ts`, not against the constants.
-
-## Copy leaves by fading, not by crossing the scene
-
-`.chapter-copy` is a 100vh sticky block. It holds at the foot of the frame
-while its section is in view, then unpins for the section's last viewport of
-scrolling and travels up **through** the subject — the headline rode over the
-card fan and then over the phone. The scene's layout was never the problem.
-
-**The fade is driven from the engine's clock**, not by CSS. `copyOpacity` in
-`src/chapters/copyFade.ts` is a pure function of scroll position; `CopyFade` in
-`src/canvas/` writes it to each section as `--copy-opacity`, and
-`.chapter-copy` reads `opacity: var(--copy-opacity, 1)`.
-
-**The fallback value is what makes the quiet routes correct:** the static route
-mounts no canvas, so nothing writes the property and the copy stays fully
-opaque — right, where there is no scene to collide with.
-
-**`CopyFade` must stay mounted after `ScrollDriver`.** Both use `useFrame` at
-the default priority and R3F runs subscriptions in the order they were added,
-so the clock advances before it is read. A non-zero priority is not the fix: in
-R3F any priority above zero hands the render loop to the caller.
-
-This was a CSS `view-timeline` until 2026-09-14. It was removed for
-correctness, not purity: the rule sat behind
-`@supports (animation-timeline: view())`, so **in a browser without
-scroll-driven animations the fade never ran and the copy still crossed the
-subject.** The bug was only ever fixed in browsers that had the feature. The
-window (`FADE_START`/`FADE_END`) is tuned and verified by screenshot, not
-derived — where the copy sits inside its sticky block decides when it reaches
-the subject.
-
-## Why a lit object looks dull grey
-
-**R3F's renderer defaults to `ACESFilmicToneMapping`** (`flat` would turn it
-off, and the Canvas here does not set it). ACES compresses highlights hard, so
-white comes out grey and saturated colour comes out muted. The app screens
-never showed this because `Screen.tsx` sets `toneMapped={false}` — a screen
-emits its own light and must not be pulled down by the tone curve.
-
-The card faces did show it, and it was most of "the cards do not look bright or
-premium". Three things compounded:
-
-1. the stock had been *darkened* to `#eeebe3` to stop it out-shouting the phone;
-2. the scene's only `directionalLight` is at `x = +3` while the fan sits at
-   `x = -1.8`, so the cards were lit by little more than the 0.42 ambient;
-3. ACES then greyed what was left.
-
-The fix is at the material, not the artwork: `toneMapped={false}` plus an
-`emissiveMap` at ~0.34 so the face lifts off the dark stage wherever the lights
-do not reach it. **Brightness belongs to the material; darkening a texture to
-manage it is the wrong lever** — it was also why the monogram panel needed a
-compensated green, and once the material changed, two further attempts at
-compensating produced sage-grey and then charcoal. The panel now prints
-`BRAND_GREEN` directly and matches the phone.
-
-Cost: the faces went to 1024x1486 for clarity at the closest framing, which
-took the perf median from 46.2 to **40.6 fps** against a floor of 30. Budgeted
-deliberately; do not add more texture here without re-running the gate.
-
-## The cards are drawn, not captured
-
-`cardFace.ts` draws each face to a canvas at build-free runtime and
-`useCardTextures.ts` turns it into a texture — there is no card artwork to
-refresh and no extra image request. Edit `HAND` to change which cards are on
-stage.
-
-They were untextured slabs until 2026-09-13, dark on the theory that white
-ones "read as missing textures". They read as missing textures either way:
-five blank rounded rectangles, larger on screen than the phone beside them, in
-the chapter about a card game. The owner reported them twice as "blank boxes".
-**A blank primitive does not become a prop by being recoloured.**
-
-Two further rounds were needed after that, both worth knowing:
-
-- **Pips must be drawn, not typed.** `cardPips.ts` holds a path per suit. Set
-  in the UI font they were the clearest tell that a card was not a card.
-- **A coloured panel with a centred emblem is a card *back*.** The first
-  branded attempt printed one on every rank, so the fan read as five face-down
-  cards — and A/K/J of the same suit were indistinguishable, the rank living
-  only in a corner. **The rank is what makes a face a face.** Faces are now
-  white stock with a large suit-coloured index, real pip layouts
-  (`pipLayout`), and the brand's green and gold held to the court monogram
-  and a hairline rule.
-- **Judge the artwork flat.** Rendering `drawCardFace` to a canvas and looking
-  at it found a squircle where a diamond should be and a zigzag where the
-  ten's columns should be — neither legible in the rotated 3D view.
-- **Cards need their own depth.** All five sat at `z = 0`, so overlapping
-  cards in the fan were coplanar and z-fought; the diagonal hatching across
-  the faces was that, not a texture problem.
-
-### Round six (2026-09-16): one system, real shadows, and an alphaMap trap
-
-The owner called the fan "raw". Four separate causes, found by looking at
-full frames on desktop and mobile before touching anything:
-
-- **Two card systems in one hand.** Pip cards on white stock sat beside court
-  cards carrying a dark-green inset panel with a yellow letter. Every face is
-  now white stock; J/Q/K are drawn double-ended in suit ink; the brand prints
-  only on the gold 3 of Spades (a gold frame and gold ink).
-- **Back cards were dimmed flat grey** to fake occlusion, which read as muddy
-  paper. Each card now casts a soft shadow (`cardShadow.ts`) onto the card
-  behind it. Without *some* edge, overlapping white cards merge completely —
-  the front card's ink appears to float on the one behind.
-- **`alphaMap` reads the GREEN channel, not alpha.** The first shadow mask was
-  white blurred onto a transparent canvas: green is 255 wherever anything was
-  drawn, so the blur lived only in alpha and every shadow rendered as a hard
-  grey band. Draw white on opaque black. Sample the channel flat before
-  judging it in the scene — two wrong diagnoses (shadow size, card thickness)
-  preceded that check.
-- **The fan was seen ~35° off its axis**, so the arc crowded unevenly.
-  `fanYaw` turns the hand most of the way toward the camera each frame.
-  Thickening the stock to show an edge backfired once it turned: the sides
-  catch none of the key light and read as grey slabs. It stays at 0.014.
-
-**Portrait frames get their own camera for this chapter (2026-09-16).** The
-round-6 placement tucked a tiny hand onto the phone and still got cut off on an
-iPhone 17 Pro; the Watch was cropped on every phone and the copy covered the
-phone's lower half. A portrait frame is ~1.4 units wide at the subject, so no
-prop placement could fix it -- the camera had to change (AD-13).
-`lib/layout.ts#layoutFor` is the one predicate; `Chapter.portrait` is an
-optional camera track (transition, shady-spade, process carry one) and the
-registry validates tracks and seams **per layout** (AD-18). Poses are shared.
-
-- **Test framing in WebKit at the iPhone 17 Pro profile**
-  (`devices["iPhone 17 Pro"]`, 402x681 -- Safari's toolbars included). The
-  earlier 393x852 check missed the problem because a taller frame has room the
-  real one does not. `npx playwright install webkit` if it is missing.
-- **`portraitFraming.test.ts` guards it** by projecting the phone, Watch and
-  every card corner through the real camera at five phone viewports across the
-  chapter. It fails against the pre-fix framing and against a pushed-in camera.
-  It rebuilds Subject's transform chain from the same pure functions, so a new
-  transform in `Subject` must be added there too.
-- Upright iPads (0.66-0.70) get the portrait framing on purpose.
-- A layout change mid-scroll (rotating the phone) cuts the camera to the other
-  track. Accepted: rotation reflows the whole page anyway, and blending would
-  add state outside the one scroll clock (AD-2).
-
-### Flush layers need a polygon offset, not a depth gap
-
-**Blank white cards on a real iPhone 17 Pro, clean in every desktop and WebKit
-render (2026-09-16).** Each card face sat 0.0015 units in front of the white
-card body; the phone's screens sit 0.001 in front of the recess. Once the
-portrait camera pulled back to ~5.7 units, a phone GPU's depth buffer could not
-resolve that gap and the body won -- a white box where the face should be.
-
-- **Reproduce on a desktop by making depth coarse**: temporarily set
-  `camera={{ near: 0.001 }}` on the `<Canvas>` in `Stage.tsx`. Depth precision
-  scales with the near plane, so the faces break up into blotches at the
-  portrait distance and stay clean close up -- the same pattern as the device.
-  **Revert it after.**
-- **The fix is `polygonOffset` on anything printed flush on another surface**
-  (card faces, `Screen`, `HomeScreen`). It is resolved in window space and does
-  not depend on precision or distance. Do not "fix" it by widening the gap.
-- Any new camera that pulls back, or any new flush layer, should get the
-  coarse-depth check before it ships.
-
-## Refreshing the captures
-
-Build each app for the iOS 26.5 simulator (iPhone 17 Pro, UDID
-`CA2078AC-6559-4BF3-93CB-370CF27E92EA`), install, launch, then
-`xcrun simctl io <udid> screenshot`. Then crop, resize to 768 wide and save as
-progressive JPEG q80-82 into the chapter folder.
-
-- **Terminate the other app first.** Launching one app while another runs leaves
-  a "back to <app>" indicator in the status bar.
-- **The home screen capture needs the simulator tidied.** Uninstall
-  `*.uitests.xctrunner` and `com.vijaygoyal.darkicontest` or they appear on it.
-- **Icon rectangles** for the zoom live in `src/subject/iconZoom.ts`. If the home
-  screen is recaptured, re-measure them and verify by cropping the rect back out
-  and looking at it.
-- Textures are gated at 250 kB total; currently 218 kB.
-
-## Generate textures off the critical path
-
-`useCardTextures` waits for `requestIdleCallback` (timeout fallback for Safari
-before 26) and calls `invalidate()` when the faces land, because the canvas
-renders on demand and would otherwise not redraw.
-
-Building them at mount cost **about 100ms of main-thread work at load** -- five
-canvases of 1024x1486 -- visible as Other 178 to 240ms, Rendering 9 to 31ms and
-GC 19 to 40ms, and it took Lighthouse performance from 0.90 to **0.85 against a
-0.90 floor**. It was also pure waste: the hand is not on stage until roughly
-44% of the way down the page. Deferring took TBT from 340ms to **250ms** and
-the median to 0.91.
-
-**Anything generated for a chapter the visitor has not reached yet belongs off
-the critical path.** The same argument applies to the `preload` member of the
-chapter contract, which is still declared and never invoked.
-
-## The Lighthouse performance gate is marginal, not green
-
-**`categories:performance` has a `minScore` of 0.9 and the median sits on
-exactly 0.90.** Observed back-to-back on 2026-09-13: `[0.86, 0.88, 0.97]`
-(median 0.88, **fails**) then `[0.85, 0.90, 0.92]` (median 0.90, passes). It is
-roughly a coin flip. Do not read a single green `npm run lh` as proof, and do
-not raise the threshold to make it stop -- the same rule as `FLOOR_FPS`.
-
-The cause is **Total Blocking Time** -- 340ms at score 0.74 when first
-measured, 250ms after the card textures moved off the critical path -- and it
-is the only weak metric: LCP 1.2 s, FCP 1.2 s, Speed Index 1.2 s and CLS 0 all score ~1.0.
-TBT comes from **809 ms of script evaluation** -- the 959 kB three.js + R3F
-`Stage` chunk. Canvas texture generation is not implicated: Rendering is 9 ms.
-
-So the fix is bundle work, not scene work: the `Stage` chunk is already lazy
-behind a WebGL check, and the next lever is splitting three.js itself or
-deferring more of the scene's construction past first interaction. **Unresolved
-as of 2026-09-13.** Running the frame-rate gate immediately before `npm run lh`
-also loads the machine enough to tip it -- run them apart.
-
-## Open items — do not mark these resolved because CI is green
-
-- **No mid-range Android has ever run this.** That device class defines the
-  30 fps floor. CI's 4× CPU throttling approximates CPU cost only and does not
-  model GPU fill rate. Until a device is sourced, the floor on that class is
-  **unverified**.
-
-- **The WebGL context-restore path has never been proven end to end.** It is
-  structurally correct and unit-tested, but headless Chromium cannot reliably
-  reproduce a real `webglcontextrestored` resurrecting the R3F scene. Step 11
-  above is the only real check. Worst case is the pre-existing behaviour: the
-  static route until reload.
-
-- **`Stage` discards the cleanup returned by `attachContextLossHandlers`.**
-  The two listeners are never explicitly detached when the canvas unmounts in
-  the `abandoned` phase. Harmless in current engines (they are collected with
-  the node) but a known loose end.
-
-## Notes for whoever runs this next
-
-- **`.github/workflows/ci.yml` already exists** with four jobs — `test`, `e2e`,
-  `perf`, `lighthouse`. They were added incrementally. Anything that proposes
-  *creating* this file is stale: append to it, never recreate it, or the jobs
-  are clobbered.
-
-- **The holding page was deliberately skipped.** It existed to make the domain
-  resolve while the site was being built; the site was finished first, so the
-  real app deployed directly. `holding/` does not exist and should not be
-  recreated.
-
-- Chapters 2-5 (xBill, Shady Spade, Craft, Colophon) and the model / KTX2 /
-  video asset pipeline are a second plan. Its **first** task should be the
-  lazy-loading contract decision (`Scene` as `lazy()` + `Suspense`, `Content`
-  eager, `preload()` actually called at the predecessor midpoint) — that
-  decision is cheapest before three more chapters exist, and `preload` is
-  currently a declared but never-invoked member of the chapter contract.
-
-- **Design tokens own visual design** as of 2026-09-14 (`AD-23`).
-  `src/styles/tokens.css` is the single authority for surfaces, text, lines,
-  accent, spacing, type, radii, elevation, motion and layout;
-  `src/styles.css` consumes it and declares no raw colour, no raw type scale
-  and no magic clamp. `src/styles/tokens.test.ts` holds that true.
-
-  Three things to know before changing it. The type is the **system stack on
-  purpose** — SF Pro on Apple platforms, no request, no FOUT, on a page whose
-  Lighthouse median sits a point above its floor. The frame is **monochrome**:
-  no third brand hue exists, and a product section re-points `--accent` via
-  `[data-accent="xbill"|"spade"]` with hues sampled from the real captures.
-  The CSS easing **mirrors `src/lib/ease.ts`**, so DOM and scene motion share
-  a curve.
-
-  **Tokenising is a rename, not a redesign.** The first attempt silently
-  drifted three values — `--measure` 32→34rem, label tracking 0.18→0.16em, and
-  the document's 1.6 line-height folded into the copy's 1.62. A pixel diff saw
-  ~1% of pixels change but could not say why; **comparing computed styles
-  against production named all three in one pass.** Use that check, not your
-  eye, when a change is meant to be visually neutral.
+- **`not_found_handling: "single-page-application"` still returns the homepage
+  for every path**, so `/robots.txt` and `/sitemap.xml` return HTML and nothing
+  404s (AD-11). Fixed by the routes step, which also adds the case studies.
+- **The page is client-rendered.** Crawlers and no-JS visitors get the
+  `<noscript>` block, not the page. A prerender step (AD-9, AD-10) is the next
+  structural piece, and the case-study routes need it.
+- **Content the owner owes:** a photograph for About (a generated portrait is
+  forbidden, AD-14), further simulator captures for the product beats, and a
+  read-through of the case-study copy when those pages exist.

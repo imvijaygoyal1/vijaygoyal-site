@@ -5,15 +5,14 @@
       "dist/assets/index-*.js",
       "dist/assets/*.css"
     ],
-    "limit": "1.5 MB",
+    "limit": "120 kB",
     "gzip": true
   },
   {
-    "name": "screen textures",
+    "name": "images and fonts",
     "path": [
-      "dist/assets/*.jpg",
-      "dist/assets/*.png",
-      "dist/assets/*.webp"
+      "dist/assets/*.webp",
+      "dist/fonts/*.woff2"
     ],
     "limit": "250 kB",
     "gzip": false

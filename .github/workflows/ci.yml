@@ -27,16 +27,6 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
 
-  perf:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "22", cache: "npm" }
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npx playwright test e2e/perf.spec.ts --project=desktop --retries=1
-
   lighthouse:
     runs-on: ubuntu-latest
     steps:

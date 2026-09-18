@@ -1,74 +1,69 @@
 /*
- * Design tokens — the single styling authority (AD-23).
+ * Design tokens — the single authority for colour, type, spacing, rules and
+ * motion (AD-23). Light "editorial" key, chosen 2026-09-17: the site is a
+ * document about two products, not a stage, so it reads as printed matter —
+ * paper ground, one ink, hairline rules, and type doing the work.
  *
- * Before this file, `styles.css` held seven custom properties and hard-coded
- * the stage colour as a literal `rgb(7 8 10 / …)` in four separate places, so
- * changing the ground meant finding four literals. There was no spacing scale,
- * no type scale, no radii, no motion values, and no accent. The runbook said
- * plainly that nobody owned visual design. This is that owner.
- *
- * Every section and both routes consume these. No section declares its own
- * scale — the one thing a nine-section page with two product personalities
- * cannot survive is nine private scales.
- *
- * Three decisions are worth knowing before you change anything here.
- *
- * 1. THE FRAME IS MONOCHROME; THE PRODUCTS BRING THE COLOUR.
- *    There is no third brand hue invented for this site. xBill's violet and
- *    The Shady Spade's green and gold are sampled from the apps themselves and
- *    are the only colour on the page, re-pointed per section through
- *    `--accent`. That is how two distinct personalities live in one system
- *    without the frame competing with either.
- *
- * 2. THE TYPE IS THE SYSTEM STACK, DELIBERATELY.
- *    It resolves to SF Pro on Apple platforms, which is the face the brief's
- *    own reference points are set in, and it costs no request and cannot
- *    flash. A webfont would add two round trips and a FOUT risk to a page
- *    whose Lighthouse performance median already sits one point above its
- *    floor. If a display face is ever wanted, it belongs here as
- *    `--family-display` alone — never as a second face for body copy.
- *
- * 3. THE EASING MIRRORS THE ENGINE.
- *    `--ease-out` and `--ease-in-out` are the cubic-bezier equivalents of
- *    `easeOutCubic` and `easeInOutCubic` in `src/lib/ease.ts`, which drive the
- *    3D subject. DOM motion and scene motion share a curve, so the page feels
- *    like one object rather than two systems agreeing by accident.
+ * The previous dark tokens served a WebGL narrative that no longer ships.
  */
-
 :root {
   /* ---- Surfaces -------------------------------------------------------- */
-  /* Channel triplets exist so alpha composition never re-states a colour.
-     Use `rgb(var(--stage-rgb) / 55%)`, not a literal. */
-  --stage-rgb: 7 8 10;
-  --surface-stage: rgb(var(--stage-rgb));
-  --surface-lift: #101320;
-  --surface-raised: #161b2b;
-  --surface-sunken: #04050a;
+  /* Warm paper rather than white: at full-page scale pure white glares, and
+     the app screenshots are saturated enough to need a calmer ground. */
+  --paper: #f6f5f1;
+  --paper-raised: #fffefb;
+  --paper-sunken: #edebe4;
 
-  /* ---- Text ------------------------------------------------------------ */
-  --text-rgb: 244 245 247;
-  --text-primary: rgb(var(--text-rgb));
-  --text-secondary: #a8b0bf;
-  --text-tertiary: #6d7585;
+  /* ---- Ink ------------------------------------------------------------- */
+  --ink: #0f0f10;
+  --ink-rgb: 15 15 16;
+  --ink-muted: #5c5c60;
+  /* 4.6:1 on paper: the stage numbers are set at label size, where anything
+     lighter fails AA. #8b8b8f measured 3.11 and failed the gate. */
+  --ink-faint: #6e6e72;
 
-  /* ---- Lines ----------------------------------------------------------- */
-  --line-hairline: rgb(var(--text-rgb) / 12%);
-  --line-strong: rgb(var(--text-rgb) / 28%);
+  /* ---- Rules ----------------------------------------------------------- */
+  /* Two weights only: a structural rule in full ink, and a hairline between
+     items. Every division on the page is one of these. */
+  --rule-strong: 1px solid var(--ink);
+  --rule-hair: 1px solid #dcdad3;
+  --line-hair: #dcdad3;
 
   /* ---- Accent ---------------------------------------------------------- */
-  /* `--accent` is what a section points at. The default is the frame's own
-     near-white; a product section re-points it to its own identity and
-     everything accent-coloured follows without further edits. */
-  --accent: #eef1f7;
-  --accent-contrast: rgb(var(--stage-rgb));
-  /* Sampled from the real app captures, not chosen by eye — the devices and
-     these colours appear in the same frame, so a near miss reads as an error. */
-  --accent-xbill: #7b4dff;
-  --accent-spade: #c9a94b;
-  --accent-spade-deep: #1b3b2a;
+  /* One editorial accent for what the reader should act on, plus the two
+     product hues sampled from the apps' own captures. */
+  --accent: #c33a24;
+  --accent-xbill: #5b3fd6;
+  --accent-spade: #8a6a1f;
+
+  /* ---- Type ------------------------------------------------------------ */
+  /* Inter, self-hosted and subset to latin: the look depends on a real
+     typeface, and a third-party request does not belong on a personal site. */
+  --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --font-display: clamp(3.1rem, 1.4rem + 7vw, 6.5rem);
+  --font-h2: clamp(1.9rem, 1.2rem + 2.6vw, 2.6rem);
+  --font-h3: clamp(1.15rem, 1rem + 0.5vw, 1.35rem);
+  --font-section: 1.35rem;
+  --font-body: 1.0625rem;
+  --font-small: 0.9rem;
+  --font-label: 0.6875rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-black: 800;
+
+  --leading-display: 0.95;
+  --leading-heading: 1.06;
+  --leading-body: 1.62;
+
+  --tracking-display: -0.045em;
+  --tracking-h2: -0.03em;
+  --tracking-label: 0.16em;
 
   /* ---- Spacing --------------------------------------------------------- */
-  /* 4px base. Nine steps is enough for this page and few enough to stay on. */
   --space-3xs: 0.25rem;
   --space-2xs: 0.5rem;
   --space-xs: 0.75rem;
@@ -77,112 +72,45 @@
   --space-lg: 2rem;
   --space-xl: 3rem;
   --space-2xl: 4.5rem;
-  --space-3xl: 7rem;
-
-  /* ---- Type ------------------------------------------------------------ */
-  --family-body:
-    ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --family-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-
-  /* Named by role, not by size, so a section asks for a heading rather than
-     for 3.5rem. */
-  --font-display: clamp(2.9rem, 1.6rem + 5.6vw, 5.75rem);
-  --font-h2: clamp(2rem, 1.2rem + 3.2vw, 3.5rem);
-  --font-h3: clamp(1.25rem, 1rem + 0.9vw, 1.6rem);
-  --font-body: clamp(1rem, 0.95rem + 0.3vw, 1.1rem);
-  --font-copy: 0.98rem;
-  --font-label: 0.72rem;
-  --font-meta: 0.78rem;
-
-  --leading-display: 0.98;
-  --leading-heading: 1.08;
-  /* Two body values, not one: the document sets 1.6 and a copy block sets
-     1.62. Folding them into a single token silently re-set the whole page's
-     line-height — caught by comparing computed styles against production. */
-  --leading-base: 1.6;
-  --leading-body: 1.62;
-
-  --tracking-display: -0.035em;
-  --tracking-h2: -0.03em;
-  --tracking-label: 0.18em;
-
-  --weight-regular: 400;
-  --weight-medium: 500;
-  --weight-semibold: 600;
-
-  /* ---- Radii ----------------------------------------------------------- */
-  --radius-sm: 0.35rem;
-  --radius-md: 0.6rem;
-  --radius-lg: 1rem;
-  --radius-pill: 999px;
-
-  /* ---- Elevation ------------------------------------------------------- */
-  /* On a near-black ground a shadow reads as a glow's absence, so these are
-     deliberately faint and used only where something must lift off the stage. */
-  --shadow-1: 0 1px 2px rgb(var(--stage-rgb) / 60%);
-  --shadow-2: 0 8px 24px rgb(var(--stage-rgb) / 55%);
-  --shadow-text: 0 1px 24px rgb(var(--stage-rgb) / 55%);
-
-  /* ---- Motion ---------------------------------------------------------- */
-  /* Mirrors src/lib/ease.ts, which drives the 3D subject. */
-  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --duration-fast: 160ms;
-  --duration-base: 320ms;
-  --duration-slow: 640ms;
+  --space-3xl: 6rem;
 
   /* ---- Layout ---------------------------------------------------------- */
-  --measure: 32rem;
-  /* Wider copy blocks: a product's four beats over the scene, and the
-     document half's grids. */
-  --measure-wide: 58rem;
-  --width-document: 68rem;
-  /* Narrowest a grid column may get before the grid drops a column. */
+  --width-page: 74rem;
+  --measure: 34rem;
+  --measure-wide: 48rem;
+  /* The label column that gives every labelled row its shared left edge. */
+  --column-label: 12.5rem;
   --column-min: 15rem;
-  /* Apple's minimum comfortable hit target. */
+  --edge: clamp(1.375rem, 4vw, 2.5rem);
   --target-min: 2.75rem;
-  /* The pinned story copy covers more of the frame than a single paragraph,
-     so its scrim reaches further up. */
-  --scrim-copy: 34%;
-  --scrim-story: 58%;
-  /* Clear stage above How I Build: room for the scene to leave the frame
-     before the document half's first heading arrives. */
-  --lead-quiet: 90vh;
-  /* Block padding between consecutive document sections: two of these meet
-     at every boundary, so it is half the gap a visitor sees. */
-  --pad-section: var(--space-2xl);
-  --edge: clamp(1.25rem, 5vw, 3rem);
-  /* Block padding for the document-style routes — the static fallback and the
-     noscript block, which each had their own near-identical magic clamp. */
-  --pad-document: clamp(3.5rem, 12vh, 8rem);
 
-  color-scheme: dark;
+  /* ---- Radii and elevation --------------------------------------------- */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  /* Screens lift off the paper; nothing else does. */
+  --shadow-screen: 0 20px 44px rgb(var(--ink-rgb) / 16%);
+
+  /* ---- Motion ---------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --duration-fast: 140ms;
+  --duration-base: 260ms;
+
+  color-scheme: light;
 }
 
-/*
- * Per-section accent. A product section carries one of these and everything
- * accent-coloured inside it follows — no section-specific colour rules.
- */
+/* A product section re-points the accent to its own app's hue. */
 [data-accent="xbill"] {
   --accent: var(--accent-xbill);
-  --accent-contrast: var(--text-primary);
 }
 
 [data-accent="spade"] {
   --accent: var(--accent-spade);
-  --accent-contrast: var(--accent-spade-deep);
 }
 
-/*
- * Motion tokens collapse under a reduced-motion preference so any transition
- * built from them stops without each component remembering to opt out.
- */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-fast: 0ms;
     --duration-base: 0ms;
-    --duration-slow: 0ms;
   }
 }
