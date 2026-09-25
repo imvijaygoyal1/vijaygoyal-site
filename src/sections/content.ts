@@ -67,7 +67,7 @@ export const PRODUCTS: readonly Product[] = [
     ],
     facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", "8 releases · 537 tests"],
     screen: xbillScreen,
-    screenAlt: "xBill's welcome screen on an iPhone",
+    screenAlt: "xBill reviewing a scanned ALDI receipt on an iPhone: each line item parsed with its price, and tappable chips assigning every item to one or more people",
     links: [
       { href: LINKS.xbillAppStore, label: "App Store", name: "xBill on the App Store" },
       { href: LINKS.xbillSite, label: "xbill.vijaygoyal.org" },
