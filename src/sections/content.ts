@@ -91,7 +91,7 @@ export const PRODUCTS: readonly Product[] = [
     ],
     facts: ["Swift · watchOS", "Bluetooth · Firebase", "v1.10 live · 192 tests"],
     screen: spadeScreen,
-    screenAlt: "The Shady Spade's title screen on an iPhone",
+    screenAlt: "The Shady Spade mid-hand on an iPhone: six players marked bidder, partner or defense, spades as trump, two called cards, and the bidding team 150 points into a 130 bid",
     links: [
       { href: LINKS.spadeAppStore, label: "App Store", name: "The Shady Spade on the App Store" },
       { href: LINKS.spadeSite, label: "shadyspade.vijaygoyal.org" },
