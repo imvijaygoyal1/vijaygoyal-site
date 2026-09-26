@@ -240,6 +240,12 @@ see AD-19, which makes them machine-checkable.
 - **Prevents:** three places writing metadata — the static `index.html`, per-route prerender output, and a client-side head manager — disagreeing about title and OG tags
 - **Rule:** Per-route metadata is emitted by the prerender step from one source of route definitions, and that same source generates `sitemap.xml`. `index.html` carries only what is genuinely global. No runtime head mutation.
 
+### AD-25 — The night stage [ADOPTED 2026-09-26]
+
+- **Binds:** `tokens.css`, `/`'s Work section, `src/scene/`
+- **Prevents:** re-litigating the palette after the owner chose it; a canvas creeping into case-study routes
+- **Rule:** The site is dark (tokens.css, "night" key), superseding the 2026-09-17 paper key. `/` carries one 2D canvas, the night scene, driven by `src/scene/nightScene.ts`. No WebGL. Its choreography, clocks and geometry are pure functions with unit tests. Case-study routes (AD-8) do not import `src/scene/`. Text tokens must measure ≥ 4.5:1 on the ground.
+
 ## Consistency Conventions
 
 | Concern | Convention |

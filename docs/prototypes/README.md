@@ -39,13 +39,9 @@ icons they use are already in `assets/`, downscaled to 512 from each app's own
    carry the product hues exactly and have no licence attached. If a real
    photograph is ever supplied, it swaps in behind the petals.
 
-## The open decision
+## Decided
 
-`night-scroll.html` makes the site **dark**. That contradicts the Swiss-light
-editorial direction chosen 2026-09-17 after five rejected rounds. It is a
-redesign — tokens, every section, the whole palette — and it needs a written
-plan and a deliberate decision, not a drift into it.
-
-What is **live** is the capture read-through
-(`docs/superpowers/plans/2026-09-25-scroll-read-captures.md`), which keeps the
-paper document.
+**2026-09-26: `night-scroll.html` adopted.** The owner chose it ("Adopt
+night-scroll (dark)", then "I like it"). The site is dark; see AD-25 and
+`docs/superpowers/plans/2026-09-26-night-scroll.md`. The shipped version carries
+no anime.js: its clocks and scroll binding are pure functions in `src/scene/`.

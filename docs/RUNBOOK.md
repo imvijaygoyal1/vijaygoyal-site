@@ -30,34 +30,42 @@ framing — live in git history and in the session memory. Recover them from
 
 ## Motion
 
-Five pieces: the opening lines rise out of their clipping boxes on load,
-content arrives as it is reached, each screenshot wipes up, links sweep an
-underline on hover — all from `src/lib/reveal.ts` and `styles.css` — and each
-product capture is **read through** as its section is scrolled, from
-`src/lib/scrollScene.ts`.
+**Since 2026-09-26 the site is dark and the Work section opens on the night
+scene** (AD-25), adopted from `docs/prototypes/night-scroll.html`. Motion is
+now: the opening lines rise on load, content arrives as it is reached, links
+sweep an underline on hover (`src/lib/reveal.ts`, `styles.css`) — and the
+night scene (`src/scene/`).
 
-**The read-through is the one thing tied to scroll position.** A product
-section's words are read in normal flow, then its capture gets a **full-bleed
-240vh stage** pinned to the whole viewport — at column width the read-through
-was a detail inside a thumbnail, and the owner's words were that it was "not
-like full screen". The caption is **page type beside the capture**, not
-lettering inside it: it can be set large, it wraps, and it cannot run off an
-edge, which deleted the clamp that shipped wrong twice. How far the stage has
-travelled is how far the capture has been read; how far the section has
-travelled is how far the capture has been read. A spotlight rests on one
-region, travels to the next and rests again: everything else is under a veil of
-the page's own paper, the active region is framed in the product's accent, and
-a caption names it. The anchors are measured in the capture's own 768 x 1670
-pixel space and live in `content.ts`, sourced from `CONTENT.md` — the overlay's
-`viewBox` is that same space, so an anchor cannot drift off the thing it names.
+**The night scene** is one pinned, 620vh stage holding both captures, both
+real App Store icons and a 2D canvas. The canvas draws a lotus that never
+stops (four counter-rotating whorls, 56 orbiting marks, a sweep of light);
+scrolling flies both products in, brings xBill forward and reads it region by
+region, hands over to the Shady Spade and reads it, then settles both back.
+Scrubbed: scrolling back runs it backwards.
 
-The geometry is pure: `sceneProgress` and `spotlightAt` in `src/lib/spotlight.ts`
-take numbers and return numbers, and are tested without a browser.
+- **Everything the loop computes is pure and unit-tested:** `motion.ts`
+  (choreography of progress), `ambient.ts` (clocks of time — no animation
+  library), `lotus.ts` (geometry). `nightScene.ts` only writes the result.
+  The spotlight still comes from `src/lib/spotlight.ts`.
+- **One rAF loop, alive only while the scene is on screen.** Progress is read
+  as a position every frame, so a jump lands on the right frame. The root
+  carries `data-running` and `data-progress`; the e2e reads both.
+- **The lotus is drawn into sprites once per size** and only rotated and
+  scaled per frame; live `shadowBlur` on ~50 petals cannot hold 30 fps.
+- **The canvas is capped at 1.25x density**, measured: its cost is its pixel
+  count, and at 2x a 4x-throttled CPU drew 21 fps (1.25x: ~43). Captures and
+  icons are DOM and stay sharp. Re-measure with
+  `npx playwright test e2e/perf.spec.ts --project=mobile` (it is `@perf`, so
+  `npm run e2e` skips it).
+- **Three layouts, decided by CSS alone** so the script arriving never moves
+  anything: `(scripting: none)` a plain pair; `(scripting: enabled)` a pinned
+  stage with every element in its resting pose; plus `prefers-reduced-motion:
+  no-preference`, the 620vh scrub length. The CSS resting pose and
+  `choreograph(REST)` must agree — an e2e compares them.
+- **Colours:** each product has a hue (glows, strokes, lotus) and a text shade.
+  The hues fail AA as text on black; `tokens.test.ts` measures every text token.
 
-**The 48px screen drift and `animejs` were removed when this shipped** (payload
-82.4 kB → 67.2 kB). The drift animated the same captures this pins, and the
-scrub is only *progress → set attributes*, which the existing scroll listener
-already does. A prototype used anime.js; the shipped version needs none.
+The per-product read-through (`src/lib/scrollScene.ts`) this replaced is gone.
 
 **It has been rebuilt twice, both times because "verified" meant "verified in
 the engines that happen to agree with me".**
@@ -188,6 +196,10 @@ the apex and `www`. **Never add those hostnames to the apex routes.**
 - **The page is client-rendered.** Crawlers and no-JS visitors get the
   `<noscript>` block, not the page. A prerender step (AD-9, AD-10) is the next
   structural piece, and the case-study routes need it.
+- **A flaky e2e, pre-existing:** "content arrives on scroll" fails about 3 in
+  10 in WebKit, on the 2026-09-25 live branch too — its first opacity read
+  races the moment `.js-reveal` is applied. Not caused by the night scene
+  (measured with the driver disabled).
 - **Content the owner owes:** a photograph for About (a generated portrait is
   forbidden, AD-14), further simulator captures for the product beats, and a
   read-through of the case-study copy when those pages exist.
