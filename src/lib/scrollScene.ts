@@ -1,5 +1,5 @@
 import type { Spot } from "../sections/content";
-import { captionX, sceneProgress, spotlightAt } from "./spotlight";
+import { captionX, estimateCaptionWidth, sceneProgress, spotlightAt } from "./spotlight";
 
 /** Marks the root while the scenes are actually being driven. Without it the
  *  CSS keeps every overlay hidden, so a page whose script never runs shows the
@@ -47,6 +47,23 @@ function collect(root: ParentNode): Scene[] {
   return scenes;
 }
 
+/**
+ * The caption's rendered width, in the capture's own units.
+ *
+ * `getBBox` and not `getComputedTextLength`: WebKit leaves letter-spacing out
+ * of the computed length, so a clamp built on it overshot the picture's edge
+ * by 1.5px per character — 27px on the longest caption — and still clipped on
+ * an iPhone while passing in Chromium.
+ */
+function measureCaption(caption: SVGTextElement): number {
+  try {
+    return caption.getBBox().width;
+  } catch {
+    // No layout (a test environment, a hidden subtree): fall back.
+    return 0;
+  }
+}
+
 function paint(scene: Scene, viewportHeight: number): void {
   const box = scene.root.getBoundingClientRect();
   const light = spotlightAt(scene.spots, sceneProgress(box.top, box.height, viewportHeight));
@@ -68,13 +85,14 @@ function paint(scene: Scene, viewportHeight: number): void {
 
   // Above its subject, unless the subject is near the top of the capture.
   const above = light.y > CAPTION_HEIGHT + CAPTION_GAP;
-  scene.caption.setAttribute(
-    "x",
-    String(captionX(light.x, light.label, CAPTION_SIZE, CAPTURE_WIDTH)),
-  );
+  // Set the words before measuring them: the width that matters is the one
+  // the browser actually renders, not a ratio guessed from the character
+  // count. An estimate is only the fallback where there is no layout at all.
+  if (scene.caption.textContent !== light.label) scene.caption.textContent = light.label;
+  const textWidth = measureCaption(scene.caption) || estimateCaptionWidth(light.label, CAPTION_SIZE);
+  scene.caption.setAttribute("x", String(captionX(light.x, textWidth, CAPTURE_WIDTH)));
   scene.caption.setAttribute("y", String(above ? light.y - CAPTION_GAP : light.y + light.h + CAPTION_HEIGHT));
   scene.caption.setAttribute("fill-opacity", String(light.labelOpacity));
-  if (scene.caption.textContent !== light.label) scene.caption.textContent = light.label;
 }
 
 /**

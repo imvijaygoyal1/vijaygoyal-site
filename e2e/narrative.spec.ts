@@ -227,3 +227,30 @@ test("a capture is shown plainly under reduced motion", async ({ page }) => {
   expect(shown).toBe("none");
   await expect(page.locator("#xbill img.screen")).toBeVisible();
 });
+
+test("every caption stays inside the capture it names", async ({ page }) => {
+  // A caption anchored at its region's left edge ran off the right of the
+  // picture and shipped clipped — "150 into a 13". Measured, not estimated:
+  // the width that matters is the one the engine renders, and it differs
+  // between them.
+  await page.goto("/");
+
+  for (const id of ["xbill", "shady-spade"]) {
+    const offenders = await page.locator(`#${id}`).evaluate(async (scene) => {
+      const caption = scene.querySelector("[data-caption]") as SVGTextElement;
+      const width = Number(scene.querySelector("svg")!.getAttribute("viewBox")!.split(" ")[2]);
+      const bad: string[] = [];
+      for (const f of [0, 0.25, 0.5, 0.75, 1]) {
+        const box = scene.getBoundingClientRect();
+        window.scrollBy(0, box.top + (box.height - window.innerHeight) * f);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const b = caption.getBBox();
+        if (b.x < 0 || b.x + b.width > width) {
+          bad.push(`${caption.textContent}: ${Math.round(b.x)}..${Math.round(b.x + b.width)} of ${width}`);
+        }
+      }
+      return bad;
+    });
+    expect(offenders, `${id} captions outside the capture`).toEqual([]);
+  }
+});

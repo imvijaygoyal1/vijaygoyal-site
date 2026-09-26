@@ -90,6 +90,11 @@ anything at or above the trigger line has arrived, however it got there.
   It reported a deleted animation as working. **Kill port 4173 before any e2e
   run that is meant to prove a source change**, and prove the test fails when
   you break the thing it checks.
+- **`getComputedTextLength` leaves letter-spacing out, in WebKit.** A caption
+  clamp built on it overshot the capture's edge by 1.5px per character — 27px
+  on the longest one — and clipped on an iPhone while passing in Chromium.
+  Measure rendered text with `getBBox().width`, which is the ink box the
+  reader actually sees.
 - **A sticky element is transparent.** On a phone the pinned capture floated
   over the section's own heading, which reads as a broken page rather than a
   pinned one. A sticky band needs its own opaque ground and a rule under it.
