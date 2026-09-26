@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { observeReveals } from "../lib/reveal";
+import { observeDrift } from "../lib/drift";
 import { SCREEN_H, SCREEN_W, ABOUT, CONTACT, DESCRIPTOR, OPENING, PRODUCTS, STAGES, TOOLKIT, type Product } from "./content";
 import { LINKS } from "../lib/links";
 
@@ -88,16 +89,22 @@ function WorkItem({ product }: { product: Product }) {
           image loads: without it a lazy screenshot has zero height until it
           arrives — a layout shift, and in Safari a box that is not there at
           all until it loads. */}
-      <img
-        className="screen"
-        data-reveal
-        src={product.screen}
-        alt={product.screenAlt}
-        width={SCREEN_W}
-        height={SCREEN_H}
-        loading="lazy"
-        decoding="async"
-      />
+      {/* The drift lives on a wrapper, NOT on the image. The CSS reveal animates the image's own
+          `transform` (scale 1.03 -> none, with clip-path), and an inline transform from the
+          animation library beats a stylesheet rule — putting both on one element silently
+          cancelled the wipe-up. Two transforms, two elements. */}
+      <span className="screen-drift" data-drift="">
+        <img
+          className="screen"
+          data-reveal
+          src={product.screen}
+          alt={product.screenAlt}
+          width={SCREEN_W}
+          height={SCREEN_H}
+          loading="lazy"
+          decoding="async"
+        />
+      </span>
     </article>
   );
 }
@@ -211,7 +218,14 @@ export function Page() {
   // Arrivals are marked by an observer rather than by CSS scroll timelines:
   // see lib/reveal.ts. The effect runs after the first paint, so nothing is
   // hidden before it starts.
-  useEffect(() => observeReveals(), []);
+  useEffect(() => {
+    const stopReveals = observeReveals();
+    const stopDrift = observeDrift();
+    return () => {
+      stopReveals();
+      stopDrift();
+    };
+  }, []);
 
   return (
     <div className="page">

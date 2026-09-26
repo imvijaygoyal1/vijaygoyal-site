@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { DRIFT } from "../src/lib/drift";
 
 const SECTIONS = ["opening", "work", "process", "toolkit", "about", "contact"];
 
@@ -167,4 +168,69 @@ test("content arrives on scroll, and is fully visible once passed", async ({ pag
     expect(r.transform === "none" || r.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
     expect(r.clip === "none" || r.clip === "inset(0%)" || r.clip === "inset(0px)").toBe(true);
   }
+});
+
+test("each screenshot drifts as it passes, in every engine", async ({ page }) => {
+  await page.goto("/");
+
+  // Sampled at the element's own position rather than at fixed scroll offsets,
+  // so the four viewport shapes are all asking the same question.
+  const { interior, ends } = await page.evaluate(async () => {
+    const el = document.querySelector<HTMLElement>("[data-drift]")!;
+    const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const read = () => {
+      const t = getComputedStyle(el).transform;
+      return t === "none" ? 0 : new DOMMatrix(t).m42;
+    };
+
+    // Mid-passage, where the drift is actually being driven.
+    const interior: number[] = [];
+    for (const fraction of [1, 0.5, 0, -0.5, -0.9]) {
+      window.scrollBy(0, el.getBoundingClientRect().top - fraction * window.innerHeight);
+      await settle();
+      interior.push(read());
+    }
+
+    // The two clamped ends: before the passage starts and after it finishes.
+    // Measuring the travel anywhere short of these reads low, because the
+    // element has not reached the end of its range.
+    window.scrollTo(0, 0);
+    await settle();
+    const before = read();
+    window.scrollTo(0, document.body.scrollHeight);
+    await settle();
+    const after = read();
+
+    return { interior, ends: [before, after] as [number, number] };
+  });
+
+  // It rises steadily the whole way through: every sample below the one before
+  // it. A drift that stalls, or only moves at the ends, is the jumpiness the
+  // full-passage window exists to avoid.
+  for (let i = 1; i < interior.length; i++) {
+    expect(interior[i]!, `sample ${i} of ${JSON.stringify(interior)}`).toBeLessThan(interior[i - 1]!);
+  }
+  // And it is a drift, not a lurch: the whole travel is the declared distance,
+  // centred on the resting position.
+  expect(ends[0] - ends[1]).toBeCloseTo(DRIFT, 0);
+  expect(ends[0] + ends[1]).toBeCloseTo(0, 0);
+});
+
+test("the drift is absent entirely under reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+
+  const transforms = await page.evaluate(async () => {
+    const el = document.querySelector<HTMLElement>("[data-drift]")!;
+    const out: string[] = [];
+    for (const fraction of [1, 0.25, -0.5]) {
+      window.scrollBy(0, el.getBoundingClientRect().top - fraction * window.innerHeight);
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      out.push(getComputedStyle(el).transform);
+    }
+    return out;
+  });
+
+  // Not "transformed by zero" — untouched. The resting state is the finished state.
+  for (const t of transforms) expect(t).toBe("none");
 });

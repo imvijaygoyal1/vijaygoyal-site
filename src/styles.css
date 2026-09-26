@@ -294,6 +294,12 @@ a {
   margin-top: var(--space-md);
 }
 
+/* Carries the scroll-linked drift so the image keeps its own transform for the wipe-up.
+   `display: block` so it does not add an inline-box baseline gap under the picture. */
+.screen-drift {
+  display: block;
+}
+
 .screen {
   width: 100%;
   height: auto;

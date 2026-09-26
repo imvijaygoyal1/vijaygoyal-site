@@ -26,9 +26,17 @@ framing — live in git history and in the session memory. Recover them from
 
 ## Motion
 
-Four pieces, all driven from `src/lib/reveal.ts` and `styles.css`: the opening
-lines rise out of their clipping boxes on load, content arrives as it is
-reached, each screenshot wipes up, and links sweep an underline on hover.
+Five pieces: the opening lines rise out of their clipping boxes on load,
+content arrives as it is reached, each screenshot wipes up, links sweep an
+underline on hover — all from `src/lib/reveal.ts` and `styles.css` — and each
+screenshot drifts as it passes, from `src/lib/drift.ts`.
+
+The drift is the **only** thing on the page tied to scroll position. The site
+had a scroll-driven narrative once and it was retired; this is a detail, not a
+structure, and it should stay that way. It is `translateY` on a wrapper span,
+never on the image — the image's own `transform` belongs to the CSS wipe-up,
+and an inline transform from the animation library beats a stylesheet rule, so
+sharing one element kills the wipe-up silently. `page.test.tsx` pins that.
 
 **It has been rebuilt twice, both times because "verified" meant "verified in
 the engines that happen to agree with me".**
@@ -54,7 +62,20 @@ anything at or above the trigger line has arrived, however it got there.
 - **e2e runs on four projects** — Chrome desktop, Pixel, Desktop Safari and an
   iPhone 17 Pro — because a single-engine pass is what let both failures ship.
 - **Judge motion on a phone, mid-scroll, with numbers** (`getComputedStyle`
-  opacity/transform at several scroll offsets), not from a still.
+  opacity/transform at several scroll offsets), not from a still. Judge the
+  *amount* as a share of the element's travel, not in pixels: 14px of drift
+  sounds deliberate and measures 1.1% of a 1280px passage, which is the same
+  order as the motion pass the owner could not see at all. The drift ships at
+  48px, ≈3.7%.
+- **`reuseExistingServer` will serve you a stale `dist/`.** A preview server
+  left running from an earlier `npx playwright test` is reused as-is, so a
+  source change never reaches the browser and the e2e passes on the old build.
+  It reported a deleted animation as working. **Kill port 4173 before any e2e
+  run that is meant to prove a source change**, and prove the test fails when
+  you break the thing it checks.
+- **Measure a scroll-linked range at its clamped ends.** Sampling "near" the
+  start and end of a passage reads the travel low — 47.4 against a declared 48
+  — and the tolerance you then loosen is hiding a real defect next time.
 - **Safari-specific:** a lazy `<img>` with no intrinsic size has **no box at
   all** until it loads, so it is not merely invisible — it is not there.
   Captures carry `width`/`height` and an `aspect-ratio`. Tab does not reach
