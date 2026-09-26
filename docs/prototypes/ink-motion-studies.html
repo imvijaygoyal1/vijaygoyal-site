@@ -1,0 +1,490 @@
+<title>Ink Motion Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<style>
+  /* Tokens lifted verbatim from vijaygoyal-site/src/styles/tokens.css, so these
+     studies are drawn in the site's real ink rather than an approximation.
+     The site is deliberately light-only (color-scheme: light, paper ground),
+     so these pages commit to that single world and paint every colour. */
+  :root {
+    --paper: #f6f5f1;
+    --paper-raised: #fffefb;
+    --paper-sunken: #edebe4;
+    --ink: #0f0f10;
+    --ink-muted: #5c5c60;
+    --ink-faint: #6e6e72;
+    --line-hair: #dcdad3;
+    --accent: #c33a24;
+    --accent-xbill: #5b3fd6;
+    --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --tracking-label: 0.16em;
+    --measure: 34rem;
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--family-body);
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding-inline: max(1rem, 4vw);
+    padding-block: clamp(2.5rem, 7vw, 5rem) 4rem;
+  }
+
+  .label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 1.2rem + 3.4vw, 3.1rem);
+    line-height: 1.06;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+    text-wrap: balance;
+    margin: 0.75rem 0 0;
+  }
+
+  .standfirst {
+    max-width: var(--measure);
+    color: var(--ink-muted);
+    margin: 1rem 0 0;
+  }
+
+  .masthead {
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .studies {
+    display: grid;
+    gap: clamp(3rem, 8vw, 5.5rem);
+    margin-block: clamp(2.5rem, 7vw, 4rem);
+  }
+
+  .study-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--line-hair);
+    padding-bottom: 0.7rem;
+  }
+
+  .sigil {
+    font-family: var(--family-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+  }
+
+  h2 {
+    font-size: clamp(1.25rem, 1.05rem + 0.8vw, 1.6rem);
+    letter-spacing: -0.02em;
+    font-weight: 600;
+    margin: 0;
+    flex: 1 1 auto;
+  }
+
+  .gloss {
+    max-width: var(--measure);
+    color: var(--ink-muted);
+    margin: 0.9rem 0 1.4rem;
+  }
+
+  .stage {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-hair);
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    display: block;
+  }
+
+  @media (max-width: 640px) {
+    .stage { aspect-ratio: 4 / 3; }
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 0.9rem 1.5rem;
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line-hair);
+  }
+
+  .meta div { display: grid; gap: 0.15rem; }
+
+  .meta dt, .meta .k {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .meta .v {
+    font-size: 0.9rem;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .closing {
+    border-top: 1px solid var(--ink);
+    padding-top: clamp(1.5rem, 4vw, 2.25rem);
+  }
+
+  .closing p { max-width: var(--measure); color: var(--ink-muted); }
+  .closing strong { color: var(--ink); font-weight: 600; }
+
+  .note {
+    font-size: 0.9rem;
+    color: var(--ink-faint);
+    max-width: var(--measure);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rm-note { display: block; }
+  }
+  .rm-note { display: none; }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="label">Motion studies · vijaygoyal.org</p>
+    <h1>Three ways to put a moving graphic on the page</h1>
+    <p class="standfirst">
+      The site animates text arriving. None of that produces a graphic — there is no object
+      on screen whose job is to move. These are three candidates for that object, drawn in
+      the site's own ink on its own paper, so the editorial page stays intact. Watch them,
+      pick one.
+    </p>
+    <p class="note rm-note" style="margin-top:1rem">
+      Reduce Motion is switched on in your system settings, so each study is showing a single
+      frozen frame. That same setting is why the live site shows you no motion at all.
+    </p>
+  </header>
+
+  <div class="studies">
+
+    <section class="study">
+      <div class="study-head">
+        <span class="sigil">A</span>
+        <h2>Idea to product</h2>
+      </div>
+      <p class="gloss">
+        One continuous line, drawn live. It wanders — searching, uncertain — then resolves into
+        the outline of a phone and holds. It is the sentence at the top of your site, said as a
+        drawing rather than as words.
+      </p>
+      <canvas class="stage" id="study-a" aria-label="An ink line wanders, then resolves into the outline of a phone"></canvas>
+      <div class="meta">
+        <div><span class="k">Where it sits</span><span class="v">The opening, beside the h1</span></div>
+        <div><span class="k">Character</span><span class="v">Deliberate, once per visit</span></div>
+        <div><span class="k">Cost</span><span class="v">~2 kB, canvas 2D</span></div>
+        <div><span class="k">anime.js</span><span class="v">Not needed</span></div>
+      </div>
+    </section>
+
+    <section class="study">
+      <div class="study-head">
+        <span class="sigil">B</span>
+        <h2>Contour field</h2>
+      </div>
+      <p class="gloss">
+        Topographic hairlines that never stop moving — an engraving that breathes. It gives the
+        page a living surface without ever asking to be looked at, and it is the only one of the
+        three that is still moving while you read.
+      </p>
+      <canvas class="stage" id="study-b" aria-label="Topographic hairlines drifting slowly like a breathing engraving"></canvas>
+      <div class="meta">
+        <div><span class="k">Where it sits</span><span class="v">Full-bleed band between sections</span></div>
+        <div><span class="k">Character</span><span class="v">Ambient, continuous</span></div>
+        <div><span class="k">Cost</span><span class="v">~1.5 kB, canvas 2D</span></div>
+        <div><span class="k">anime.js</span><span class="v">Not needed</span></div>
+      </div>
+    </section>
+
+    <section class="study">
+      <div class="study-head">
+        <span class="sigil">C</span>
+        <h2>The split</h2>
+      </div>
+      <p class="gloss">
+        A bill divides itself, over and over, into shares that never come out even. This one is
+        not abstract: it is what xBill does, drawn as a diagram. The accent marks the share you
+        owe.
+      </p>
+      <canvas class="stage" id="study-c" aria-label="A bar repeatedly dividing into uneven labelled shares"></canvas>
+      <div class="meta">
+        <div><span class="k">Where it sits</span><span class="v">The xBill product section</span></div>
+        <div><span class="k">Character</span><span class="v">Explanatory, loops</span></div>
+        <div><span class="k">Cost</span><span class="v">~2.5 kB, canvas 2D</span></div>
+        <div><span class="k">anime.js</span><span class="v">Not needed</span></div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="closing">
+    <p class="label">How to choose</p>
+    <p>
+      <strong>A</strong> is a statement and is over in eight seconds. <strong>B</strong> is
+      atmosphere and never stops. <strong>C</strong> earns its place by explaining a product
+      rather than decorating a page. They are not exclusive — A and C could both ship, in
+      different sections.
+    </p>
+      <p class="note">
+        All three are canvas 2D drawn by hand, so whichever you pick, the 18&nbsp;kB anime.js
+        dependency currently in the live bundle can be removed. Each holds a still resting
+        state under Reduce Motion, the way the rest of the site does.
+      </p>
+  </footer>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+    var INK = "#0f0f10", HAIR = "#dcdad3", ACCENT = "#c33a24", PAPER = "#fffefb";
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function mount(id, draw, frozenT) {
+      var canvas = document.getElementById(id);
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var w = 0, h = 0, raf = 0, start = 0, running = false;
+
+      function resize() {
+        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var r = canvas.getBoundingClientRect();
+        w = r.width; h = r.height;
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        if (reduced || !running) frame(reduced ? frozenT : (performance.now() - start) / 1000);
+      }
+
+      function frame(t) {
+        ctx.fillStyle = PAPER;
+        ctx.fillRect(0, 0, w, h);
+        draw(ctx, w, h, t);
+      }
+
+      function tick(now) {
+        if (!start) start = now;
+        frame((now - start) / 1000);
+        raf = requestAnimationFrame(tick);
+      }
+
+      // The resting state is the finished state: a frozen, complete frame is
+      // painted before anything is scheduled, so a page whose loop never runs
+      // is simply still rather than blank.
+      resize();
+      if (reduced) {
+        frame(frozenT);
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          var on = entries[0] && entries[0].isIntersecting;
+          if (on && !running) { running = true; start = 0; raf = requestAnimationFrame(tick); }
+          else if (!on && running) { running = false; cancelAnimationFrame(raf); }
+        }, { rootMargin: "120px" });
+        io.observe(canvas);
+      }
+      if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas);
+      else window.addEventListener("resize", resize);
+    }
+
+    function easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+    /* ---- A. Idea to product ------------------------------------------- */
+    // A single stroke: a searching line whose wobble decays, handing over to
+    // the outline of a phone. Drawn progressively, held, then re-drawn.
+    function pathA(u, w, h) {
+      var m = Math.min(w, h);
+      var boxW = m * 0.30, boxH = m * 0.60;
+      var bx = w * 0.70 - boxW / 2, by = h / 2 - boxH / 2;
+      var r = m * 0.05;
+
+      if (u < 0.45) {
+        var k = u / 0.45;                       // 0..1 across the searching run
+        var calm = Math.pow(1 - k, 2);          // the wobble decays as it resolves
+        var x = w * 0.08 + (bx - w * 0.08) * k;
+        var y = h / 2
+          + Math.sin(k * 13.0) * h * 0.20 * calm
+          + Math.sin(k * 31.0) * h * 0.07 * calm
+          + Math.sin(k * 5.0) * h * 0.10 * calm;
+        return [x, y];
+      }
+
+      // The phone outline, traced clockwise from the middle of its left edge.
+      var v = (u - 0.45) / 0.55;
+      var top = by + r, bot = by + boxH - r, left = bx + r, right = bx + boxW - r;
+      var side = boxH - 2 * r, span = boxW - 2 * r;
+      var arc = r * Math.PI / 2;
+      var per = 2 * side + 2 * span + 4 * arc;
+      var d = v * per;
+      var startD = side / 2;                    // begin mid-left edge
+      d = (d + startD) % per;
+
+      if (d < side / 2) return [bx, by + boxH / 2 - d];
+      d -= side / 2;
+      if (d < arc) { var a = d / arc; return [left - r * Math.cos(a * Math.PI / 2), top - r * Math.sin(a * Math.PI / 2)]; }
+      d -= arc;
+      if (d < span) return [left + d, by];
+      d -= span;
+      if (d < arc) { var b = d / arc; return [right + r * Math.sin(b * Math.PI / 2), top - r * Math.cos(b * Math.PI / 2)]; }
+      d -= arc;
+      if (d < side) return [bx + boxW, top + d];
+      d -= side;
+      if (d < arc) { var c = d / arc; return [right + r * Math.cos(c * Math.PI / 2), bot + r * Math.sin(c * Math.PI / 2)]; }
+      d -= arc;
+      if (d < span) return [right - d, by + boxH];
+      d -= span;
+      if (d < arc) { var e = d / arc; return [left - r * Math.sin(e * Math.PI / 2), bot + r * Math.cos(e * Math.PI / 2)]; }
+      d -= arc;
+      return [bx, bot - d];
+    }
+
+    function drawA(ctx, w, h, t) {
+      var CYCLE = 9.5;
+      var loop = t % CYCLE;
+      var p = clamp01(loop / 6.2);
+      var progress = easeOut(p);
+      var fade = loop > 8.3 ? 1 - (loop - 8.3) / 1.2 : 1;
+
+      ctx.globalAlpha = clamp01(fade);
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.25;
+      ctx.lineJoin = "round";
+      ctx.lineCap = "round";
+
+      var steps = 520;
+      var last = Math.max(1, Math.floor(steps * progress));
+      ctx.beginPath();
+      for (var i = 0; i <= last; i++) {
+        var pt = pathA(i / steps, w, h);
+        if (i === 0) ctx.moveTo(pt[0], pt[1]); else ctx.lineTo(pt[0], pt[1]);
+      }
+      ctx.stroke();
+
+      // The head of the stroke, while it is still being drawn.
+      if (progress < 1) {
+        var head = pathA(last / steps, w, h);
+        ctx.fillStyle = ACCENT;
+        ctx.beginPath();
+        ctx.arc(head[0], head[1], 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    /* ---- B. Contour field ---------------------------------------------- */
+    function drawB(ctx, w, h, t) {
+      var lines = Math.max(9, Math.round(h / 22));
+      var amp = h * 0.052;
+      for (var i = 0; i < lines; i++) {
+        var base = (i + 0.5) / lines * h;
+        var phase = i * 0.42;
+        var accent = i === Math.floor(lines * 0.38);
+        ctx.beginPath();
+        for (var x = 0; x <= w; x += 3) {
+          var u = x / w;
+          var y = base
+            + Math.sin(u * 4.6 + t * 0.30 + phase) * amp
+            + Math.sin(u * 9.7 - t * 0.19 + phase * 0.6) * amp * 0.42
+            + Math.sin(u * 1.9 + t * 0.11 + phase * 0.25) * amp * 0.70;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = accent ? ACCENT : (i % 3 === 0 ? "#b9b6ad" : HAIR);
+        ctx.lineWidth = accent ? 1.4 : 1;
+        ctx.stroke();
+      }
+    }
+
+    /* ---- C. The split --------------------------------------------------- */
+    // Shares that never come out even: each cycle deals a new uneven partition
+    // and eases the boundaries to it.
+    var splitSeed = 0;
+    function partition(seed, n) {
+      var out = [], sum = 0, i;
+      for (i = 0; i < n; i++) {
+        var v = 0.55 + (Math.sin(seed * 12.9898 + i * 78.233) * 0.5 + 0.5);
+        out.push(v); sum += v;
+      }
+      for (i = 0; i < n; i++) out[i] /= sum;
+      return out;
+    }
+
+    function drawC(ctx, w, h, t) {
+      var CYCLE = 4.2;
+      var idx = Math.floor(t / CYCLE);
+      var k = clamp01((t % CYCLE) / 1.3);
+      var ease = easeOut(k);
+
+      var nA = 3 + (idx % 2), nB = 3 + ((idx + 1) % 2);
+      var n = Math.max(nA, nB);
+      var a = partition(idx, n), b = partition(idx + 1, n);
+
+      var pad = Math.min(w, h) * 0.09;
+      var barH = Math.min(h * 0.38, 160);
+      var y = h / 2 - barH / 2;
+      var x0 = pad, x1 = w - pad, span = x1 - x0;
+
+      var owedIndex = idx % n;
+      var cursor = x0;
+      ctx.font = "600 11px " + "ui-monospace, SFMono-Regular, Menlo, monospace";
+      ctx.textBaseline = "top";
+
+      for (var i = 0; i < n; i++) {
+        var frac = a[i] + (b[i] - a[i]) * ease;
+        var segW = frac * span;
+
+        if (i === owedIndex) {
+          ctx.fillStyle = "rgba(195, 58, 36, 0.12)";
+          ctx.fillRect(cursor, y, segW, barH);
+        }
+        ctx.strokeStyle = i === owedIndex ? ACCENT : INK;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cursor + 0.5, y + 0.5, Math.max(0, segW - 1), barH - 1);
+
+        var pct = Math.round(frac * 100) + "%";
+        ctx.fillStyle = i === owedIndex ? ACCENT : "#6e6e72";
+        var tw = ctx.measureText(pct).width;
+        if (segW > tw + 14) ctx.fillText(pct, cursor + segW / 2 - tw / 2, y + barH + 10);
+
+        cursor += segW;
+      }
+
+      // The total, ruled off above the bar the way the app rules off a receipt.
+      ctx.strokeStyle = HAIR;
+      ctx.beginPath();
+      ctx.moveTo(x0, y - 16.5);
+      ctx.lineTo(x1, y - 16.5);
+      ctx.stroke();
+      ctx.fillStyle = "#6e6e72";
+      ctx.fillText("ONE BILL", x0, y - 32);
+      var lbl = n + " WAYS";
+      ctx.fillText(lbl, x1 - ctx.measureText(lbl).width, y - 32);
+    }
+
+    mount("study-a", drawA, 6.0);
+    mount("study-b", drawB, 3.0);
+    mount("study-c", drawC, 1.4);
+  })();
+</script>

@@ -1,0 +1,563 @@
+<title>Night Scroll Sequence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+<style>
+  :root {
+    --night: #0b0b0d;
+    --night-ink: #f4f3ef;
+    --night-faint: #8a8a93;
+    --xbill: #5b3fd6;
+    --spade: #b8902c;
+    --accent: #c33a24;
+    --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--night-ink);
+    font-family: var(--family-body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .lead {
+    min-height: 62vh;
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    padding: clamp(1.5rem, 5vw, 4rem);
+    box-sizing: border-box;
+  }
+
+  .tag {
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--xbill);
+    margin: 0;
+  }
+
+  .lead h1 {
+    margin: 0;
+    font-size: clamp(2rem, 1rem + 5vw, 4.4rem);
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+    max-width: 16ch;
+    text-wrap: balance;
+  }
+
+  .lead p { max-width: 30rem; color: var(--night-faint); margin: 0; }
+
+  .hint {
+    font-family: var(--family-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+  }
+
+  /* ---- The scene: tall, with everything pinned inside it -------------- */
+
+  .scene { position: relative; height: 620vh; }
+
+  .pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 50% 45%, rgba(91, 63, 214, 0.22), transparent 62%),
+      var(--night);
+  }
+
+  #bed { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  .stage { position: absolute; inset: 0; }
+
+  .dev {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(26vh, 15rem);
+    aspect-ratio: 768 / 1670;
+    margin-left: calc(min(26vh, 15rem) / -2);
+    margin-top: calc(min(26vh, 15rem) * 1670 / 768 / -2);
+    will-change: transform, opacity;
+  }
+
+  .dev img,
+  .dev svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .dev img { border-radius: 14px; }
+
+  .dev--xbill img {
+    box-shadow: 0 0 0 1px rgba(91, 63, 214, 0.5), 0 26px 70px rgba(91, 63, 214, 0.38),
+      0 0 110px rgba(91, 63, 214, 0.22);
+  }
+
+  .dev--spade img {
+    box-shadow: 0 0 0 1px rgba(184, 144, 44, 0.5), 0 26px 70px rgba(184, 144, 44, 0.32),
+      0 0 110px rgba(184, 144, 44, 0.18);
+  }
+
+  /* The real App Store icons, squircled the way iOS draws them. */
+  .icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: min(9.5vh, 5.5rem);
+    /* The img's height="512" attribute is a presentational hint that wins
+       unless height is set here, which stretched both icons into slivers. */
+    height: auto;
+    aspect-ratio: 1;
+    margin: calc(min(9.5vh, 5.5rem) / -2);
+    border-radius: 23%;
+    will-change: transform, opacity;
+    opacity: 0;
+  }
+
+  .icon--xbill { box-shadow: 0 0 0 1px rgba(91, 63, 214, 0.55), 0 14px 40px rgba(91, 63, 214, 0.45); }
+  .icon--spade { box-shadow: 0 0 0 1px rgba(184, 144, 44, 0.55), 0 14px 40px rgba(184, 144, 44, 0.40); }
+
+  .caption {
+    position: absolute;
+    left: clamp(1.25rem, 5vw, 4rem);
+    bottom: clamp(3.5rem, 12vh, 7rem);
+    margin: 0;
+    max-width: 14ch;
+    font-size: clamp(1.5rem, 0.9rem + 2.6vw, 3.2rem);
+    line-height: 1.04;
+    letter-spacing: -0.035em;
+    font-weight: 800;
+    text-wrap: balance;
+    opacity: 0;
+  }
+
+  .readout {
+    position: absolute;
+    right: clamp(1.25rem, 5vw, 4rem);
+    bottom: clamp(1.25rem, 4vw, 2.5rem);
+    margin: 0;
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--night-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .beat {
+    position: absolute;
+    left: clamp(1.25rem, 5vw, 4rem);
+    top: clamp(1.25rem, 5vw, 3rem);
+    margin: 0;
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--night-faint);
+  }
+
+  .after {
+    padding: clamp(1.5rem, 5vw, 3rem);
+    border-top: 1px solid rgba(244, 243, 239, 0.14);
+    color: var(--night-faint);
+  }
+
+  .after p { max-width: 34rem; margin: 0 0 0.75rem; }
+  .after strong { color: var(--night-ink); font-weight: 600; }
+  .after :last-child { margin-bottom: 0; }
+
+  .rm-note { display: none; }
+  @media (prefers-reduced-motion: reduce) { .rm-note { display: block; } }
+</style>
+
+<div class="lead">
+  <p class="tag">Product &middot; Design &middot; Technology &middot; AI</p>
+  <h1>I turn ideas into products.</h1>
+  <p>
+    Two iOS apps, designed and built end to end. Eight releases, eight first-pass App Store
+    approvals, 729 tests across the two.
+  </p>
+  <p class="hint">&darr; Scroll &mdash; the whole sequence is your scroll position</p>
+</div>
+
+<section class="scene" id="scene">
+  <div class="pin">
+    <canvas id="bed"></canvas>
+
+    <div class="stage">
+      <div class="dev dev--xbill" id="dev-xbill">
+        <img src="xbill-screen.webp" width="768" height="1670"
+             alt="xBill reviewing a scanned ALDI receipt: each line item parsed with its price, and chips assigning every item to one or more people">
+        <svg viewBox="0 0 768 1670" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <mask id="m-xbill">
+            <rect width="768" height="1670" fill="#fff" />
+            <rect data-hole rx="18" fill="#000" />
+          </mask>
+          <rect data-veil width="768" height="1670" fill="#0b0b0d" fill-opacity="0" mask="url(#m-xbill)" />
+          <rect data-frame rx="18" fill="none" stroke="#5b3fd6" stroke-width="5" stroke-opacity="0" />
+        </svg>
+      </div>
+
+      <div class="dev dev--spade" id="dev-spade">
+        <img src="spade-screen.webp" width="768" height="1670"
+             alt="A Shady Spade hand in play: bidder, partners and defence, spades as trump, the called cards, and 150 scored into a 130 bid">
+        <svg viewBox="0 0 768 1670" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <mask id="m-spade">
+            <rect width="768" height="1670" fill="#fff" />
+            <rect data-hole rx="18" fill="#000" />
+          </mask>
+          <rect data-veil width="768" height="1670" fill="#0b0b0d" fill-opacity="0" mask="url(#m-spade)" />
+          <rect data-frame rx="18" fill="none" stroke="#b8902c" stroke-width="5" stroke-opacity="0" />
+        </svg>
+      </div>
+    </div>
+
+    <img class="icon icon--xbill" id="icon-xbill" src="xbill-icon.png" width="512" height="512"
+         alt="The xBill app icon: a receipt splitting into three people">
+    <img class="icon icon--spade" id="icon-spade" src="spade-icon.png" width="512" height="512"
+         alt="The Shady Spade app icon: a gold spade">
+
+    <p class="beat" id="beat">01 &mdash; Two products</p>
+    <p class="caption" id="caption"></p>
+    <p class="readout" id="readout">0%</p>
+  </div>
+</section>
+
+<div class="after">
+  <p>
+    <strong>Everything above is your scroll position.</strong> The products fly in, one comes
+    forward and is read region by region, hands over to the other, and they settle back — all of
+    it scrubbed, so scrolling back runs it backwards.
+  </p>
+  <p>
+    Underneath, the lotus never stops: four whorls of petals counter-rotate and breathe, 56 marks
+    orbit around them, and a sweep crosses the field &mdash; whether you are scrolling or not. It is
+    drawn, not photographed, so it is sharp at any size and on any display, carries the product
+    hues exactly, and has no licence attached to it. The two App Store icons are the real ones,
+    straight out of each app's asset catalogue: they sit paired above the flower, and whichever
+    product is being read flies down to stand beside its own caption.
+  </p>
+  <p class="rm-note">Reduce Motion is on, so this is showing one composed frame.</p>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+    var A = window.anime;
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    var SPOTS = {
+      xbill: [
+        { x: 40, y: 292, w: 688, h: 96, label: "Scanned, and it says how sure it is" },
+        { x: 40, y: 706, w: 688, h: 202, label: "Merchant, parsed from the receipt" },
+        { x: 40, y: 1032, w: 688, h: 190, label: "Every line item, priced" },
+        { x: 60, y: 1148, w: 440, h: 56, label: "Assigned per person, per item" },
+        { x: 40, y: 1468, w: 688, h: 172, label: "One item, one person" },
+      ],
+      spade: [
+        { x: 30, y: 78, w: 708, h: 168, label: "Bidder, partners, defence" },
+        { x: 22, y: 276, w: 234, h: 82, label: "Trump" },
+        { x: 266, y: 276, w: 236, h: 82, label: "The called cards" },
+        { x: 512, y: 276, w: 230, h: 82, label: "150 into a 130 bid" },
+        { x: 626, y: 1150, w: 96, h: 136, label: "The three of spades is worth thirty" },
+      ],
+    };
+
+    var clamp01 = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+    var lerp = function (a, b, t) { return a + (b - a) * t; };
+    var smooth = function (t) { return t * t * (3 - 2 * t); };
+    var band = function (p, from, to) { return smooth(clamp01((p - from) / (to - from))); };
+
+    var canvas = document.getElementById("bed");
+    var view = null;
+    function fit() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var r = canvas.getBoundingClientRect();
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      var ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      view = { ctx: ctx, w: r.width, h: r.height };
+    }
+    fit();
+
+    // A lotus, drawn rather than photographed: vector petals stay crisp at any
+    // size and on any display, they carry the product hues exactly, and there
+    // is no licence attached to them. Four whorls, counter-rotating.
+    var WHORLS = [
+      { n: 16, len: 0.50, wide: 0.115, speed: 1.00, colour: "#5b3fd6", alpha: 0.42 },
+      { n: 13, len: 0.405, wide: 0.125, speed: -0.62, colour: "#b8902c", alpha: 0.46 },
+      { n: 10, len: 0.315, wide: 0.135, speed: 0.34, colour: "#c33a24", alpha: 0.52 },
+      { n: 7, len: 0.195, wide: 0.120, speed: -1.35, colour: "#f4f3ef", alpha: 0.30 },
+    ];
+
+    function petalPath(ctx, len, wide) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(wide, -len * 0.34, wide * 0.62, -len * 0.84, 0, -len);
+      ctx.bezierCurveTo(-wide * 0.62, -len * 0.84, -wide, -len * 0.34, 0, 0);
+      ctx.closePath();
+    }
+
+    function drawLotus(ctx, cx, cy, R, spin, open, pulse) {
+      for (var i = 0; i < WHORLS.length; i++) {
+        var whorl = WHORLS[i];
+        // Each whorl opens a little more than the one outside it, so the
+        // flower unfurls from the middle rather than all at once.
+        var unfurl = open * (0.82 + i * 0.06);
+        var len = whorl.len * R * unfurl * (0.97 + pulse * 0.06);
+        var wide = whorl.wide * R * unfurl;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(spin * whorl.speed);
+        ctx.shadowColor = whorl.colour;
+        ctx.shadowBlur = 26;
+        for (var k = 0; k < whorl.n; k++) {
+          ctx.save();
+          ctx.rotate((k / whorl.n) * Math.PI * 2);
+          var grad = ctx.createLinearGradient(0, 0, 0, -len);
+          grad.addColorStop(0, "rgba(11,11,13,0)");
+          grad.addColorStop(0.55, whorl.colour);
+          grad.addColorStop(1, "rgba(244,243,239,0.62)");
+          ctx.globalAlpha = whorl.alpha;
+          ctx.fillStyle = grad;
+          petalPath(ctx, len, wide);
+          ctx.fill();
+          ctx.globalAlpha = whorl.alpha * 0.8;
+          ctx.strokeStyle = whorl.colour;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+
+      // The seed head at the centre.
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.globalAlpha = 0.5 + pulse * 0.3;
+      ctx.fillStyle = "#f4f3ef";
+      ctx.shadowColor = "#b8902c";
+      ctx.shadowBlur = 30;
+      ctx.beginPath();
+      ctx.arc(0, 0, R * 0.026 * (0.9 + pulse * 0.2), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 1;
+    }
+    var dots = [];
+    for (var i = 0; i < 56; i++) dots.push({ a: (i / 56) * Math.PI * 2, s: 0.25 });
+
+    // Ambient state runs on its own clock; `p` is the scroll.
+    var amb = { spin: 0.7, pulse: 0.5, sweep: 0.3 };
+    var scroll = { p: 0 };
+
+    var els = {
+      xbill: document.getElementById("dev-xbill"),
+      spade: document.getElementById("dev-spade"),
+      iconX: document.getElementById("icon-xbill"),
+      iconS: document.getElementById("icon-spade"),
+      caption: document.getElementById("caption"),
+      readout: document.getElementById("readout"),
+      beat: document.getElementById("beat"),
+    };
+
+    function parts(el) {
+      return {
+        hole: el.querySelector("[data-hole]"),
+        veil: el.querySelector("[data-veil]"),
+        frame: el.querySelector("[data-frame]"),
+      };
+    }
+    var px = parts(els.xbill), ps = parts(els.spade);
+
+    // Reads one product's anchors across a stretch of the scroll.
+    function readThrough(part, spots, t, accent) {
+      if (t <= 0 || t >= 1) {
+        part.veil.setAttribute("fill-opacity", "0");
+        part.frame.setAttribute("stroke-opacity", "0");
+        return null;
+      }
+      var n = spots.length;
+      var u = clamp01(t) * (n - 1);
+      var i = Math.min(n - 2, Math.floor(u));
+      var f = u - i;
+      var e = smooth(clamp01((f - 0.18) / 0.64));
+      var a = spots[i], b = spots[i + 1];
+      var x = lerp(a.x, b.x, e), y = lerp(a.y, b.y, e);
+      var w = lerp(a.w, b.w, e), h = lerp(a.h, b.h, e);
+      for (var k = 0; k < 2; k++) {
+        var r = k === 0 ? part.hole : part.frame;
+        r.setAttribute("x", x); r.setAttribute("y", y);
+        r.setAttribute("width", w); r.setAttribute("height", h);
+      }
+      // Fades in at the start of the read and out at the end.
+      var strength = Math.min(band(t, 0, 0.08), 1 - band(t, 0.92, 1));
+      part.veil.setAttribute("fill-opacity", String(0.72 * strength));
+      part.frame.setAttribute("stroke-opacity", String(strength));
+      part.frame.setAttribute("stroke", accent);
+      return { label: f < 0.5 ? a.label : b.label, opacity: clamp01(Math.abs(f - 0.5) / 0.32) * strength };
+    }
+
+    function place(el, x, y, scale, rot, opacity) {
+      el.style.transform = "translate(" + x + "px," + y + "px) scale(" + scale + ") rotate(" + rot + "deg)";
+      el.style.opacity = String(opacity);
+    }
+
+    function frame() {
+      var ctx = view.ctx, w = view.w, h = view.h;
+      var p = scroll.p;
+      var spread = Math.min(w * 0.22, 260);
+
+      // --- The four beats, all of them scroll position -------------------
+      var gather = band(p, 0.02, 0.18);      // fly in from the sides
+      var toX = band(p, 0.20, 0.32);         // xBill comes forward
+      var readX = clamp01((p - 0.32) / 0.20);
+      var hand = band(p, 0.52, 0.64);        // hands over
+      var readS = clamp01((p - 0.64) / 0.20);
+      var settle = band(p, 0.86, 0.98);      // both return
+
+      var xbillX = lerp(-spread * 2.2, -spread, gather);
+      xbillX = lerp(xbillX, 0, toX);
+      xbillX = lerp(xbillX, -spread * 1.5, hand);
+      xbillX = lerp(xbillX, -spread * 0.9, settle);
+
+      var spadeX = lerp(spread * 2.2, spread, gather);
+      spadeX = lerp(spadeX, spread * 1.5, toX);
+      spadeX = lerp(spadeX, 0, hand);
+      spadeX = lerp(spadeX, spread * 0.9, settle);
+
+      var xbillScale = lerp(0.6, 0.92, gather);
+      xbillScale = lerp(xbillScale, 1.55, toX);
+      xbillScale = lerp(xbillScale, 0.8, hand);
+      xbillScale = lerp(xbillScale, 0.95, settle);
+
+      var spadeScale = lerp(0.6, 0.92, gather);
+      spadeScale = lerp(spadeScale, 0.8, toX);
+      spadeScale = lerp(spadeScale, 1.55, hand);
+      spadeScale = lerp(spadeScale, 0.95, settle);
+
+      place(els.xbill, xbillX, lerp(40, 0, gather), xbillScale,
+        lerp(-10, -4, gather) + lerp(0, 4, toX) - lerp(0, 4, hand), lerp(0, 1, gather));
+      place(els.spade, spadeX, lerp(40, 0, gather), spadeScale,
+        lerp(10, 4, gather) - lerp(0, 4, hand), lerp(0, 1, gather));
+
+      // The app icons: paired above the flower while both products are on
+      // stage, then the focused one flies down to sit with its caption.
+      var iconPad = Math.min(Math.max(w * 0.05, 20), 64);
+      var iconSize = Math.min(h * 0.095, 88);
+      var homeY = -h * 0.33;
+      var homeGap = Math.min(w * 0.06, 70);
+      // Under the beat label, top left: the bottom left belongs to the
+      // caption, and an icon parked there sat on top of its own words.
+      var focusX = -w / 2 + iconPad + iconSize * 0.62;
+      var focusY = -h / 2 + iconPad + iconSize * 0.62 + 44;
+      var liveX = readX > 0 && readX < 1 ? 1 : 0;
+      var liveS = readS > 0 && readS < 1 ? 1 : 0;
+
+      place(els.iconX,
+        lerp(-homeGap, focusX, liveX), lerp(homeY, focusY, liveX),
+        lerp(1, 1.24, liveX), lerp(-8, 0, gather) + amb.pulse * 2,
+        gather * (liveS ? 0.12 : 1));
+      place(els.iconS,
+        lerp(homeGap, focusX, liveS), lerp(homeY, focusY, liveS),
+        lerp(1, 1.24, liveS), lerp(8, 0, gather) - amb.pulse * 2,
+        gather * (liveX ? 0.12 : 1));
+
+      var readingX = readThrough(px, SPOTS.xbill, readX, "#5b3fd6");
+      var readingS = readThrough(ps, SPOTS.spade, readS, "#b8902c");
+      var reading = readingX || readingS;
+      if (reading) {
+        els.caption.textContent = reading.label;
+        els.caption.style.opacity = String(reading.opacity);
+        els.caption.style.color = readingX ? "#5b3fd6" : "#b8902c";
+      } else {
+        els.caption.style.opacity = "0";
+      }
+
+      els.readout.textContent = Math.round(p * 100) + "%";
+      els.beat.textContent =
+        p < 0.2 ? "01 — Two products" :
+        p < 0.52 ? "02 — xBill, read through" :
+        p < 0.86 ? "03 — The Shady Spade, read through" : "04 — Both, shipped";
+
+      // --- The machine, which never stops --------------------------------
+      ctx.clearRect(0, 0, w, h);
+      var cx = w * 0.5, cy = h * 0.5, R = Math.min(w, h);
+      // It tightens as a product is read, so the rings breathe with the story.
+      var focus = Math.max(readX > 0 && readX < 1 ? 1 : 0, readS > 0 && readS < 1 ? 1 : 0);
+      var squeeze = lerp(1, 0.82, focus);
+
+      // The flower opens as the sequence begins and closes in around whichever
+      // product is being read, so it answers the scroll rather than ignoring it.
+      drawLotus(ctx, cx, cy, R, amb.spin + p * Math.PI * 1.5, lerp(0.55, 1, band(p, 0, 0.2)) * squeeze, amb.pulse);
+
+      for (var d = 0; d < dots.length; d++) {
+        var dot = dots[d];
+        var rr = R * 0.545 * squeeze;
+        var x = cx + Math.cos(dot.a + amb.spin * 0.22 + p * 1.2) * rr;
+        var y = cy + Math.sin(dot.a + amb.spin * 0.22 + p * 1.2) * rr;
+        ctx.beginPath();
+        ctx.fillStyle = "#f4f3ef";
+        ctx.globalAlpha = 0.18 + dot.s * 0.7;
+        ctx.arc(x, y, 1.2 + dot.s * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      var sx = amb.sweep * w;
+      var grad = ctx.createLinearGradient(sx - 160, 0, sx + 160, 0);
+      grad.addColorStop(0, "rgba(91,63,214,0)");
+      grad.addColorStop(0.5, "rgba(91,63,214,0.16)");
+      grad.addColorStop(1, "rgba(91,63,214,0)");
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = grad;
+      ctx.fillRect(sx - 160, 0, 320, h);
+    }
+
+    if (!A || reduced) {
+      scroll.p = 0.14;
+      frame();
+      return;
+    }
+
+    // Ambient: its own clocks, none of them shared.
+    A.animate(amb, { spin: 0.7 + Math.PI * 2, duration: 15000, ease: "linear", loop: true });
+    A.animate(amb, { pulse: [0, 1], duration: 1900, ease: "inOutSine", loop: true, alternate: true });
+    A.animate(amb, { sweep: [-0.2, 1.2], duration: 5400, ease: "inOutQuad", loop: true });
+    A.animate(dots, {
+      s: [{ to: 1 }, { to: 0.12 }],
+      duration: 1600, ease: "outElastic(1, .6)", loop: true,
+      delay: A.stagger(62, { from: "first" }),
+    });
+
+    // Scrubbed: the sequence IS the scroll position.
+    A.animate(scroll, {
+      p: 1,
+      ease: "linear",
+      autoplay: A.onScroll({
+        target: document.getElementById("scene"),
+        enter: "top top",
+        leave: "bottom bottom",
+        sync: true,
+      }),
+    });
+
+    A.animate({ t: 0 }, { t: 1, duration: 1e9, ease: "linear", onUpdate: frame });
+    window.addEventListener("resize", fit, { passive: true });
+  })();
+</script>

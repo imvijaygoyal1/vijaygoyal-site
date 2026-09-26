@@ -1,0 +1,517 @@
+<title>Scroll Scrub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+<style>
+  :root {
+    --paper: #f6f5f1;
+    --paper-raised: #fffefb;
+    --ink: #0f0f10;
+    --ink-muted: #5c5c60;
+    --ink-faint: #6e6e72;
+    --line-hair: #dcdad3;
+    --accent: #c33a24;
+    --accent-xbill: #5b3fd6;
+    --accent-spade: #8a6a1f;
+    --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --tracking-label: 0.16em;
+    --measure: 34rem;
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--family-body);
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .gutter { padding-inline: max(1rem, 5vw); }
+  .inner { max-width: 74rem; margin-inline: auto; }
+
+  .label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  /* ---- Intro ---------------------------------------------------------- */
+
+  .intro {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.25rem;
+    border-bottom: 1px solid var(--ink);
+    padding-block: 3rem;
+  }
+
+  .intro h1 {
+    font-size: clamp(1.9rem, 6vw, 3.6rem);
+    line-height: 1.0;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+    margin: 0;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+
+  .intro p { max-width: var(--measure); color: var(--ink-muted); margin: 0; }
+
+  .hint {
+    font-family: var(--family-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+  }
+
+  /* ---- Scenes ---------------------------------------------------------- */
+
+  .scene { position: relative; }
+  .scene-1 { height: 280vh; }
+  .scene-2 { height: 320vh; }
+  .scene-3 { height: 320vh; }
+  .scene-4 { height: 190vh; }
+
+  .pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: clamp(0.6rem, 2vw, 1.25rem);
+    padding-block: clamp(1rem, 3vh, 2rem);
+    box-sizing: border-box;
+  }
+
+  .pin-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border-bottom: 1px solid var(--line-hair);
+    padding-bottom: 0.6rem;
+    width: 100%;
+  }
+
+  .pin-head h2 {
+    font-size: clamp(1rem, 0.92rem + 0.55vw, 1.35rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+
+  .readout {
+    font-family: var(--family-mono);
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .frame {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-hair);
+    display: grid;
+    place-items: center;
+    min-height: 0;
+    overflow: hidden;
+    padding: clamp(0.5rem, 2vw, 1.25rem);
+  }
+
+  .frame svg { display: block; width: 100%; height: auto; max-height: 100%; }
+
+  /* An art frame takes the drawing's own proportions, so the graphic fills it
+     rather than floating in the middle of a 100vh box on a phone. */
+  .frame--art {
+    aspect-ratio: 3 / 2;
+    height: auto;
+    max-height: 100%;
+    width: 100%;
+    align-self: center;
+  }
+
+  /* ---- A real product capture, with a travelling spotlight ------------- */
+
+  .frame--capture { background: var(--paper); border: 0; padding: 0; }
+
+  /* The image sets the size and the wrapper shrink-wraps it, so the capture
+     can never be taller than the pinned viewport. Deriving the wrapper from an
+     aspect-ratio instead let it overflow on a phone. */
+  .capture {
+    position: relative;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .capture img {
+    display: block;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    border-radius: 14px;
+    box-shadow: 0 20px 44px rgb(15 15 16 / 16%);
+  }
+
+  .capture svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* ---- Scene 4 --------------------------------------------------------- */
+
+  .facts { display: grid; gap: 0.9rem; align-content: center; width: 100%; max-width: 42rem; }
+
+  .fact {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr);
+    gap: 0 1rem;
+    align-items: baseline;
+    border-top: 1px solid var(--line-hair);
+    padding-top: 0.6rem;
+  }
+
+  .fact .n { font-family: var(--family-mono); font-size: 0.75rem; color: var(--accent); }
+  .fact .t { font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.15rem); }
+
+  /* ---- Closing --------------------------------------------------------- */
+
+  .closing {
+    border-top: 1px solid var(--ink);
+    padding-block: clamp(2rem, 6vw, 3.5rem) 4rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .closing p { max-width: var(--measure); color: var(--ink-muted); margin: 0; }
+  .closing strong { color: var(--ink); font-weight: 600; }
+
+  code {
+    font-family: var(--family-mono);
+    font-size: 0.85em;
+    background: var(--paper-raised);
+    border: 1px solid var(--line-hair);
+    padding: 0.05em 0.3em;
+  }
+
+  .note { font-size: 0.9rem; color: var(--ink-faint); max-width: var(--measure); }
+
+  .rm-note { display: none; }
+  @media (prefers-reduced-motion: reduce) { .rm-note { display: block; } }
+</style>
+
+<div class="gutter">
+  <div class="inner intro">
+    <p class="label">Scroll-scrubbed motion &middot; vijaygoyal.org</p>
+    <h1>The scroll bar is the playhead.</h1>
+    <p>
+      Nothing here plays on a timer. Each scene below is wired to your scroll position &mdash;
+      scroll down and it advances, scroll back up and it runs backwards, stop halfway and it
+      holds. The percentage in each corner is the actual progress value driving it.
+    </p>
+    <p>
+      Scenes 02 and 03 use <strong>your real product captures</strong> &mdash; the same two files
+      already in the site&rsquo;s bundle, so they add nothing to the payload.
+    </p>
+    <p class="hint">&darr; Scroll slowly</p>
+  </div>
+</div>
+
+<!-- 01 ------------------------------------------------------------------- -->
+<section class="scene scene-1" id="scene-1">
+  <div class="pin gutter">
+    <div class="inner pin-head">
+      <h2>01 &mdash; The line draws as you scroll</h2>
+      <span class="readout" id="read-1">0%</span>
+    </div>
+    <div class="frame frame--art">
+      <svg viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="A line wanders, then resolves into the outline of a phone, drawn in step with the scroll">
+        <path id="route" fill="none" stroke="#0f0f10" stroke-width="1.8"
+              stroke-linecap="round" stroke-linejoin="round"
+              d="M 30 210
+                 C 68 118, 108 302, 150 206
+                 C 181 138, 206 268, 236 209
+                 C 263 174, 291 234, 319 211
+                 C 341 196, 366 210, 390 210
+                 L 390 112
+                 A 22 22 0 0 1 412 90
+                 L 518 90
+                 A 22 22 0 0 1 540 112
+                 L 540 328
+                 A 22 22 0 0 1 518 350
+                 L 412 350
+                 A 22 22 0 0 1 390 328
+                 L 390 210" />
+        <circle id="head" r="5.5" fill="#c33a24" cx="0" cy="0" />
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- 02 — xBill ------------------------------------------------------------ -->
+<section class="scene scene-2" id="scene-2">
+  <div class="pin gutter">
+    <div class="inner pin-head">
+      <h2>02 &mdash; xBill, read as you scroll</h2>
+      <span class="readout" id="read-2">0%</span>
+    </div>
+    <div class="frame frame--capture">
+      <div class="capture">
+        <img src="xbill-screen.webp" width="768" height="1670"
+             alt="xBill reviewing a scanned ALDI receipt: each line item parsed with its price, and chips assigning every item to one or more people">
+        <svg id="ov-xbill" viewBox="0 0 768 1670" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 — The Shady Spade --------------------------------------------------- -->
+<section class="scene scene-3" id="scene-3">
+  <div class="pin gutter">
+    <div class="inner pin-head">
+      <h2>03 &mdash; The Shady Spade, read as you scroll</h2>
+      <span class="readout" id="read-3">0%</span>
+    </div>
+    <div class="frame frame--capture">
+      <div class="capture">
+        <img src="spade-screen.webp" width="768" height="1670"
+             alt="A Shady Spade hand in play: bidder, partners and defence, spades as trump, the called cards, and 150 scored into a 130 bid">
+        <svg id="ov-spade" viewBox="0 0 768 1670" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 --------------------------------------------------------------------- -->
+<section class="scene scene-4" id="scene-4">
+  <div class="pin gutter">
+    <div class="inner pin-head">
+      <h2>04 &mdash; What the site does today</h2>
+      <span class="readout" id="read-4">0%</span>
+    </div>
+    <div class="frame">
+      <div class="facts">
+        <div class="fact"><span class="n">01</span><span class="t">Two iOS apps, designed and built end to end</span></div>
+        <div class="fact"><span class="n">02</span><span class="t">Eight releases, eight first-pass App Store approvals</span></div>
+        <div class="fact"><span class="n">03</span><span class="t">729 tests across the two</span></div>
+        <div class="fact"><span class="n">04</span><span class="t">Swift &middot; SwiftUI &middot; Supabase &middot; Postgres row-level security</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="gutter">
+  <div class="inner closing">
+    <p class="label">What this is</p>
+    <p>
+      <strong>01</strong> is <code>svg.createDrawable</code> with its progress bound to scroll
+      instead of to time. <strong>02</strong> and <strong>03</strong> hold your real captures
+      still and move a spotlight through them, one feature at a time, scrubbed.
+      <strong>04</strong> is the other mode &mdash; it triggers once on arrival and plays at its
+      own speed. That last one is what the live site does today, which is why it reads as so
+      much less than the three above it.
+    </p>
+    <p class="note">
+      All anime.js, which already ships in your bundle: marginal cost 0&nbsp;kB. Both captures
+      are the existing <code>xbill-screen.webp</code> and <code>spade-screen.webp</code>, so the
+      233&nbsp;kB image budget is untouched. No 3D engine anywhere.
+    </p>
+    <p class="note rm-note">
+      Reduce Motion is on in your system settings, so every scene is showing its finished state
+      and nothing is scrubbing. That setting is also why the live site shows you no motion.
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var NS = "http://www.w3.org/2000/svg";
+    var ACCENT = "#c33a24";
+
+    /* Anchors measured off the 768x1670 captures themselves. */
+    var SPOTS = {
+      "ov-xbill": [
+        { x: 40, y: 292, w: 688, h: 96, label: "SCANNED &middot; AND IT SAYS HOW SURE IT IS" },
+        { x: 40, y: 706, w: 688, h: 202, label: "MERCHANT, PARSED FROM THE RECEIPT" },
+        { x: 40, y: 1032, w: 688, h: 190, label: "EVERY LINE ITEM, PRICED" },
+        { x: 60, y: 1148, w: 440, h: 56, label: "ASSIGNED PER PERSON, PER ITEM" },
+        { x: 40, y: 1468, w: 688, h: 172, label: "ONE ITEM, ONE PERSON" }
+      ],
+      "ov-spade": [
+        { x: 30, y: 78, w: 708, h: 168, label: "BIDDER &middot; PARTNERS &middot; DEFENCE" },
+        { x: 22, y: 276, w: 234, h: 82, label: "TRUMP" },
+        { x: 266, y: 276, w: 236, h: 82, label: "THE CALLED CARDS" },
+        { x: 512, y: 276, w: 230, h: 82, label: "150 INTO A 130 BID" },
+        { x: 626, y: 1150, w: 96, h: 136, label: "THE 3 OF SPADES IS WORTH 30" }
+      ]
+    };
+
+    function buildOverlay(id) {
+      var svg = document.getElementById(id);
+      var spots = SPOTS[id];
+
+      var mask = document.createElementNS(NS, "mask");
+      mask.setAttribute("id", id + "-mask");
+      var full = document.createElementNS(NS, "rect");
+      full.setAttribute("width", 768); full.setAttribute("height", 1670);
+      full.setAttribute("fill", "#fff");
+      var hole = document.createElementNS(NS, "rect");
+      hole.setAttribute("fill", "#000"); hole.setAttribute("rx", 14);
+      mask.appendChild(full); mask.appendChild(hole);
+      svg.appendChild(mask);
+
+      // The veil is the site's own paper, so the capture is quietened rather
+      // than darkened — the page stays light even while it spotlights.
+      var veil = document.createElementNS(NS, "rect");
+      veil.setAttribute("width", 768); veil.setAttribute("height", 1670);
+      veil.setAttribute("fill", "#f6f5f1");
+      veil.setAttribute("fill-opacity", "0.66");
+      veil.setAttribute("mask", "url(#" + id + "-mask)");
+      svg.appendChild(veil);
+
+      var box = document.createElementNS(NS, "rect");
+      box.setAttribute("fill", "none");
+      box.setAttribute("stroke", ACCENT);
+      box.setAttribute("stroke-width", "3");
+      box.setAttribute("rx", 14);
+      svg.appendChild(box);
+
+      var text = document.createElementNS(NS, "text");
+      text.setAttribute("fill", ACCENT);
+      text.setAttribute("font-family", "ui-monospace, SFMono-Regular, Menlo, monospace");
+      text.setAttribute("font-size", "26");
+      text.setAttribute("font-weight", "600");
+      text.setAttribute("letter-spacing", "2");
+      svg.appendChild(text);
+
+      return { svg: svg, spots: spots, hole: hole, box: box, text: text };
+    }
+
+    function smooth(t) { return t * t * (3 - 2 * t); }
+    function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+
+    // One spotlight travelling between anchors: it rests on each, then moves.
+    function place(ov, p) {
+      var spots = ov.spots, n = spots.length;
+      var t = clamp01(p) * (n - 1);
+      var i = Math.min(n - 2, Math.floor(t));
+      var f = t - i;
+      var e = smooth(clamp01((f - 0.18) / 0.64));   // hold, travel, hold
+      var a = spots[i], b = spots[i + 1];
+
+      var x = a.x + (b.x - a.x) * e;
+      var y = a.y + (b.y - a.y) * e;
+      var w = a.w + (b.w - a.w) * e;
+      var h = a.h + (b.h - a.h) * e;
+
+      ov.hole.setAttribute("x", x); ov.hole.setAttribute("y", y);
+      ov.hole.setAttribute("width", w); ov.hole.setAttribute("height", h);
+      ov.box.setAttribute("x", x); ov.box.setAttribute("y", y);
+      ov.box.setAttribute("width", w); ov.box.setAttribute("height", h);
+
+      var near = f < 0.5 ? a : b;
+      // The label sits above its subject, unless the subject is at the top.
+      var above = y > 150;
+      ov.text.setAttribute("x", Math.max(24, Math.min(x, 768 - 24)));
+      ov.text.setAttribute("y", above ? y - 18 : y + h + 36);
+      ov.text.setAttribute("text-anchor", "start");
+      ov.text.innerHTML = near.label;
+      // Full while the spotlight rests on an anchor, out at the midpoint of
+      // the travel, so the label swaps without ever reading as the wrong one.
+      ov.text.setAttribute("fill-opacity", clamp01(Math.abs(f - 0.5) / 0.32));
+    }
+
+    var xbill = buildOverlay("ov-xbill");
+    var spade = buildOverlay("ov-spade");
+
+    function readout(id, v) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = Math.round(clamp01(v) * 100) + "%";
+    }
+
+    // The resting state is the finished state: with no script, no library or
+    // under reduced motion the captures are simply shown, unveiled.
+    if (reduced || !window.anime) {
+      xbill.svg.style.display = "none";
+      spade.svg.style.display = "none";
+      var head = document.getElementById("head");
+      if (head) head.style.opacity = "0";
+      readout("read-1", 1); readout("read-2", 1); readout("read-3", 1); readout("read-4", 1);
+      return;
+    }
+
+    place(xbill, 0);
+    place(spade, 0);
+
+    var A = window.anime;
+
+    // enter/leave read "<container edge> <target edge>", so 'top top' →
+    // 'bottom bottom' is a pinned scene's full travel: 0 as its top meets the
+    // viewport top, 1 as its bottom meets the viewport bottom.
+    function scrub(sceneId) {
+      return A.onScroll({
+        target: document.getElementById(sceneId),
+        enter: "top top",
+        leave: "bottom bottom",
+        sync: true
+      });
+    }
+
+    /* 01 — the drawable's progress IS the scroll position. */
+    var motion = A.svg.createMotionPath("#route");
+    A.animate(A.svg.createDrawable("#route"), {
+      draw: ["0 0", "0 1"], ease: "linear", autoplay: scrub("scene-1")
+    });
+    A.animate("#head", {
+      translateX: motion.translateX, translateY: motion.translateY,
+      ease: "linear", autoplay: scrub("scene-1")
+    });
+    var s1 = { p: 0 };
+    A.animate(s1, {
+      p: 1, ease: "linear", autoplay: scrub("scene-1"),
+      onUpdate: function () { readout("read-1", s1.p); }
+    });
+
+    /* 02 and 03 — one scrubbed value moves the spotlight through the capture. */
+    var s2 = { p: 0 };
+    A.animate(s2, {
+      p: 1, ease: "linear", autoplay: scrub("scene-2"),
+      onUpdate: function () { place(xbill, s2.p); readout("read-2", s2.p); }
+    });
+
+    var s3 = { p: 0 };
+    A.animate(s3, {
+      p: 1, ease: "linear", autoplay: scrub("scene-3"),
+      onUpdate: function () { place(spade, s3.p); readout("read-3", s3.p); }
+    });
+
+    /* 04 — the other mode: triggered on arrival, then plays at its own pace. */
+    A.utils.set(".fact", { opacity: 0, y: 24 });
+    A.animate(".fact", {
+      opacity: [0, 1], y: [24, 0], duration: 760, ease: "out(3)",
+      delay: A.stagger(130),
+      autoplay: A.onScroll({ target: "#scene-4", enter: "bottom top" })
+    });
+    var s4 = { p: 0 };
+    A.animate(s4, {
+      p: 1, ease: "linear", autoplay: scrub("scene-4"),
+      onUpdate: function () { readout("read-4", s4.p); }
+    });
+  })();
+</script>

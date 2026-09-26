@@ -1,0 +1,292 @@
+<title>Opening Sequence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+<style>
+  /* Tokens verbatim from vijaygoyal-site/src/styles/tokens.css. The site is
+     deliberately light-only, so this page commits to that one world and
+     paints every colour explicitly. */
+  :root {
+    --paper: #f6f5f1;
+    --paper-raised: #fffefb;
+    --ink: #0f0f10;
+    --ink-muted: #5c5c60;
+    --ink-faint: #6e6e72;
+    --line-hair: #dcdad3;
+    --accent: #c33a24;
+    --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --tracking-label: 0.16em;
+    --measure: 34rem;
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--family-body);
+    font-size: 1.0625rem;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 74rem;
+    margin-inline: auto;
+    padding-inline: max(1rem, 4vw);
+    padding-block: clamp(2rem, 6vw, 4rem) 3rem;
+  }
+
+  .label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  /* ---- The mock of the site's opening -------------------------------- */
+
+  .opening {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+    border-top: 1px solid var(--ink);
+    padding-top: clamp(1.75rem, 4vw, 3rem);
+  }
+
+  @media (max-width: 820px) {
+    .opening { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  .descriptor {
+    font-family: var(--family-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin: 0 0 clamp(1rem, 3vw, 1.75rem);
+  }
+
+  h1 {
+    /* Sized so each of the two lines stays one line at every width: a wrapped
+       line escapes its clip box and the rise reads as a jump. */
+    font-size: clamp(1.9rem, 6.2vw, 3.8rem);
+    line-height: 1.0;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .clip { display: block; overflow: hidden; }
+  .h1-line { display: block; white-space: nowrap; will-change: transform; }
+
+  .rows {
+    display: grid;
+    gap: 1.1rem;
+    margin-top: clamp(1.5rem, 4vw, 2.5rem);
+    max-width: var(--measure);
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr);
+    gap: 0 1.25rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--line-hair);
+  }
+
+  @media (max-width: 560px) {
+    .row { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
+  }
+
+  .row p { margin: 0; color: var(--ink-muted); font-size: 0.9375rem; }
+
+  .stage {
+    background: var(--paper-raised);
+    border: 1px solid var(--line-hair);
+    padding: clamp(0.75rem, 2vw, 1.25rem);
+  }
+
+  .stage svg { display: block; width: 100%; height: auto; }
+
+  /* ---- Controls and notes -------------------------------------------- */
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    margin-top: clamp(2rem, 5vw, 3rem);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--ink);
+  }
+
+  button {
+    font: inherit;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--ink);
+    background: none;
+    border: 0;
+    border-bottom: 2px solid var(--accent);
+    padding: 0.15rem 0;
+    cursor: pointer;
+  }
+
+  button:hover { color: var(--accent); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+  .credits {
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 1.1rem 1.75rem;
+    border-top: 1px solid var(--line-hair);
+    padding-top: 1.25rem;
+  }
+
+  .credits div { display: grid; gap: 0.15rem; }
+  .credits .k {
+    font-size: 0.6875rem; font-weight: 600; letter-spacing: var(--tracking-label);
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+  .credits .v { font-size: 0.9rem; }
+  .credits code {
+    font-family: var(--family-mono); font-size: 0.85em;
+    background: var(--paper-raised); border: 1px solid var(--line-hair);
+    padding: 0.05em 0.3em;
+  }
+
+  .note { font-size: 0.9rem; color: var(--ink-faint); max-width: var(--measure); }
+
+  .rm-note { display: none; }
+  @media (prefers-reduced-motion: reduce) { .rm-note { display: block; } }
+</style>
+
+<div class="wrap">
+  <p class="label">Study A, rebuilt · vijaygoyal.org</p>
+
+  <div class="opening">
+    <div>
+      <p class="descriptor" id="descriptor">Product · Design · Technology · AI</p>
+      <h1>
+        <span class="clip"><span class="h1-line">I turn ideas</span></span>
+        <span class="clip"><span class="h1-line">into products.</span></span>
+      </h1>
+      <div class="rows">
+        <div class="row">
+          <p class="label">What I do</p>
+          <p>Product manager and independent app builder. I design, build and ship my own iOS apps, end to end.</p>
+        </div>
+        <div class="row">
+          <p class="label">Shipped</p>
+          <p>Two iOS apps · eight releases, eight first-pass App Store approvals as of September 2026 · 729 tests across the two.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <svg viewBox="0 0 600 420" role="img" aria-label="A line wanders, searching, then resolves into the outline of a phone">
+        <path id="route" fill="none" stroke="#0f0f10" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round"
+              d="M 30 210
+                 C 68 118, 108 302, 150 206
+                 C 181 138, 206 268, 236 209
+                 C 263 174, 291 234, 319 211
+                 C 341 196, 366 210, 390 210
+                 L 390 112
+                 A 22 22 0 0 1 412 90
+                 L 518 90
+                 A 22 22 0 0 1 540 112
+                 L 540 328
+                 A 22 22 0 0 1 518 350
+                 L 412 350
+                 A 22 22 0 0 1 390 328
+                 L 390 210" />
+        <path id="bar" fill="none" stroke="#0f0f10" stroke-width="3"
+              stroke-linecap="round" d="M 437 326 L 493 326" />
+        <circle id="head" r="4.5" fill="#c33a24" cx="0" cy="0" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="replay" type="button">Replay the sequence</button>
+    <span class="note">Watch it more than once — the whole thing is over in 3.2 seconds.</span>
+  </div>
+
+  <p class="note rm-note" style="margin-top:1.25rem">
+    Reduce Motion is on in your system settings, so this page is showing you its finished
+    resting state and nothing is animating. That is the same setting that has been hiding the
+    live site's motion.
+  </p>
+
+  <div class="credits">
+    <div><span class="k">Line drawn by</span><span class="v"><code>svg.createDrawable</code></span></div>
+    <div><span class="k">Mark rides</span><span class="v"><code>svg.createMotionPath</code></span></div>
+    <div><span class="k">Copy split by</span><span class="v"><code>splitText</code> + <code>stagger</code></span></div>
+    <div><span class="k">Orchestrated by</span><span class="v"><code>createTimeline</code></span></div>
+    <div><span class="k">Marginal cost</span><span class="v">0 kB — anime.js already ships</span></div>
+    <div><span class="k">3D engine</span><span class="v">None. SVG only.</span></div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var replay = document.getElementById("replay");
+
+    // The resting state is the finished state: the markup above is already the
+    // finished page. Nothing is hidden until the script decides to drive it, so
+    // a blocked CDN or a thrown error leaves a complete opening, not a blank one.
+    if (reduced || !window.anime) {
+      document.getElementById("head").style.opacity = "0";
+      if (replay) replay.parentNode.removeChild(replay);
+      return;
+    }
+
+    var A = window.anime;
+    var timeline = null;
+
+    function build() {
+      if (timeline) timeline.revert();
+
+      // Pre-state, set from script only — see above.
+      A.utils.set(".h1-line", { y: "110%" });
+      A.utils.set("#descriptor, .row", { opacity: 0, y: 14 });
+      A.utils.set("#head", { opacity: 1 });
+
+      var motion = A.svg.createMotionPath("#route");
+
+      timeline = A.createTimeline({ defaults: { ease: "inOut(2)" } });
+
+      // The line searches, then resolves — with the accent mark at its head.
+      timeline
+        .add(A.svg.createDrawable("#route"), { draw: ["0 0", "0 1"], duration: 2400 }, 0)
+        .add("#head", {
+          translateX: motion.translateX,
+          translateY: motion.translateY,
+          duration: 2400,
+          ease: "inOut(2)"
+        }, 0)
+        // The type arrives while the line is still drawing, so the two read as
+        // one moment rather than as a slideshow of two.
+        .add(".h1-line", { y: ["110%", "0%"], duration: 980, ease: "out(3)" }, A.stagger(130, { start: 320 }))
+        .add("#descriptor", { opacity: [0, 1], y: [14, 0], duration: 620 }, 250)
+        .add(".row", { opacity: [0, 1], y: [14, 0], duration: 700 }, A.stagger(120, { start: 1250 }))
+        // The line lands, the mark retires, and the one detail inside the
+        // outline finishes the drawing.
+        .add("#head", { opacity: [1, 0], duration: 320 }, 2320)
+        .add(A.svg.createDrawable("#bar"), { draw: ["0 0", "0 1"], duration: 460 }, 2360);
+    }
+
+    build();
+    if (replay) replay.addEventListener("click", build);
+  })();
+</script>

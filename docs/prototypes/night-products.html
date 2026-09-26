@@ -1,0 +1,340 @@
+<title>Night Products Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+<style>
+  :root {
+    --night: #0b0b0d;
+    --night-ink: #f4f3ef;
+    --night-faint: #8a8a93;
+    --xbill: #5b3fd6;
+    --spade: #b8902c;
+    --accent: #c33a24;
+    --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme: dark;
+  }
+
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--night-ink);
+    font-family: var(--family-body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    align-items: center;
+    gap: clamp(1rem, 4vw, 3rem);
+    padding: clamp(1.5rem, 5vw, 4rem);
+    box-sizing: border-box;
+    background:
+      radial-gradient(120% 90% at 72% 50%, rgba(91, 63, 214, 0.20), transparent 60%),
+      radial-gradient(90% 80% at 30% 80%, rgba(195, 58, 36, 0.12), transparent 60%),
+      var(--night);
+  }
+
+  #bed {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .copy { position: relative; z-index: 2; }
+
+  .tag {
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--xbill);
+    margin: 0 0 1rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 1rem + 5.6vw, 5.2rem);
+    line-height: 0.95;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+    max-width: 13ch;
+    text-wrap: balance;
+  }
+
+  .sub {
+    margin: 1.2rem 0 0;
+    max-width: 28rem;
+    color: var(--night-faint);
+  }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.6rem;
+    margin: 1.8rem 0 0;
+    padding: 1rem 0 0;
+    border-top: 1px solid rgba(244, 243, 239, 0.14);
+    list-style: none;
+    font-family: var(--family-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--night-faint);
+  }
+
+  .stats b { color: var(--night-ink); font-weight: 600; }
+
+  /* ---- The products are the graphic ----------------------------------- */
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    min-height: min(74vh, 40rem);
+  }
+
+  .device {
+    position: absolute;
+    display: block;
+    height: min(62vh, 34rem);
+    width: auto;
+    border-radius: 20px;
+    will-change: transform;
+  }
+
+  .device--xbill {
+    left: 6%;
+    box-shadow:
+      0 0 0 1px rgba(91, 63, 214, 0.45),
+      0 30px 80px rgba(91, 63, 214, 0.35),
+      0 0 120px rgba(91, 63, 214, 0.22);
+  }
+
+  .device--spade {
+    right: 6%;
+    box-shadow:
+      0 0 0 1px rgba(184, 144, 44, 0.45),
+      0 30px 80px rgba(184, 144, 44, 0.30),
+      0 0 120px rgba(184, 144, 44, 0.18);
+  }
+
+  .corner {
+    position: absolute;
+    left: clamp(1.5rem, 5vw, 4rem);
+    bottom: clamp(1.25rem, 4vw, 2.5rem);
+    z-index: 2;
+    margin: 0;
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--night-faint);
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr);
+      align-content: center;
+      gap: 1.5rem;
+      padding-block: clamp(2rem, 8vw, 3rem) 4rem;
+    }
+
+    /* The whole hero holds one screen: the copy, then the products, then the
+       caption — rather than the devices running off the bottom. */
+    .copy { order: 1; }
+    .stage { order: 2; min-height: min(42vh, 22rem); }
+    .device { height: min(38vh, 20rem); border-radius: 14px; }
+    .device--xbill { left: 1%; }
+    .device--spade { right: 1%; }
+    .corner { order: 3; position: static; margin: 0; }
+  }
+
+  .note {
+    padding: clamp(1.5rem, 5vw, 3rem);
+    color: var(--night-faint);
+    border-top: 1px solid rgba(244, 243, 239, 0.14);
+  }
+
+  .note p { max-width: 34rem; margin: 0 0 0.75rem; }
+  .note strong { color: var(--night-ink); font-weight: 600; }
+  .note :last-child { margin-bottom: 0; }
+
+  .rm-note { display: none; }
+  @media (prefers-reduced-motion: reduce) { .rm-note { display: block; } }
+</style>
+
+<section class="hero">
+  <canvas id="bed"></canvas>
+
+  <div class="copy">
+    <p class="tag">Product &middot; Design &middot; Technology &middot; AI</p>
+    <h1>I turn ideas into products.</h1>
+    <p class="sub">
+      Product manager and independent app builder. I design, build and ship my own iOS apps,
+      end to end.
+    </p>
+    <ul class="stats">
+      <li><b>2</b> apps</li>
+      <li><b>8</b> releases</li>
+      <li><b>8</b> first-pass approvals</li>
+      <li><b>729</b> tests</li>
+    </ul>
+  </div>
+
+  <div class="stage">
+    <img class="device device--xbill" id="dev-xbill" src="xbill-screen.webp" width="768" height="1670"
+         alt="xBill reviewing a scanned ALDI receipt: each line item parsed with its price, and chips assigning every item to one or more people">
+    <img class="device device--spade" id="dev-spade" src="spade-screen.webp" width="768" height="1670"
+         alt="A Shady Spade hand in play: bidder, partners and defence, spades as trump, the called cards, and 150 scored into a 130 bid">
+  </div>
+
+  <p class="corner">xBill &middot; The Shady Spade &middot; continuous</p>
+</section>
+
+<div class="note">
+  <p>
+    <strong>Same posture as anime.js, your assets as the machine.</strong> Four rings counter-rotate
+    behind the products in their own hues, 56 marks breathe on an orbit, and a light sweep crosses
+    the field &mdash; all of it continuous, none of it waiting for a scroll. The two captures float
+    and tilt on different periods, so they never fall into step with each other.
+  </p>
+  <p class="rm-note">
+    Reduce Motion is on in your system settings, so this is showing one frozen frame.
+  </p>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+    var A = window.anime;
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    var canvas = document.getElementById("bed");
+    var view = null;
+
+    function fit() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var r = canvas.getBoundingClientRect();
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      var ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      view = { ctx: ctx, w: r.width, h: r.height };
+    }
+    fit();
+
+    var RINGS = [
+      { r: 0.46, w: 2.5, gap: 0.30, speed: 1, colour: "#5b3fd6" },
+      { r: 0.385, w: 1.4, gap: 0.55, speed: -0.62, colour: "#b8902c" },
+      { r: 0.305, w: 4, gap: 0.12, speed: 0.34, colour: "#c33a24" },
+      { r: 0.235, w: 1, gap: 0.72, speed: -1.35, colour: "#f4f3ef" },
+    ];
+    var DOTS = 56;
+    var dots = [];
+    for (var i = 0; i < DOTS; i++) dots.push({ a: (i / DOTS) * Math.PI * 2, s: 0.25 });
+    var state = { spin: 0.7, pulse: 0.5, sweep: 0.3 };
+
+    function draw() {
+      var ctx = view.ctx, w = view.w, h = view.h;
+      ctx.clearRect(0, 0, w, h);
+      // Centred on the products, which sit in the right-hand half on a wide
+      // screen and in the middle once it stacks.
+      var cx = w > 900 ? w * 0.70 : w * 0.5;
+      var cy = w > 900 ? h * 0.5 : h * 0.62;
+      var R = Math.min(w, h);
+
+      for (var i = 0; i < RINGS.length; i++) {
+        var ring = RINGS[i];
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(state.spin * ring.speed);
+        ctx.strokeStyle = ring.colour;
+        ctx.globalAlpha = 0.85;
+        ctx.lineWidth = ring.w;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.arc(0, 0, ring.r * R * (0.95 + state.pulse * 0.05), 0, Math.PI * 2 * (1 - ring.gap));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      for (var d = 0; d < dots.length; d++) {
+        var dot = dots[d];
+        var rr = R * 0.545;
+        var x = cx + Math.cos(dot.a + state.spin * 0.22) * rr;
+        var y = cy + Math.sin(dot.a + state.spin * 0.22) * rr;
+        ctx.beginPath();
+        ctx.fillStyle = "#f4f3ef";
+        ctx.globalAlpha = 0.18 + dot.s * 0.7;
+        ctx.arc(x, y, 1.2 + dot.s * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      var sx = state.sweep * w;
+      var grad = ctx.createLinearGradient(sx - 160, 0, sx + 160, 0);
+      grad.addColorStop(0, "rgba(91,63,214,0)");
+      grad.addColorStop(0.5, "rgba(91,63,214,0.18)");
+      grad.addColorStop(1, "rgba(91,63,214,0)");
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = grad;
+      ctx.fillRect(sx - 160, 0, 320, h);
+    }
+
+    if (!A || reduced) {
+      // The resting state is a composed frame: the products are shown, the
+      // machine behind them is simply not turning.
+      draw();
+      return;
+    }
+
+    // Nothing shares a period, so the composition never falls into step.
+    A.animate(state, { spin: 0.7 + Math.PI * 2, duration: 15000, ease: "linear", loop: true });
+    A.animate(state, { pulse: [0, 1], duration: 1900, ease: "inOutSine", loop: true, alternate: true });
+    A.animate(state, { sweep: [-0.2, 1.2], duration: 5400, ease: "inOutQuad", loop: true });
+    A.animate(dots, {
+      s: [{ to: 1 }, { to: 0.12 }],
+      duration: 1600,
+      ease: "outElastic(1, .6)",
+      loop: true,
+      delay: A.stagger(62, { from: "first" }),
+    });
+
+    // The captures float and tilt, each on its own clock.
+    A.animate("#dev-xbill", {
+      translateY: [-14, 14],
+      rotate: [-5.4, -3.2],
+      duration: 4200,
+      ease: "inOutSine",
+      loop: true,
+      alternate: true,
+    });
+    A.animate("#dev-spade", {
+      translateY: [16, -12],
+      rotate: [4.8, 2.6],
+      duration: 5300,
+      ease: "inOutSine",
+      loop: true,
+      alternate: true,
+    });
+    A.animate("#dev-xbill, #dev-spade", {
+      scale: [0.985, 1.015],
+      duration: 6100,
+      ease: "inOutQuad",
+      loop: true,
+      alternate: true,
+      delay: A.stagger(700),
+    });
+
+    A.animate({ t: 0 }, { t: 1, duration: 1e9, ease: "linear", onUpdate: draw });
+    window.addEventListener("resize", fit, { passive: true });
+  })();
+</script>

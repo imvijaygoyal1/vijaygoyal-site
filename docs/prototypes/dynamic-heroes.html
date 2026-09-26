@@ -1,0 +1,372 @@
+<title>Two Dynamic Heroes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+<style>
+  :root {
+    --paper: #f6f5f1;
+    --paper-raised: #fffefb;
+    --ink: #0f0f10;
+    --ink-muted: #5c5c60;
+    --ink-faint: #6e6e72;
+    --line-hair: #dcdad3;
+    --accent: #c33a24;
+    --xbill: #5b3fd6;
+    --spade: #8a6a1f;
+    --night: #0d0d0f;
+    --night-raised: #17171a;
+    --night-ink: #f2f1ed;
+    --night-faint: #7b7b84;
+    --family-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --family-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    --tracking-label: 0.16em;
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--family-body);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .gutter { padding-inline: max(1rem, 5vw); }
+  .inner { max-width: 68rem; margin-inline: auto; }
+
+  .label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  .intro {
+    padding-block: clamp(2.5rem, 7vw, 4rem) clamp(1.5rem, 4vw, 2.5rem);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .intro h1 {
+    font-size: clamp(1.9rem, 1.2rem + 3.2vw, 3.2rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    font-weight: 800;
+    margin: 0.7rem 0 0;
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+
+  .intro p { max-width: 36rem; color: var(--ink-muted); margin: 0.9rem 0 0; }
+
+  /* ---- A hero is a full screen ---------------------------------------- */
+
+  .hero {
+    position: relative;
+    height: 100vh;
+    min-height: 34rem;
+    overflow: hidden;
+    display: grid;
+    align-content: center;
+    gap: 1rem;
+    padding: clamp(1.5rem, 5vw, 3.5rem);
+    box-sizing: border-box;
+  }
+
+  .hero canvas,
+  .hero svg.bed {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .hero > .copy { position: relative; }
+
+  .hero .tag {
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 0 0 0.8rem;
+  }
+
+  .hero h2 {
+    margin: 0;
+    font-size: clamp(2.1rem, 1rem + 5.4vw, 5rem);
+    line-height: 0.96;
+    letter-spacing: -0.045em;
+    font-weight: 800;
+    max-width: 14ch;
+  }
+
+  .hero .sub {
+    margin: 1rem 0 0;
+    max-width: 30rem;
+    font-size: 1rem;
+  }
+
+  .hero .corner {
+    position: absolute;
+    right: clamp(1.5rem, 5vw, 3.5rem);
+    bottom: clamp(1.5rem, 5vw, 3.5rem);
+    font-family: var(--family-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+
+  /* A — paper */
+  .hero--paper { background: var(--paper); color: var(--ink); }
+  .hero--paper .tag { color: var(--accent); }
+  .hero--paper .sub { color: var(--ink-muted); }
+  .hero--paper .corner { color: var(--ink-faint); }
+
+  /* B — night */
+  .hero--night { background: var(--night); color: var(--night-ink); }
+  .hero--night .tag { color: var(--xbill); }
+  .hero--night .sub { color: var(--night-faint); }
+  .hero--night .corner { color: var(--night-faint); }
+
+  .verdict {
+    padding-block: clamp(2rem, 6vw, 3rem) 4rem;
+    display: grid;
+    gap: 1rem;
+    border-top: 1px solid var(--ink);
+  }
+
+  .verdict p { max-width: 36rem; color: var(--ink-muted); margin: 0; }
+  .verdict strong { color: var(--ink); font-weight: 600; }
+
+  .rm-note { display: none; }
+  @media (prefers-reduced-motion: reduce) { .rm-note { display: block; } }
+</style>
+
+<div class="gutter">
+  <div class="inner intro">
+    <p class="label">Two ways to be dynamic &middot; vijaygoyal.org</p>
+    <h1>Dynamic means many things moving, always.</h1>
+    <p>
+      Both heroes below fill the screen and never stop &mdash; no scrolling required, dozens of
+      elements moving at once, staggered, with spring easing. The difference between them is not
+      the amount of motion. It is whether the site stays a paper document or becomes a dark
+      showcase.
+    </p>
+    <p class="rm-note" style="color:var(--ink-faint);font-size:0.9rem">
+      Reduce Motion is on in your system settings, so both heroes are frozen. That setting has
+      been hiding the live site's motion from you all along.
+    </p>
+  </div>
+</div>
+
+<section class="hero hero--paper" id="hero-a">
+  <canvas id="bed-a"></canvas>
+  <div class="copy inner">
+    <p class="tag">A &middot; Paper, alive</p>
+    <h2>I turn ideas into products.</h2>
+    <p class="sub">
+      The site stays exactly what it is &mdash; ink on paper, one accent &mdash; but the ground
+      beneath the words is never still.
+    </p>
+  </div>
+  <p class="corner">Ink field &middot; 420 marks &middot; continuous</p>
+</section>
+
+<section class="hero hero--night" id="hero-b">
+  <canvas id="bed-b"></canvas>
+  <div class="copy inner">
+    <p class="tag">B &middot; Night, showcase</p>
+    <h2>I turn ideas into products.</h2>
+    <p class="sub">
+      The anime.js posture: dark ground, a machine in motion, type in a supporting role. This is
+      a different site from the one you have.
+    </p>
+  </div>
+  <p class="corner">Rings &middot; orbits &middot; continuous</p>
+</section>
+
+<div class="gutter">
+  <div class="inner verdict">
+    <p class="label">What you are choosing between</p>
+    <p>
+      <strong>A</strong> keeps the editorial decision you made in September and makes the page
+      genuinely alive underneath it. <strong>B</strong> abandons it: a dark showcase reads as a
+      technology product, not as a document about two apps.
+    </p>
+    <p>
+      Either can carry the capture read-through that is live now &mdash; this is about what the
+      page feels like around it, not a replacement for it.
+    </p>
+  </div>
+</div>
+
+<script>
+  (function () {
+    "use strict";
+    var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var A = window.anime;
+
+    function fit(canvas) {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var r = canvas.getBoundingClientRect();
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      var ctx = canvas.getContext("2d");
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      return { ctx: ctx, w: r.width, h: r.height };
+    }
+
+    /* ---- A · an ink field that never settles --------------------------- */
+    // Every mark is its own animation with its own delay and duration, so the
+    // field ripples rather than pulsing as one block.
+    function paperHero() {
+      var canvas = document.getElementById("bed-a");
+      var view = fit(canvas);
+      var COLS = 30, ROWS = 14;
+      var marks = [];
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          marks.push({
+            cx: (c + 0.5) / COLS,
+            cy: (r + 0.5) / ROWS,
+            // Distance from the middle drives the stagger, so the motion
+            // travels out from the centre like a ripple.
+            d: Math.hypot((c + 0.5) / COLS - 0.5, ((r + 0.5) / ROWS - 0.5) * 0.6),
+            len: 0.25,
+            tilt: 0,
+            accent: 0,
+          });
+        }
+      }
+
+      function draw() {
+        var ctx = view.ctx, w = view.w, h = view.h;
+        ctx.clearRect(0, 0, w, h);
+        var unit = Math.min(w / COLS, h / ROWS);
+        for (var i = 0; i < marks.length; i++) {
+          var m = marks[i];
+          var x = m.cx * w, y = m.cy * h;
+          var len = m.len * unit * 1.9;
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(m.tilt);
+          ctx.strokeStyle = m.accent > 0.5 ? "#c33a24" : "#0f0f10";
+          ctx.globalAlpha = m.accent > 0.5 ? 0.85 : 0.18 + m.len * 0.5;
+          ctx.lineWidth = 1.5;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(0, -len / 2);
+          ctx.lineTo(0, len / 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      if (reduced) { draw(); return; }
+
+      A.createTimeline({ defaults: { ease: "inOutQuad" }, loop: true })
+        .add(marks, {
+          len: [{ to: 1.15 }, { to: 0.18 }],
+          tilt: [{ to: Math.PI / 2 }, { to: 0 }],
+          duration: 2600,
+          delay: A.stagger(1500, { grid: [COLS, ROWS], from: "center" }),
+        }, 0)
+        .add(marks, {
+          accent: [{ to: 1, duration: 380 }, { to: 0, duration: 1600 }],
+          delay: A.stagger(16, { grid: [COLS, ROWS], from: "center" }),
+        }, 400)
+        .init();
+
+      A.animate({ t: 0 }, { t: 1, duration: 1e9, ease: "linear", onUpdate: draw });
+      window.addEventListener("resize", function () { view = fit(canvas); }, { passive: true });
+    }
+
+    /* ---- B · a machine in motion --------------------------------------- */
+    function nightHero() {
+      var canvas = document.getElementById("bed-b");
+      var view = fit(canvas);
+      var RINGS = [
+        { r: 0.46, w: 2.5, gap: 0.30, speed: 1, colour: "#5b3fd6" },
+        { r: 0.38, w: 1.5, gap: 0.55, speed: -0.6, colour: "#8a6a1f" },
+        { r: 0.30, w: 4, gap: 0.12, speed: 0.35, colour: "#c33a24" },
+        { r: 0.22, w: 1, gap: 0.72, speed: -1.4, colour: "#f2f1ed" },
+      ];
+      var state = { spin: 0, pulse: 0, sweep: 0 };
+      var DOTS = 48;
+      var dots = [];
+      for (var i = 0; i < DOTS; i++) dots.push({ a: (i / DOTS) * Math.PI * 2, s: 0.2 });
+
+      function draw() {
+        var ctx = view.ctx, w = view.w, h = view.h;
+        ctx.clearRect(0, 0, w, h);
+        var cx = w * 0.72, cy = h * 0.5;
+        if (w < 760) { cx = w * 0.5; cy = h * 0.34; }
+        var R = Math.min(w, h);
+
+        for (var i = 0; i < RINGS.length; i++) {
+          var ring = RINGS[i];
+          var radius = ring.r * R * (0.94 + state.pulse * 0.06);
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.rotate(state.spin * ring.speed);
+          ctx.strokeStyle = ring.colour;
+          ctx.globalAlpha = 0.9;
+          ctx.lineWidth = ring.w;
+          ctx.lineCap = "round";
+          var arc = Math.PI * 2 * (1 - ring.gap);
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, arc);
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // A ring of marks that breathe, each on its own phase.
+        for (var d = 0; d < dots.length; d++) {
+          var dot = dots[d];
+          var rr = R * 0.52;
+          var x = cx + Math.cos(dot.a + state.spin * 0.25) * rr;
+          var y = cy + Math.sin(dot.a + state.spin * 0.25) * rr;
+          ctx.beginPath();
+          ctx.fillStyle = "#f2f1ed";
+          ctx.globalAlpha = 0.25 + dot.s * 0.75;
+          ctx.arc(x, y, 1.4 + dot.s * 3.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // A sweep that crosses the whole field, left to right, forever.
+        var sx = state.sweep * w;
+        var grad = ctx.createLinearGradient(sx - 140, 0, sx + 140, 0);
+        grad.addColorStop(0, "rgba(91,63,214,0)");
+        grad.addColorStop(0.5, "rgba(91,63,214,0.20)");
+        grad.addColorStop(1, "rgba(91,63,214,0)");
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = grad;
+        ctx.fillRect(sx - 140, 0, 280, h);
+      }
+
+      if (reduced) { draw(); return; }
+
+      A.animate(state, { spin: Math.PI * 2, duration: 14000, ease: "linear", loop: true });
+      A.animate(state, { pulse: [0, 1], duration: 1800, ease: "inOutSine", loop: true, alternate: true });
+      A.animate(state, { sweep: [-0.15, 1.15], duration: 5200, ease: "inOutQuad", loop: true });
+      A.animate(dots, {
+        s: [{ to: 1 }, { to: 0.15 }],
+        duration: 1500,
+        ease: "outElastic(1, .6)",
+        loop: true,
+        delay: A.stagger(70, { from: "first" }),
+      });
+      A.animate({ t: 0 }, { t: 1, duration: 1e9, ease: "linear", onUpdate: draw });
+      window.addEventListener("resize", function () { view = fit(canvas); }, { passive: true });
+    }
+
+    if (!A) return;
+    paperHero();
+    nightHero();
+  })();
+</script>
