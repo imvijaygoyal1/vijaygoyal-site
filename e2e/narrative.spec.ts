@@ -35,14 +35,12 @@ test("keyboard users can skip to the introduction, then reach the work", async (
 
 test("shows both products with their screenshots and store links", async ({ page }) => {
   await page.goto("/");
-  for (const [id, name] of [
-    ["xbill", "xBill on the App Store"],
-    ["shady-spade", "The Shady Spade on the App Store"],
+  for (const [id, accent, name] of [
+    ["xbill", "xbill", "xBill on the App Store"],
+    ["shady-spade", "spade", "The Shady Spade on the App Store"],
   ] as const) {
-    const item = page.locator(`#${id}`);
-    await expect(item.getByRole("link", { name })).toBeVisible();
-    const shot = item.locator("img");
-    await expect(shot).toBeVisible();
+    await expect(page.locator(`#${id}`).getByRole("link", { name })).toBeVisible();
+    const shot = page.locator(`[data-device="${accent}"] img`);
     // Loaded, not merely present: a broken path would decode to nothing. The
     // captures are lazy, so reach them the way a visitor does.
     await shot.scrollIntoViewIfNeeded();
@@ -61,13 +59,19 @@ test("the typeface is self-hosted and actually applied", async ({ page }) => {
   expect(loaded).toContain("Inter");
 });
 
-test("ships no 3D engine", async ({ page }) => {
+test("ships no 3D engine: one 2D canvas and no WebGL", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (r) => requests.push(r.url()));
   await page.goto("/");
   await page.waitForLoadState("networkidle");
   expect(requests.filter((u) => /three|Stage-/.test(u))).toEqual([]);
-  await expect(page.locator("canvas")).toHaveCount(0);
+  await expect(page.locator("canvas")).toHaveCount(1);
+  const webgl = await page.evaluate(() => {
+    const c = document.querySelector("canvas")!;
+    // A canvas already bound to "2d" returns null for any other context.
+    return c.getContext("webgl") !== null || c.getContext("webgl2") !== null;
+  });
+  expect(webgl).toBe(false);
 });
 
 test("footer and contact links point at the sourced destinations", async ({ page }) => {
@@ -167,65 +171,4 @@ test("content arrives on scroll, and is fully visible once passed", async ({ pag
     expect(r.transform === "none" || r.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
     expect(r.clip === "none" || r.clip === "inset(0%)" || r.clip === "inset(0px)").toBe(true);
   }
-});
-
-/** Reads a scene's spotlight straight off the DOM, in the capture's own units. */
-async function spotlight(page: import("@playwright/test").Page, id: string) {
-  return page.locator(`#${id}`).evaluate((scene) => ({
-    y: Number(scene.querySelector("[data-frame]")!.getAttribute("y")),
-    caption: scene.querySelector("[data-caption]")!.textContent,
-  }));
-}
-
-test("each capture is read through as its section is scrolled, in every engine", async ({ page }) => {
-  await page.goto("/");
-  // The script marks the root only while it is actually driving the scenes.
-  await expect(page.locator("html")).toHaveClass(/js-scene/);
-
-  for (const id of ["xbill", "shady-spade"]) {
-    // The scene is the stage the capture is pinned in, not the whole article:
-    // the words above it are read in normal flow.
-    const scene = page.locator(`#${id} [data-scene]`);
-    const seen: { y: number; caption: string | null }[] = [];
-
-    // Walk the scene's own passage rather than fixed offsets, so the four
-    // viewport shapes all ask the same question.
-    for (const fraction of [0, 0.25, 0.5, 0.75, 1]) {
-      await scene.evaluate((el, f) => {
-        const box = el.getBoundingClientRect();
-        const travel = box.height - window.innerHeight;
-        window.scrollBy(0, box.top + travel * f);
-      }, fraction);
-      await page.waitForTimeout(90);
-      const { y, caption } = await spotlight(page, id);
-      seen.push({ y, caption });
-    }
-
-    // It works down the capture: every sample at or below the one before it,
-    // and the ends land exactly on the first and last anchors.
-    for (let i = 1; i < seen.length; i++) {
-      expect(seen[i]!.y, `${id} sample ${i} of ${JSON.stringify(seen)}`).toBeGreaterThanOrEqual(
-        seen[i - 1]!.y,
-      );
-    }
-    expect(seen[seen.length - 1]!.y, id).toBeGreaterThan(seen[0]!.y);
-
-    // And it says what it is pointing at, in the words CONTENT.md sources.
-    const captions = seen.map((s) => s.caption).filter(Boolean);
-    expect(new Set(captions).size, `${id} captions: ${JSON.stringify(captions)}`).toBeGreaterThan(1);
-  }
-});
-
-test("a capture is shown plainly under reduced motion", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-
-  // Not "veiled by zero" — never driven at all, so the overlay stays hidden
-  // and the capture is the picture it has always been.
-  await expect(page.locator("html")).not.toHaveClass(/js-scene/);
-  const shown = await page.locator("#xbill .screen-read").evaluate((el) => getComputedStyle(el).display);
-  expect(shown).toBe("none");
-  // And the caption never fills in, so no stray word is left on the paper.
-  expect(await page.locator("#xbill [data-caption]").textContent()).toBe("");
-  await expect(page.locator("#xbill img.screen")).toBeVisible();
 });

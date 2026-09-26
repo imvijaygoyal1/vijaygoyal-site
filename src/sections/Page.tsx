@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { observeReveals } from "../lib/reveal";
-import { observeScenes } from "../lib/scrollScene";
+import { observeNightScene } from "../scene/nightScene";
 import {
   SCREEN_H,
   SCREEN_W,
@@ -315,8 +315,8 @@ function Footer() {
 }
 
 /**
- * The whole page. No canvas, no scroll engine: the site is a document about
- * two products, and everything on it is here in the first render.
+ * The whole page. Everything on it is here in the first render; the one 2D
+ * canvas, the night scene's lotus, is drawn in an effect after first paint.
  */
 export function Page() {
   // Arrivals are marked by an observer rather than by CSS scroll timelines:
@@ -324,10 +324,10 @@ export function Page() {
   // hidden before it starts.
   useEffect(() => {
     const stopReveals = observeReveals();
-    const stopScenes = observeScenes();
+    const stopNight = observeNightScene();
     return () => {
       stopReveals();
-      stopScenes();
+      stopNight();
     };
   }, []);
 

@@ -9,7 +9,11 @@ test.describe("reduced motion", () => {
     for (const id of ["opening", "work", "process", "toolkit", "about", "contact"]) {
       await expect(page.locator(`#${id}`)).toHaveCount(1);
     }
-    await expect(page.locator("canvas")).toHaveCount(0);
+    await expect(page.locator("[data-night]")).toHaveAttribute("data-running", "false");
+    for (const sel of ['[data-device="xbill"]', '[data-device="spade"]', '[data-icon="xbill"]', '[data-icon="spade"]']) {
+      const o = await page.locator(sel).evaluate((el) => Number(getComputedStyle(el).opacity));
+      expect(o, sel).toBe(1);
+    }
   });
 });
 
@@ -37,7 +41,7 @@ test.describe("reduced motion, again", () => {
     // Everything the clock would otherwise move: opening, work, stages,
     // toolkit rows, screenshots.
     const rest = await page
-      .locator("#opening h1 .line-inner, #opening .row, #xbill > div, #xbill img, .stage, .toolkit div")
+      .locator("#opening h1 .line-inner, #opening .row, #xbill > div, [data-device] img, .stage, .toolkit div")
       .evaluateAll((els) =>
         els.map((el) => {
           const s = getComputedStyle(el);
