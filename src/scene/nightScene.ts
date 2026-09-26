@@ -4,6 +4,9 @@ import { ambientAt } from "./ambient";
 import { buildSprites, drawLotus, drawOrbit, drawSweep, type Palette, type Sprites } from "./lotus";
 import { band, choreograph, isReading, REST, type Placement } from "./motion";
 
+/** The canvas's pixel density ceiling; see `fit`. */
+export const CANVAS_DPR = 1.25;
+
 /** Reads the anchors a device carries, or nothing if they are unusable. */
 export function readSpots(el: Element): readonly Spot[] {
   const raw = el.getAttribute("data-spots");
@@ -105,7 +108,11 @@ export function observeNightScene(root: ParentNode = document): () => void {
   let sprites: Sprites | null = null;
 
   const fit = () => {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Capped at 1.25, measured: the canvas's cost is its pixel count, and at 2x
+    // a 4x-throttled phone CPU drew 21 fps (1.5x: 28, 1.25x: 38, 1x: 56). The
+    // flower is glow and soft gradients, so it gives up little; the captures
+    // and icons are DOM and stay at full resolution.
+    const dpr = Math.min(window.devicePixelRatio || 1, CANVAS_DPR);
     const r = canvas.getBoundingClientRect();
     canvas.width = Math.round(r.width * dpr);
     canvas.height = Math.round(r.height * dpr);

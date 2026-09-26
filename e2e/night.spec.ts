@@ -98,7 +98,7 @@ test.describe("the night scene", () => {
     await expect
       .poll(() =>
         page.locator("[data-bed]").evaluate((c: HTMLCanvasElement) => {
-          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
           return Math.abs(c.width - Math.round(c.getBoundingClientRect().width * dpr));
         }),
       )
