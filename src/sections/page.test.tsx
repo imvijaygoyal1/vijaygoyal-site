@@ -60,9 +60,15 @@ describe("the page", () => {
       const svg = scene.querySelector("svg.screen-read")!;
       expect(svg.getAttribute("viewBox")).toBe(`0 0 ${SCREEN_W} ${SCREEN_H}`);
       expect(svg.getAttribute("aria-hidden")).toBe("true");
-      for (const part of ["[data-hole]", "[data-frame]", "[data-caption]"]) {
+      for (const part of ["[data-hole]", "[data-frame]"]) {
         expect(svg.querySelector(part), `${product.id} ${part}`).not.toBeNull();
       }
+      // The caption is page type beside the capture, not lettering inside it,
+      // so it lives in the scene rather than in the overlay.
+      const caption = scene.querySelector("[data-caption]")!;
+      expect(caption, product.id).not.toBeNull();
+      expect(caption.tagName).toBe("P");
+      expect(caption.getAttribute("aria-hidden")).toBe("true");
       // The capture itself keeps its own transform for the CSS wipe-up.
       expect(scene.querySelector("img.screen[data-reveal]")).not.toBeNull();
     }

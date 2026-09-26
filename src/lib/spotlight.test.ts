@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Spot } from "../sections/content";
-import { captionX, estimateCaptionWidth, HOLD, sceneProgress, spotlightAt } from "./spotlight";
+import { HOLD, sceneProgress, spotlightAt } from "./spotlight";
 
 const SPOTS: readonly Spot[] = [
   { x: 0, y: 0, w: 100, h: 100, label: "first" },
@@ -103,48 +103,5 @@ describe("spotlightAt", () => {
   it("clamps progress that arrives out of range", () => {
     expect(spotlightAt(SPOTS, -3)!.label).toBe("first");
     expect(spotlightAt(SPOTS, 9)!.label).toBe("third");
-  });
-});
-
-describe("captionX", () => {
-  const CAPTURE = 768;
-
-  it("leaves a caption where it is when the whole thing fits", () => {
-    expect(captionX(40, 120, CAPTURE)).toBe(40);
-  });
-
-  it("pulls a caption back so its last character stays inside the capture", () => {
-    // This shipped: a right-hand region's caption ran off the edge and read as
-    // a truncated sentence — "150 into a 13".
-    const x = captionX(512, 359, CAPTURE);
-    expect(x).toBeLessThan(512);
-    expect(x + 359).toBeLessThanOrEqual(CAPTURE - 24);
-  });
-
-  it("never pushes a caption off the left instead", () => {
-    // Wider than the capture: it cannot fit, but it must still start at the
-    // margin rather than at a negative x.
-    expect(captionX(626, 2000, CAPTURE)).toBe(24);
-    expect(captionX(0, 120, CAPTURE)).toBe(24);
-  });
-});
-
-describe("estimateCaptionWidth", () => {
-  it("is not smaller than the widths the browser actually rendered", () => {
-    // Measured on the shipped page, at 30px with 1.5px tracking. The first
-    // estimate used 0.6 and no tracking, came out under every one of these,
-    // and let two captions ship clipped.
-    for (const [label, rendered] of [
-      ["150 into a 130 bid", 359],
-      ["The three of spades is worth thirty", 700],
-      ["Scanned, and it says how sure it is", 700],
-    ] as const) {
-      expect(estimateCaptionWidth(label, 30), label).toBeGreaterThanOrEqual(rendered);
-    }
-  });
-
-  it("grows with the label and with the type size", () => {
-    expect(estimateCaptionWidth("aaaa", 30)).toBeGreaterThan(estimateCaptionWidth("aa", 30));
-    expect(estimateCaptionWidth("aa", 40)).toBeGreaterThan(estimateCaptionWidth("aa", 30));
   });
 });

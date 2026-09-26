@@ -229,23 +229,51 @@ a {
    needs length to be read across. The text spreads down that length rather
    than sitting in a block at the top with dead space under it. */
 .work-item {
-  min-height: 200vh;
-  padding-block: var(--space-2xl);
+  padding-block: var(--space-2xl) 0;
   border-bottom: var(--rule-hair);
 }
 
-/* The section holds still — words and capture together — while the scroll
-   reads the capture. Spreading the words down the scene's whole length
-   instead left a column of dead paper beside them. */
-.work-spread {
+.work-intro {
+  max-width: var(--measure-wide);
+}
+
+/* The capture is given the whole viewport to be read in. At column width the
+   read-through was a detail inside a thumbnail; the owner's words were that it
+   was "not like full screen". */
+.work-stage {
+  min-height: 240vh;
+  margin-inline: calc(50% - 50vw);
+  margin-top: var(--space-xl);
+}
+
+.stage-pin {
   position: sticky;
   top: 0;
-  min-height: 100vh;
+  height: 100vh;
   display: grid;
-  grid-template-columns: 1fr 19rem;
-  gap: var(--space-2xl);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  padding-block: var(--space-xl);
+  gap: var(--space-2xl);
+  padding-inline: var(--edge);
+  padding-block: var(--space-lg);
+  box-sizing: border-box;
+}
+
+/* Page type, not lettering inside the picture: large enough to be read across
+   the room, and it wraps rather than running off an edge. */
+.stage-caption {
+  margin: 0;
+  max-width: 16ch;
+  justify-self: end;
+  text-align: right;
+  font-size: var(--font-h2);
+  font-weight: var(--weight-black);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-h2);
+  text-wrap: balance;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-out);
 }
 
 .work-eyebrow {
@@ -266,7 +294,7 @@ a {
   text-wrap: balance;
 }
 
-.work-item > div > p {
+.work-intro > p {
   margin: 0 0 var(--space-md);
   max-width: var(--measure);
   color: var(--ink-muted);
@@ -309,15 +337,6 @@ a {
   margin-top: var(--space-md);
 }
 
-/* On a wide screen the whole spread is pinned, so the capture needs no
-   stickiness of its own; stacked on a phone it takes over the pinning. */
-.screen-pin {
-  align-self: center;
-}
-
-/* Shrink-wraps the capture so the overlay's box is exactly the image's box.
-   Sizing the wrapper from an aspect-ratio instead let it overflow the pinned
-   viewport on a phone. */
 .screen-stack {
   position: relative;
   display: block;
@@ -327,7 +346,7 @@ a {
 
 .screen {
   display: block;
-  height: min(74vh, 40rem);
+  height: min(82vh, 52rem);
   width: auto;
   max-width: 100%;
   aspect-ratio: 768 / 1670;
@@ -560,36 +579,27 @@ a {
     align-items: flex-start;
   }
 
-  /* A phone cannot hold the capture and all the words at once, so the spread
-     stops pinning and the capture alone stays put while the words pass it. */
-  .work-spread {
-    position: static;
-    min-height: 0;
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
-    padding-block: 0;
+  /* Stacked: the capture takes the screen, its caption sits under it. */
+  .stage-pin {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: center;
+    gap: var(--space-md);
   }
 
-  .work-item {
-    min-height: 170vh;
+  .stage-caption {
+    justify-self: start;
+    text-align: left;
+    max-width: none;
+    font-size: var(--font-h3);
+    order: 2;
   }
 
-  /* Pinned as an opaque band on the page's own paper, with a hairline under
-     it: a transparent sticky capture let the heading show straight through
-     itself, which reads as a broken page rather than as a pinned one. */
-  .screen-pin {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    order: -1;
-    align-self: start;
-    background: var(--paper);
-    padding-block: var(--space-sm);
-    border-bottom: var(--rule-hair);
+  .work-stage {
+    min-height: 220vh;
   }
 
   .screen {
-    height: min(46vh, 22rem);
+    height: min(64vh, 30rem);
   }
 }
 

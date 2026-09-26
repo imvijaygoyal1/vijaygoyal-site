@@ -171,11 +171,9 @@ test("content arrives on scroll, and is fully visible once passed", async ({ pag
 
 /** Reads a scene's spotlight straight off the DOM, in the capture's own units. */
 async function spotlight(page: import("@playwright/test").Page, id: string) {
-  return page.locator(`#${id} [data-frame]`).evaluate((el) => ({
-    x: Number(el.getAttribute("x")),
-    y: Number(el.getAttribute("y")),
-    h: Number(el.getAttribute("height")),
-    caption: el.parentElement!.querySelector("[data-caption]")!.textContent,
+  return page.locator(`#${id}`).evaluate((scene) => ({
+    y: Number(scene.querySelector("[data-frame]")!.getAttribute("y")),
+    caption: scene.querySelector("[data-caption]")!.textContent,
   }));
 }
 
@@ -185,7 +183,9 @@ test("each capture is read through as its section is scrolled, in every engine",
   await expect(page.locator("html")).toHaveClass(/js-scene/);
 
   for (const id of ["xbill", "shady-spade"]) {
-    const scene = page.locator(`#${id}`);
+    // The scene is the stage the capture is pinned in, not the whole article:
+    // the words above it are read in normal flow.
+    const scene = page.locator(`#${id} [data-scene]`);
     const seen: { y: number; caption: string | null }[] = [];
 
     // Walk the scene's own passage rather than fixed offsets, so the four
@@ -225,32 +225,7 @@ test("a capture is shown plainly under reduced motion", async ({ page }) => {
   await expect(page.locator("html")).not.toHaveClass(/js-scene/);
   const shown = await page.locator("#xbill .screen-read").evaluate((el) => getComputedStyle(el).display);
   expect(shown).toBe("none");
+  // And the caption never fills in, so no stray word is left on the paper.
+  expect(await page.locator("#xbill [data-caption]").textContent()).toBe("");
   await expect(page.locator("#xbill img.screen")).toBeVisible();
-});
-
-test("every caption stays inside the capture it names", async ({ page }) => {
-  // A caption anchored at its region's left edge ran off the right of the
-  // picture and shipped clipped — "150 into a 13". Measured, not estimated:
-  // the width that matters is the one the engine renders, and it differs
-  // between them.
-  await page.goto("/");
-
-  for (const id of ["xbill", "shady-spade"]) {
-    const offenders = await page.locator(`#${id}`).evaluate(async (scene) => {
-      const caption = scene.querySelector("[data-caption]") as SVGTextElement;
-      const width = Number(scene.querySelector("svg")!.getAttribute("viewBox")!.split(" ")[2]);
-      const bad: string[] = [];
-      for (const f of [0, 0.25, 0.5, 0.75, 1]) {
-        const box = scene.getBoundingClientRect();
-        window.scrollBy(0, box.top + (box.height - window.innerHeight) * f);
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const b = caption.getBBox();
-        if (b.x < 0 || b.x + b.width > width) {
-          bad.push(`${caption.textContent}: ${Math.round(b.x)}..${Math.round(b.x + b.width)} of ${width}`);
-        }
-      }
-      return bad;
-    });
-    expect(offenders, `${id} captions outside the capture`).toEqual([]);
-  }
 });

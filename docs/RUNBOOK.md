@@ -37,7 +37,13 @@ product capture is **read through** as its section is scrolled, from
 `src/lib/scrollScene.ts`.
 
 **The read-through is the one thing tied to scroll position.** A product
-section is a 200vh scene whose spread is pinned; how far the section has
+section's words are read in normal flow, then its capture gets a **full-bleed
+240vh stage** pinned to the whole viewport — at column width the read-through
+was a detail inside a thumbnail, and the owner's words were that it was "not
+like full screen". The caption is **page type beside the capture**, not
+lettering inside it: it can be set large, it wraps, and it cannot run off an
+edge, which deleted the clamp that shipped wrong twice. How far the stage has
+travelled is how far the capture has been read; how far the section has
 travelled is how far the capture has been read. A spotlight rests on one
 region, travels to the next and rests again: everything else is under a veil of
 the page's own paper, the active region is framed in the product's accent, and
@@ -93,8 +99,11 @@ anything at or above the trigger line has arrived, however it got there.
 - **`getComputedTextLength` leaves letter-spacing out, in WebKit.** A caption
   clamp built on it overshot the capture's edge by 1.5px per character — 27px
   on the longest one — and clipped on an iPhone while passing in Chromium.
-  Measure rendered text with `getBBox().width`, which is the ink box the
-  reader actually sees.
+  Measure rendered text with `getBBox().width`. Better still, keep text out of
+  the picture: the caption is HTML now and the whole class of bug is gone.
+- **Full-bleed without breaking the page width.** `margin-inline: calc(50% -
+  50vw)` on the stage, no `width: 100vw` — the no-horizontal-scroll e2e passes
+  with it and would not with a scrollbar-width `100vw`.
 - **A sticky element is transparent.** On a phone the pinned capture floated
   over the section's own heading, which reads as a broken page rather than a
   pinned one. A sticky band needs its own opaque ground and a rule under it.

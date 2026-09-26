@@ -83,47 +83,47 @@ function SectionHead({
 
 function WorkItem({ product }: { product: Product }) {
   return (
-    <article
-      className="work-item"
-      id={product.id}
-      data-accent={product.accent}
-      data-scene=""
-      data-spots={JSON.stringify(product.spots)}
-    >
-      <div className="work-spread">
-        <div data-reveal>
-          <span className="work-eyebrow">{product.eyebrow}</span>
-          <h3>{product.heading}</h3>
-          <p>{product.lede}</p>
-          <ul className="beats">
-            {product.beats.map((beat) => (
-              <li className="beat" key={beat.heading}>
-                <h4>{beat.heading}</h4>
-                <p>{beat.copy}</p>
-              </li>
-            ))}
-          </ul>
-          <ul className="facts">
-            {product.facts.map((fact) => (
-              <li key={fact}>{fact}</li>
-            ))}
-          </ul>
-          <ul className="facts work-links">
-            {product.links.map((link) => (
-              <li key={link.href}>
-                <a className="action" href={link.href} aria-label={link.name}>
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        {/* Real captures, never a mockup (AD-14). Lazy: both sit below the fold. */}
-        {/* Intrinsic size given, so the column reserves the space before the
-          image loads: without it a lazy screenshot has zero height until it
-          arrives — a layout shift, and in Safari a box that is not there at
-          all until it loads. */}
-        <div className="screen-pin">
+    <article className="work-item" id={product.id} data-accent={product.accent}>
+      <div className="work-intro" data-reveal>
+        <span className="work-eyebrow">{product.eyebrow}</span>
+        <h3>{product.heading}</h3>
+        <p>{product.lede}</p>
+        <ul className="beats">
+          {product.beats.map((beat) => (
+            <li className="beat" key={beat.heading}>
+              <h4>{beat.heading}</h4>
+              <p>{beat.copy}</p>
+            </li>
+          ))}
+        </ul>
+        <ul className="facts">
+          {product.facts.map((fact) => (
+            <li key={fact}>{fact}</li>
+          ))}
+        </ul>
+        <ul className="facts work-links">
+          {product.links.map((link) => (
+            <li key={link.href}>
+              <a className="action" href={link.href} aria-label={link.name}>
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* The capture is given the whole viewport to be read in: at column
+          width the read-through was a detail inside a thumbnail. */}
+      <div className="work-stage" data-scene="" data-spots={JSON.stringify(product.spots)}>
+        <div className="stage-pin">
+          {/* The caption is page type, not lettering inside the picture: it
+              can be set large, it wraps, and it cannot run off an edge. */}
+          <p className="stage-caption" data-caption aria-hidden="true" />
+          {/* Real captures, never a mockup (AD-14). Lazy: both sit below the
+              fold. Intrinsic size given, so the space is reserved before the
+              image loads: without it a lazy screenshot has zero height until
+              it arrives — a layout shift, and in Safari a box that is not
+              there at all until it loads. */}
           <div className="screen-stack">
             <img
               className="screen"
@@ -136,8 +136,8 @@ function WorkItem({ product }: { product: Product }) {
               decoding="async"
             />
             {/* The overlay's viewBox is the capture's own pixel space, so an
-              anchor in content.ts lands on the thing it names at every size.
-              It is inert until the script marks the root as driving. */}
+                anchor in content.ts lands on the thing it names at every size.
+                Inert until the script marks the root as driving. */}
             <svg
               className="screen-read"
               viewBox={`0 0 ${SCREEN_W} ${SCREEN_H}`}
@@ -156,7 +156,6 @@ function WorkItem({ product }: { product: Product }) {
                 mask={`url(#read-${product.id})`}
               />
               <rect className="screen-frame" data-frame rx="18" />
-              <text className="screen-caption" data-caption />
             </svg>
           </div>
         </div>

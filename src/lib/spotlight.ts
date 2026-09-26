@@ -10,37 +10,6 @@ import type { Spot } from "../sections/content";
  */
 export const HOLD = 0.36;
 
-/**
- * A fallback estimate of a caption's rendered width.
- *
- * Only used where the real thing cannot be measured — a server render, or a
- * test environment with no layout. A constant estimate shipped a clipped
- * caption once: the ratio was too small for the actual face and left its
- * letter-spacing out entirely, so prefer `getComputedTextLength` wherever it
- * exists and treat this as the floor, not the answer.
- */
-export function estimateCaptionWidth(label: string, fontSize: number, tracking = 1.5): number {
-  return label.length * (fontSize * 0.68 + tracking);
-}
-
-/**
- * Where a caption starts, so that all of it stays inside the capture.
- *
- * A caption anchored at its region's own left edge runs off the right of the
- * picture and is clipped — which shipped, and read as a truncated sentence.
- * The label is nudged left by however much it overhangs, never past the
- * margin.
- */
-export function captionX(
-  x: number,
-  textWidth: number,
-  captureWidth: number,
-  margin = 24,
-): number {
-  const last = captureWidth - margin - textWidth;
-  return Math.max(margin, Math.min(x, last));
-}
-
 export interface Spotlight {
   readonly x: number;
   readonly y: number;
