@@ -224,10 +224,6 @@ a {
 
 /* ---- Work ------------------------------------------------------------- */
 
-/* A product section is also the scene its capture is read in: the article's
-   own passage past the viewport is how far the read-through has got, so it
-   needs length to be read across. The text spreads down that length rather
-   than sitting in a block at the top with dead space under it. */
 .work-item {
   padding-block: var(--space-2xl) 0;
   border-bottom: var(--rule-hair);
@@ -235,45 +231,6 @@ a {
 
 .work-intro {
   max-width: var(--measure-wide);
-}
-
-/* The capture is given the whole viewport to be read in. At column width the
-   read-through was a detail inside a thumbnail; the owner's words were that it
-   was "not like full screen". */
-.work-stage {
-  min-height: 240vh;
-  margin-inline: calc(50% - 50vw);
-  margin-top: var(--space-xl);
-}
-
-.stage-pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--space-2xl);
-  padding-inline: var(--edge);
-  padding-block: var(--space-lg);
-  box-sizing: border-box;
-}
-
-/* Page type, not lettering inside the picture: large enough to be read across
-   the room, and it wraps rather than running off an edge. */
-.stage-caption {
-  margin: 0;
-  max-width: 16ch;
-  justify-self: end;
-  text-align: right;
-  font-size: var(--font-h2);
-  font-weight: var(--weight-black);
-  line-height: var(--leading-heading);
-  letter-spacing: var(--tracking-h2);
-  text-wrap: balance;
-  color: var(--accent-text);
-  opacity: 0;
-  transition: opacity var(--duration-base) var(--ease-out);
 }
 
 .work-eyebrow {
@@ -337,49 +294,205 @@ a {
   margin-top: var(--space-md);
 }
 
-.screen-stack {
-  position: relative;
-  display: block;
-  width: fit-content;
-  margin-inline: auto;
+/* ---- The night stage -------------------------------------------------- */
+
+/* Full-bleed by margin, never 100vw: 100vw includes the scrollbar and gives
+   the whole page a horizontal scroll. */
+.night {
+  margin-inline: calc(50% - 50vw);
+  margin-block: var(--space-xl) var(--space-2xl);
 }
 
-.screen {
+.night-device img {
   display: block;
-  height: min(82vh, 52rem);
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  height: auto;
   aspect-ratio: 768 / 1670;
   border-radius: var(--radius-lg);
+  box-shadow: var(--glow-xbill);
 }
 
-/* Inert until the script says it is driving, so a page without JavaScript —
-   or with reduced motion — shows the capture plainly, as it did before. */
-.screen-read {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+.night-device[data-accent="spade"] img {
+  box-shadow: var(--glow-spade);
+}
+
+.night-device svg {
   display: none;
 }
 
-.js-scene .screen-read {
-  display: block;
-}
-
-/* The veil is the page's own paper, so the capture is quietened rather than
-   darkened and the section stays light while it points. */
-.screen-veil {
+.night-veil {
   fill: var(--ground);
-  fill-opacity: 0.66;
+  opacity: 0;
 }
 
-.screen-frame {
+.night-frame {
   fill: none;
   stroke: var(--accent);
-  stroke-width: 4;
+  stroke-width: 5;
+  opacity: 0;
 }
 
+/* The img's height="224" attribute is a presentational hint that wins unless
+   height is set here: it stretched both icons into slivers once already. */
+.night-icon {
+  width: min(9.5vh, 5.5rem);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 23%;
+  box-shadow: 0 0 0 1px rgb(var(--accent-rgb) / 55%), 0 14px 40px rgb(var(--accent-rgb) / 42%);
+}
+
+.night-beat,
+.night-caption,
+.night-readout,
+.night-bed {
+  display: none;
+}
+
+/* 1. No script: a plain pair, icons above. */
+@media (scripting: none) {
+  .night-pin {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-lg);
+    padding-inline: var(--edge);
+  }
+
+  .night-stage {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-lg);
+    order: 2;
+    width: 100%;
+  }
+
+  .night-device {
+    width: min(40vw, 15rem);
+  }
+}
+
+/* 2. Scripting: a pinned stage, everything in its resting pose. */
+@media (scripting: enabled) {
+  .night {
+    height: 100vh;
+  }
+
+  .night-pin {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 50% 45%, rgb(var(--xbill-rgb) / 22%), transparent 62%),
+      var(--ground);
+  }
+
+  .night-bed {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .night-stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .night-device {
+    --device-w: min(26vh, 15rem);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: var(--device-w);
+    margin-left: calc(var(--device-w) / -2);
+    margin-top: calc(var(--device-w) * 1670 / 768 / -2);
+    will-change: transform, opacity;
+    /* choreograph(REST): gathered either side of centre, neither read. */
+    transform: translate(calc(-1 * min(22vw, 260px)), 0) scale(0.92) rotate(-4deg);
+  }
+
+  .night-device[data-device="spade"] {
+    transform: translate(min(22vw, 260px), 0) scale(0.92) rotate(4deg);
+  }
+
+  .night-device svg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .night-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: calc(min(9.5vh, 5.5rem) / -2);
+    will-change: transform, opacity;
+    transform: translate(calc(-1 * min(6vw, 70px)), -33vh);
+  }
+
+  .night-icon[data-icon="spade"] {
+    transform: translate(min(6vw, 70px), -33vh);
+  }
+
+  .night-beat,
+  .night-readout {
+    display: block;
+    position: absolute;
+    margin: 0;
+    font-family: var(--family-mono);
+    font-size: var(--font-label);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .night-beat {
+    left: var(--edge);
+    top: var(--edge);
+  }
+
+  .night-readout {
+    right: var(--edge);
+    bottom: var(--edge);
+  }
+
+  .night-caption {
+    display: block;
+    position: absolute;
+    left: var(--edge);
+    bottom: var(--space-2xl);
+    margin: 0;
+    max-width: 14ch;
+    font-size: var(--font-h2);
+    font-weight: var(--weight-black);
+    line-height: var(--leading-heading);
+    letter-spacing: var(--tracking-h2);
+    text-wrap: balance;
+    color: var(--accent-text);
+    opacity: 0;
+  }
+}
+
+/* 3. Motion allowed: length to scrub through. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .night {
+    height: 620vh;
+  }
+
+  /* The icons snap between home and focus in choreograph(); this is what
+     makes the snap a flight. Here, not above: under reduced motion the one
+     composed frame would otherwise start a transition, and the fallback e2e
+     asserts that no animation runs at all. */
+  .night-icon {
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+}
 
 /* ---- Stages, toolkit, about ------------------------------------------- */
 
@@ -570,29 +683,6 @@ a {
     flex-direction: column;
     align-items: flex-start;
   }
-
-  /* Stacked: the capture takes the screen, its caption sits under it. */
-  .stage-pin {
-    grid-template-columns: minmax(0, 1fr);
-    align-content: center;
-    gap: var(--space-md);
-  }
-
-  .stage-caption {
-    justify-self: start;
-    text-align: left;
-    max-width: none;
-    font-size: var(--font-h3);
-    order: 2;
-  }
-
-  .work-stage {
-    min-height: 220vh;
-  }
-
-  .screen {
-    height: min(64vh, 30rem);
-  }
 }
 
 /* ---- Motion ------------------------------------------------------------ */
@@ -604,7 +694,7 @@ a {
  *
  *   1. the opening's lines rise out of their own clipping boxes, on load;
  *   2. work, stages, toolkit rows and the closing arrive as they are reached;
- *   3. each product screenshot wipes up into view;
+ *   3. the night scene (scene/nightScene.ts), which is script-driven;
  *   4. links answer the pointer, where there is one.
  *
  * Every rule sits inside `prefers-reduced-motion: no-preference` and uses
@@ -721,18 +811,6 @@ a {
       transform var(--duration-slow) var(--ease-out);
   }
 
-  /* A screen is a picture: it wipes up from a hair oversized rather than
-     sliding, the way a printed plate drops onto the page. */
-  .js-reveal .screen[data-reveal] {
-    opacity: 0.4;
-    transform: scale(1.03);
-    clip-path: inset(100% 0 0 0);
-    transition:
-      opacity var(--duration-slower) var(--ease-out),
-      transform var(--duration-slower) var(--ease-out),
-      clip-path var(--duration-slower) var(--ease-out);
-  }
-
   /* A section's rule draws itself as the heading arrives. */
   .js-reveal .section-head[data-reveal]::after {
     transform: scaleX(0);
@@ -749,8 +827,7 @@ a {
     transition-delay: 180ms;
   }
 
-  .js-reveal [data-reveal].is-in,
-  .js-reveal .screen[data-reveal].is-in {
+  .js-reveal [data-reveal].is-in {
     opacity: 1;
     transform: none;
     clip-path: inset(0 0 0 0);

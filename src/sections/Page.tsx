@@ -5,6 +5,8 @@ import {
   SCREEN_H,
   SCREEN_W,
   ABOUT,
+  ICON_SIZE,
+  SCENE,
   CONTACT,
   DESCRIPTOR,
   OPENING,
@@ -111,56 +113,84 @@ function WorkItem({ product }: { product: Product }) {
           ))}
         </ul>
       </div>
+    </article>
+  );
+}
 
-      {/* The capture is given the whole viewport to be read in: at column
-          width the read-through was a detail inside a thumbnail. */}
-      <div className="work-stage" data-scene="" data-spots={JSON.stringify(product.spots)}>
-        <div className="stage-pin">
-          {/* The caption is page type, not lettering inside the picture: it
-              can be set large, it wraps, and it cannot run off an edge. */}
-          <p className="stage-caption" data-caption aria-hidden="true" />
-          {/* Real captures, never a mockup (AD-14). Lazy: both sit below the
-              fold. Intrinsic size given, so the space is reserved before the
-              image loads: without it a lazy screenshot has zero height until
-              it arrives — a layout shift, and in Safari a box that is not
-              there at all until it loads. */}
-          <div className="screen-stack">
-            <img
-              className="screen"
-              data-reveal
-              src={product.screen}
-              alt={product.screenAlt}
-              width={SCREEN_W}
-              height={SCREEN_H}
-              loading="lazy"
-              decoding="async"
-            />
-            {/* The overlay's viewBox is the capture's own pixel space, so an
-                anchor in content.ts lands on the thing it names at every size.
-                Inert until the script marks the root as driving. */}
-            <svg
-              className="screen-read"
-              viewBox={`0 0 ${SCREEN_W} ${SCREEN_H}`}
-              preserveAspectRatio="none"
-              aria-hidden="true"
-              focusable="false"
+/**
+ * The night stage: both products on one pinned scene, over a drawn lotus.
+ * Everything here is in the first render; scene/nightScene.ts only moves it.
+ * With no script, CSS lays it out as a plain pair of captures.
+ */
+function NightScene() {
+  return (
+    <div className="night" data-night="">
+      <div className="night-pin">
+        <canvas className="night-bed" data-bed="" aria-hidden="true" />
+        <div className="night-stage">
+          {PRODUCTS.map((product) => (
+            <div
+              className="night-device"
+              key={product.id}
+              data-device={product.accent}
+              data-accent={product.accent}
+              data-spots={JSON.stringify(product.spots)}
             >
-              <mask id={`read-${product.id}`}>
-                <rect width={SCREEN_W} height={SCREEN_H} fill="#fff" />
-                <rect data-hole rx="18" fill="#000" />
-              </mask>
-              <rect
-                className="screen-veil"
+              {/* Real captures, never a mockup (AD-14). */}
+              <img
+                src={product.screen}
+                alt={product.screenAlt}
                 width={SCREEN_W}
                 height={SCREEN_H}
-                mask={`url(#read-${product.id})`}
+                loading="lazy"
+                decoding="async"
               />
-              <rect className="screen-frame" data-frame rx="18" />
-            </svg>
-          </div>
+              {/* The overlay's viewBox is the capture's own pixel space, so an
+                  anchor in content.ts lands on the thing it names at every size. */}
+              <svg
+                viewBox={`0 0 ${SCREEN_W} ${SCREEN_H}`}
+                preserveAspectRatio="none"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <mask id={`night-${product.accent}`}>
+                  <rect width={SCREEN_W} height={SCREEN_H} fill="#fff" />
+                  <rect data-hole="" rx="18" fill="#000" />
+                </mask>
+                <rect
+                  className="night-veil"
+                  data-veil=""
+                  width={SCREEN_W}
+                  height={SCREEN_H}
+                  mask={`url(#night-${product.accent})`}
+                />
+                <rect className="night-frame" data-frame="" rx="18" />
+              </svg>
+            </div>
+          ))}
         </div>
+        {PRODUCTS.map((product) => (
+          <img
+            className="night-icon"
+            key={product.id}
+            data-icon={product.accent}
+            data-accent={product.accent}
+            src={product.icon}
+            alt={product.iconAlt}
+            width={ICON_SIZE}
+            height={ICON_SIZE}
+            decoding="async"
+          />
+        ))}
+        <p className="night-beat" data-night-beat="" aria-hidden="true">
+          {SCENE.beats[0]}
+        </p>
+        <p className="night-caption" data-night-caption="" aria-hidden="true" />
+        <p className="night-readout" data-night-readout="" aria-hidden="true">
+          0%
+        </p>
       </div>
-    </article>
+    </div>
   );
 }
 
@@ -172,6 +202,7 @@ function Work() {
         title="Selected work"
         note="Two products, built end to end"
       />
+      <NightScene />
       {PRODUCTS.map((product) => (
         <WorkItem key={product.id} product={product} />
       ))}

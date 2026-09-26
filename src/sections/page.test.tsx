@@ -4,7 +4,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { App } from "../App";
 import { LINKS } from "../lib/links";
-import { PRODUCTS, SCREEN_H, SCREEN_W, STAGES, TOOLKIT } from "./content";
+import { ICON_SIZE, PRODUCTS, SCREEN_H, SCREEN_W, STAGES, TOOLKIT } from "./content";
 
 const content = readFileSync(resolve(process.cwd(), "docs/CONTENT.md"), "utf8");
 const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
@@ -31,47 +31,52 @@ describe("the page", () => {
     expect(ids).toEqual(["opening", "work", "process", "toolkit", "about", "contact"]);
   });
 
-  it("shows both products with their real captures and product thinking", () => {
+  it("shows each product's thinking in its own article", () => {
     const { container } = render(<App />);
     for (const product of PRODUCTS) {
-      const item = container.querySelector(`#${product.id}`)!;
+      const item = container.querySelector(`#${product.id}`) as HTMLElement;
       expect(item).not.toBeNull();
-      expect(within(item as HTMLElement).getByRole("heading", { name: product.heading })).toBeDefined();
-      const shot = item.querySelector("img")!;
-      expect(shot.getAttribute("alt")).toBe(product.screenAlt);
-      expect(shot.getAttribute("loading")).toBe("lazy");
+      expect(within(item).getByRole("heading", { name: product.heading })).toBeDefined();
       for (const beat of product.beats) {
-        expect(within(item as HTMLElement).getByRole("heading", { name: beat.heading })).toBeDefined();
+        expect(within(item).getByRole("heading", { name: beat.heading })).toBeDefined();
       }
     }
   });
 
-  it("gives each capture a read-through overlay bound to its anchors", () => {
-    // The overlay's viewBox must be the capture's own pixel space, or an
-    // anchor in content.ts lands somewhere other than the thing it names.
+  it("puts both real captures and both real icons on one night stage", () => {
     const { container } = render(<App />);
-    const scenes = [...container.querySelectorAll("[data-scene]")];
-    expect(scenes).toHaveLength(PRODUCTS.length);
+    const scene = container.querySelector("#work [data-night]")!;
+    expect(scene).not.toBeNull();
+    expect(scene.querySelector("canvas[data-bed]")!.getAttribute("aria-hidden")).toBe("true");
 
-    for (const [i, scene] of scenes.entries()) {
-      const product = PRODUCTS[i]!;
-      expect(JSON.parse(scene.getAttribute("data-spots")!)).toEqual(product.spots);
-
-      const svg = scene.querySelector("svg.screen-read")!;
+    for (const product of PRODUCTS) {
+      const device = scene.querySelector(`[data-device="${product.accent}"]`)!;
+      expect(JSON.parse(device.getAttribute("data-spots")!)).toEqual(product.spots);
+      const shot = device.querySelector("img")!;
+      expect(shot.getAttribute("alt")).toBe(product.screenAlt);
+      expect(shot.getAttribute("width")).toBe(String(SCREEN_W));
+      const svg = device.querySelector("svg")!;
       expect(svg.getAttribute("viewBox")).toBe(`0 0 ${SCREEN_W} ${SCREEN_H}`);
       expect(svg.getAttribute("aria-hidden")).toBe("true");
-      for (const part of ["[data-hole]", "[data-frame]"]) {
+      for (const part of ["[data-hole]", "[data-veil]", "[data-frame]"]) {
         expect(svg.querySelector(part), `${product.id} ${part}`).not.toBeNull();
       }
-      // The caption is page type beside the capture, not lettering inside it,
-      // so it lives in the scene rather than in the overlay.
-      const caption = scene.querySelector("[data-caption]")!;
-      expect(caption, product.id).not.toBeNull();
-      expect(caption.tagName).toBe("P");
-      expect(caption.getAttribute("aria-hidden")).toBe("true");
-      // The capture itself keeps its own transform for the CSS wipe-up.
-      expect(scene.querySelector("img.screen[data-reveal]")).not.toBeNull();
+      const icon = scene.querySelector(`img[data-icon="${product.accent}"]`)!;
+      expect(icon.getAttribute("alt")).toBe(product.iconAlt);
+      expect(icon.getAttribute("width")).toBe(String(ICON_SIZE));
     }
+
+    // Running labels change constantly; they are decoration for sighted
+    // readers and must not be read out on every frame.
+    for (const part of ["[data-night-beat]", "[data-night-caption]", "[data-night-readout]"]) {
+      expect(scene.querySelector(part)!.getAttribute("aria-hidden"), part).toBe("true");
+    }
+  });
+
+  it("gives every mask its own id, so two captures never share a hole", () => {
+    const { container } = render(<App />);
+    const ids = [...container.querySelectorAll("[data-night] mask")].map((m) => m.id);
+    expect(new Set(ids).size).toBe(PRODUCTS.length);
   });
 
   it("gives every anchor a label, inside the capture's bounds", () => {
