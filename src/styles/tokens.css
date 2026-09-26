@@ -11,6 +11,7 @@
 :root {
   /* ---- Surfaces -------------------------------------------------------- */
   --ground: #0b0b0d;
+  --ground-rgb: 11 11 13;
   --ground-raised: #151518;
   --ground-sunken: #070708;
 

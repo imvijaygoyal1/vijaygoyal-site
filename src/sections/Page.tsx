@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { observeReveals } from "../lib/reveal";
 import { observeNightScene } from "../scene/nightScene";
 import {
@@ -316,20 +316,16 @@ function Footer() {
 
 /**
  * The whole page. Everything on it is here in the first render; the one 2D
- * canvas, the night scene's lotus, is drawn in an effect after first paint.
+ * canvas, the night scene's lotus, is drawn from the first animation frame.
  */
 export function Page() {
   // Arrivals are marked by an observer rather than by CSS scroll timelines:
   // see lib/reveal.ts. The effect runs after the first paint, so nothing is
   // hidden before it starts.
-  useEffect(() => {
-    const stopReveals = observeReveals();
-    const stopNight = observeNightScene();
-    return () => {
-      stopReveals();
-      stopNight();
-    };
-  }, []);
+  useEffect(() => observeReveals(), []);
+  // A layout effect, so the scene's first frame is set before first paint:
+  // see scene/nightScene.ts.
+  useLayoutEffect(() => observeNightScene(), []);
 
   return (
     <div className="page">

@@ -142,12 +142,15 @@ test("content arrives on scroll, and is fully visible once passed", async ({ pag
   await expect(page.locator("html")).toHaveClass(/js-reveal/);
 
   // Something far down the page has not arrived yet, so it is held back.
-  const pending = await page.locator("#about [data-reveal]").first().evaluate((el) => ({
-    opacity: Number(getComputedStyle(el).opacity),
-    marked: el.classList.contains("is-in"),
-  }));
-  expect(pending.marked).toBe(false);
-  expect(pending.opacity).toBeLessThan(1);
+  // Polled, not read once: the held-back state is a transition from the
+  // finished state, and a single read in the frame .js-reveal lands still sees
+  // opacity 1. That race failed ~3 in 10 runs in WebKit, and in Chromium once
+  // the night scene moved into a layout effect.
+  const pendingEl = page.locator("#about [data-reveal]").first();
+  expect(await pendingEl.evaluate((el) => el.classList.contains("is-in"))).toBe(false);
+  await expect
+    .poll(() => pendingEl.evaluate((el) => Number(getComputedStyle(el).opacity)))
+    .toBeLessThan(1);
 
   // Scrolled to, it arrives...
   await page.locator("#about").scrollIntoViewIfNeeded();

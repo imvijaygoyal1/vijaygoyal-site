@@ -349,39 +349,43 @@ a {
   display: none;
 }
 
-/* 1. No script: a plain pair, icons above. */
-@media (scripting: none) {
-  .night-pin {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-lg);
-    padding-inline: var(--edge);
-  }
-
-  .night-stage {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-lg);
-    order: 2;
-    width: 100%;
-  }
-
-  .night-device {
-    width: min(40vw, 15rem);
-  }
+/* 1. By default, a plain pair with the icons above. Unconditional, not under
+   (scripting: none): a browser without the `scripting` feature (Safari < 17,
+   Chrome < 120) matches neither query, and drew each capture viewport-wide. */
+.night-pin {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding-inline: var(--edge);
 }
 
-/* 2. Scripting: a pinned stage, everything in its resting pose. */
+.night-stage {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  order: 2;
+  width: 100%;
+}
+
+.night-device {
+  width: min(40vw, 15rem);
+}
+
+/* 2. Scripting: a pinned stage, everything in its resting pose. svh, not vh:
+   on iOS 100vh is the viewport with the toolbars hidden, so with them shown
+   the caption and readout sat under the toolbar. */
 @media (scripting: enabled) {
   .night {
-    height: 100vh;
+    height: 100svh;
   }
 
   .night-pin {
+    display: block;
+    padding-inline: 0;
     position: sticky;
     top: 0;
-    height: 100vh;
+    height: 100svh;
     overflow: hidden;
     background:
       radial-gradient(120% 90% at 50% 45%, rgb(var(--xbill-rgb) / 22%), transparent 62%),
@@ -397,8 +401,10 @@ a {
   }
 
   .night-stage {
+    display: block;
     position: absolute;
     inset: 0;
+    width: auto;
   }
 
   .night-device {
@@ -475,6 +481,12 @@ a {
     letter-spacing: var(--tracking-h2);
     text-wrap: balance;
     color: var(--accent-text);
+    /* Its own plate: the caption can sit on the capture being read, over its
+       white, unveiled spotlight, where the text shade alone is ~2:1. At 90%
+       ground over pure white it still measures 4.5:1 (e2e). */
+    padding: var(--space-3xs) var(--space-2xs);
+    border-radius: var(--radius-sm);
+    background: rgb(var(--ground-rgb) / 90%);
     opacity: 0;
   }
 }

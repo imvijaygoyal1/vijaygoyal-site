@@ -88,10 +88,13 @@ function palette(): Palette {
 export function observeNightScene(root: ParentNode = document): () => void {
   const scene = root.querySelector<HTMLElement>("[data-night]");
   const canvas = scene?.querySelector<HTMLCanvasElement>("[data-bed]");
+  // The stage that sticks: its own height, not innerHeight, is what the
+  // scene's travel is measured against — on iOS the two differ by a toolbar.
+  const pin = scene?.querySelector<HTMLElement>(".night-pin");
   // The layout the driver moves exists only where CSS says scripting is on.
   const pinned = typeof matchMedia === "function" && matchMedia("(scripting: enabled)").matches;
   const ctx = pinned ? (canvas?.getContext("2d") ?? null) : null;
-  if (!scene || !canvas || !ctx) return () => {};
+  if (!scene || !canvas || !pin || !ctx) return () => {};
 
   const xbill = device(scene, "xbill");
   const spade = device(scene, "spade");
@@ -104,7 +107,7 @@ export function observeNightScene(root: ParentNode = document): () => void {
 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const colours = palette();
-  let view = { w: 0, h: 0 };
+  let view = { w: 0, h: 0, dpr: 1 };
   let sprites: Sprites | null = null;
 
   const fit = () => {
@@ -117,8 +120,14 @@ export function observeNightScene(root: ParentNode = document): () => void {
     canvas.width = Math.round(r.width * dpr);
     canvas.height = Math.round(r.height * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    view = { w: r.width, h: r.height };
-    sprites = buildSprites(colours, Math.min(r.width, r.height), dpr);
+    view = { w: r.width, h: r.height, dpr };
+    sprites = null;
+  };
+
+  // The sprites are the one expensive thing (every petal drawn with a blur),
+  // so they are built on the first animation frame, never before first paint.
+  const ensureSprites = () => {
+    sprites ??= buildSprites(colours, Math.min(view.w, view.h), view.dpr);
   };
 
   const render = (p: number, ms: number) => {
@@ -162,13 +171,23 @@ export function observeNightScene(root: ParentNode = document): () => void {
 
   if (reduced) {
     scene.dataset.running = "false";
-    render(REST, 0);
-    const onResize = () => {
-      fit();
+    const compose = () => {
+      ensureSprites();
       render(REST, 0);
     };
+    // Poses now, before first paint; the flower a frame later.
+    render(REST, 0);
+    let first = requestAnimationFrame(compose);
+    const onResize = () => {
+      fit();
+      compose();
+    };
     window.addEventListener("resize", onResize, { passive: true });
-    return () => window.removeEventListener("resize", onResize);
+    return () => {
+      cancelAnimationFrame(first);
+      first = 0;
+      window.removeEventListener("resize", onResize);
+    };
   }
 
   let raf = 0;
@@ -181,7 +200,8 @@ export function observeNightScene(root: ParentNode = document): () => void {
       return;
     }
     scene.dataset.running = "true";
-    render(sceneProgress(box.top, box.height, window.innerHeight), now);
+    ensureSprites();
+    render(sceneProgress(box.top, box.height, pin.clientHeight), now);
     raf = requestAnimationFrame(tick);
   };
   const wake = () => {
@@ -195,6 +215,11 @@ export function observeNightScene(root: ParentNode = document): () => void {
   window.addEventListener("scroll", wake, { passive: true });
   window.addEventListener("resize", onResize, { passive: true });
   scene.dataset.running = "false";
+  // Called before first paint (a layout effect), so the first frame a visitor
+  // sees already has the scripted pose: on a tall screen the scene is on the
+  // first screen, and painting the CSS resting pose first read as a flash.
+  const start = scene.getBoundingClientRect();
+  render(sceneProgress(start.top, start.height, pin.clientHeight), performance.now());
   wake();
 
   return () => {
