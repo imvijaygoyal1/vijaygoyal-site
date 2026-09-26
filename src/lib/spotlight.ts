@@ -10,6 +10,31 @@ import type { Spot } from "../sections/content";
  */
 export const HOLD = 0.36;
 
+/** Width of one character of the caption face, as a share of its size. The
+ *  caption is set in a monospace, so one ratio describes every label. */
+export const CAPTION_ADVANCE = 0.6;
+
+/**
+ * Where a caption starts, so that all of it stays inside the capture.
+ *
+ * A caption anchored at its region's own left edge runs off the right of the
+ * capture and is clipped — which shipped, and read as a truncated sentence.
+ * The label is nudged left by however much it overhangs, never past the
+ * margin, so a long caption sits under a region rather than half outside the
+ * picture.
+ */
+export function captionX(
+  x: number,
+  label: string,
+  fontSize: number,
+  captureWidth: number,
+  margin = 24,
+): number {
+  const width = label.length * fontSize * CAPTION_ADVANCE;
+  const last = captureWidth - margin - width;
+  return Math.max(margin, Math.min(x, last));
+}
+
 export interface Spotlight {
   readonly x: number;
   readonly y: number;

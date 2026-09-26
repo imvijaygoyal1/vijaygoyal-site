@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Spot } from "../sections/content";
-import { HOLD, sceneProgress, spotlightAt } from "./spotlight";
+import { CAPTION_ADVANCE, captionX, HOLD, sceneProgress, spotlightAt } from "./spotlight";
 
 const SPOTS: readonly Spot[] = [
   { x: 0, y: 0, w: 100, h: 100, label: "first" },
@@ -103,5 +103,43 @@ describe("spotlightAt", () => {
   it("clamps progress that arrives out of range", () => {
     expect(spotlightAt(SPOTS, -3)!.label).toBe("first");
     expect(spotlightAt(SPOTS, 9)!.label).toBe("third");
+  });
+});
+
+describe("captionX", () => {
+  const SIZE = 30;
+  const CAPTURE = 768;
+  const width = (label: string) => label.length * SIZE * CAPTION_ADVANCE;
+
+  it("leaves a caption where it is when the whole thing fits", () => {
+    expect(captionX(40, "Trump", SIZE, CAPTURE)).toBe(40);
+  });
+
+  it("pulls a caption back so its last character stays inside the capture", () => {
+    // This shipped: a right-hand region's caption ran off the edge and read as
+    // a truncated sentence — "150 into a 13".
+    const label = "150 into a 130 bid";
+    const x = captionX(512, label, SIZE, CAPTURE);
+    expect(x).toBeLessThan(512);
+    expect(x + width(label)).toBeLessThanOrEqual(CAPTURE - 24);
+  });
+
+  it("never pushes a caption off the left instead", () => {
+    // A caption longer than the capture cannot fit; it must still start at the
+    // margin rather than at a negative x.
+    const label = "x".repeat(200);
+    expect(captionX(626, label, SIZE, CAPTURE)).toBe(24);
+    expect(captionX(0, "Trump", SIZE, CAPTURE)).toBe(24);
+  });
+
+  it("keeps every shipped anchor's caption inside its capture", async () => {
+    const { PRODUCTS, SCREEN_W } = await import("../sections/content");
+    for (const product of PRODUCTS) {
+      for (const spot of product.spots) {
+        const x = captionX(spot.x, spot.label, SIZE, SCREEN_W);
+        expect(x, `${product.id}: ${spot.label}`).toBeGreaterThanOrEqual(24);
+        expect(x + width(spot.label), `${product.id}: ${spot.label}`).toBeLessThanOrEqual(SCREEN_W);
+      }
+    }
   });
 });

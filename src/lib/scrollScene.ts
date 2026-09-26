@@ -1,14 +1,18 @@
 import type { Spot } from "../sections/content";
-import { sceneProgress, spotlightAt } from "./spotlight";
+import { captionX, sceneProgress, spotlightAt } from "./spotlight";
 
 /** Marks the root while the scenes are actually being driven. Without it the
  *  CSS keeps every overlay hidden, so a page whose script never runs shows the
  *  captures plainly — which is the page as it was before any of this. */
 export const DRIVEN = "js-scene";
 
-/** Where a caption sits relative to its region, in the capture's own units. */
+/** Where a caption sits relative to its region, in the capture's own units,
+ *  and the type size it is set at — matching `--font-caption-capture`. */
 const CAPTION_GAP = 22;
 const CAPTION_HEIGHT = 34;
+const CAPTION_SIZE = 30;
+/** The captures' own width; the overlay's viewBox is this wide. */
+const CAPTURE_WIDTH = 768;
 
 /** Reads the anchors a scene carries, or nothing if they are unusable. */
 export function readSpots(el: Element): readonly Spot[] {
@@ -64,7 +68,10 @@ function paint(scene: Scene, viewportHeight: number): void {
 
   // Above its subject, unless the subject is near the top of the capture.
   const above = light.y > CAPTION_HEIGHT + CAPTION_GAP;
-  scene.caption.setAttribute("x", x);
+  scene.caption.setAttribute(
+    "x",
+    String(captionX(light.x, light.label, CAPTION_SIZE, CAPTURE_WIDTH)),
+  );
   scene.caption.setAttribute("y", String(above ? light.y - CAPTION_GAP : light.y + light.h + CAPTION_HEIGHT));
   scene.caption.setAttribute("fill-opacity", String(light.labelOpacity));
   if (scene.caption.textContent !== light.label) scene.caption.textContent = light.label;
