@@ -23,8 +23,10 @@ const declarations = consumer
 describe("design tokens are the single styling authority", () => {
   it("declares every group the page needs", () => {
     for (const token of [
-      "--paper", "--ink", "--ink-muted", "--rule-strong", "--rule-hair",
-      "--accent", "--space-sm", "--font-body", "--font-display", "--measure",
+      "--ground", "--ground-raised", "--ink", "--ink-muted", "--ink-faint",
+      "--rule-strong", "--rule-hair", "--accent", "--accent-text",
+      "--accent-xbill-text", "--glow-xbill", "--glow-spade",
+      "--space-sm", "--font-body", "--font-display", "--measure",
       "--column-label", "--ease-out", "--duration-base",
     ]) {
       expect(tokens).toContain(`${token}:`);
@@ -42,22 +44,32 @@ describe("design tokens are the single styling authority", () => {
   });
 
   it("composes alpha from a channel triplet rather than restating a colour", () => {
-    expect(tokens).toContain("--ink-rgb: 15 15 16");
-    expect(tokens).toContain("rgb(var(--ink-rgb)");
+    expect(tokens).toContain("--ink-rgb: 244 243 239");
+    expect(tokens).toContain("--xbill-rgb: 91 63 214");
+    expect(tokens).toContain("--spade-rgb: 184 144 44");
+    expect(tokens).toContain("rgb(var(--xbill-rgb)");
   });
 
-  it("is a light document: paper ground, ink text, and says so to the browser", () => {
-    expect(tokens).toContain("--paper: #f6f5f1");
-    expect(tokens).toContain("--ink: #0f0f10");
-    expect(tokens).toContain("color-scheme: light");
+  it("is a dark stage: night ground, light ink, and says so to the browser", () => {
+    expect(tokens).toContain("--ground: #0b0b0d");
+    expect(tokens).toContain("--ink: #f4f3ef");
+    expect(tokens).toContain("color-scheme: dark");
+    expect(tokens).not.toContain("--paper");
+    expect(consumer).not.toContain("--paper");
   });
 
-  it("keeps one editorial accent and a hue per product", () => {
+  it("keeps a hue per product and a readable text shade of each", () => {
     expect(tokens).toContain("--accent: #c33a24");
     expect(tokens).toContain("--accent-xbill: #5b3fd6");
-    expect(tokens).toContain("--accent-spade: #8a6a1f");
+    expect(tokens).toContain("--accent-spade: #b8902c");
     expect(tokens).toContain('[data-accent="xbill"]');
     expect(tokens).toContain('[data-accent="spade"]');
+  });
+
+  it("sets no text in a hue that is only meant for glows", () => {
+    // #5b3fd6 is 2.93:1 on the ground and #c33a24 is 3.70:1: both fail AA as
+    // text. Type takes --accent-text; strokes and glows take --accent.
+    expect(declarations).not.toMatch(/(^|[^-])color:\s*var\(--accent\)/m);
   });
 
   it("self-hosts the typeface rather than fetching it from a third party", () => {
@@ -70,5 +82,38 @@ describe("design tokens are the single styling authority", () => {
     const reduced = tokens.slice(tokens.indexOf("prefers-reduced-motion"));
     expect(reduced).toContain("--duration-fast: 0ms");
     expect(reduced).toContain("--duration-base: 0ms");
+  });
+});
+
+function hex(name: string): string {
+  const m = tokens.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})\\b`));
+  if (!m) throw new Error(`${name} is not a six-digit hex in tokens.css`);
+  return m[1]!;
+}
+
+function luminance(h: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((c) =>
+    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4,
+  );
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!;
+}
+
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi! + 0.05) / (lo! + 0.05);
+}
+
+describe("every text token is readable on the ground", () => {
+  const TEXT = ["--ink", "--ink-muted", "--ink-faint", "--accent-text", "--accent-xbill-text", "--accent-spade"];
+  for (const ground of ["--ground", "--ground-raised"]) {
+    for (const text of TEXT) {
+      it(`${text} on ${ground} is at least 4.5:1`, () => {
+        expect(contrast(hex(text), hex(ground))).toBeGreaterThanOrEqual(4.5);
+      });
+    }
+  }
+
+  it("the check itself can fail: the xBill hue is not a text colour", () => {
+    expect(contrast(hex("--accent-xbill"), hex("--ground"))).toBeLessThan(4.5);
   });
 });

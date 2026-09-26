@@ -36,12 +36,12 @@
 }
 
 html {
-  background-color: var(--paper);
+  background-color: var(--ground);
 }
 
 body {
   margin: 0;
-  background-color: var(--paper);
+  background-color: var(--ground);
   color: var(--ink);
   font-family: var(--family-body);
   font-size: var(--font-body);
@@ -116,7 +116,7 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 3px;
 }
 
@@ -126,7 +126,7 @@ a {
   left: 50%;
   z-index: 10;
   padding: var(--space-2xs) var(--space-xs);
-  color: var(--paper);
+  color: var(--ground);
   background: var(--ink);
   border-radius: var(--radius-sm);
   transform: translate(-50%, -180%);
@@ -271,7 +271,7 @@ a {
   line-height: var(--leading-heading);
   letter-spacing: var(--tracking-h2);
   text-wrap: balance;
-  color: var(--accent);
+  color: var(--accent-text);
   opacity: 0;
   transition: opacity var(--duration-base) var(--ease-out);
 }
@@ -282,7 +282,7 @@ a {
   font-size: var(--font-label);
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 .work-item h3 {
@@ -351,7 +351,6 @@ a {
   max-width: 100%;
   aspect-ratio: 768 / 1670;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-screen);
 }
 
 /* Inert until the script says it is driving, so a page without JavaScript —
@@ -371,7 +370,7 @@ a {
 /* The veil is the page's own paper, so the capture is quietened rather than
    darkened and the section stays light while it points. */
 .screen-veil {
-  fill: var(--paper);
+  fill: var(--ground);
   fill-opacity: 0.66;
 }
 
@@ -381,13 +380,6 @@ a {
   stroke-width: 4;
 }
 
-.screen-caption {
-  fill: var(--accent);
-  font-family: var(--family-mono);
-  font-size: var(--font-caption-capture);
-  font-weight: var(--weight-semibold);
-  letter-spacing: var(--tracking-caption-capture);
-}
 
 /* ---- Stages, toolkit, about ------------------------------------------- */
 
@@ -484,7 +476,7 @@ a {
   justify-content: center;
   aspect-ratio: 4 / 5;
   border: var(--rule-hair);
-  background: var(--paper-sunken);
+  background: var(--ground-sunken);
   color: var(--ink-faint);
   font-size: var(--font-label);
   letter-spacing: var(--tracking-label);
@@ -687,7 +679,7 @@ a {
 }
 
 .action:hover {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 /*

@@ -1,40 +1,42 @@
 /*
  * Design tokens — the single authority for colour, type, spacing, rules and
- * motion (AD-23). Light "editorial" key, chosen 2026-09-17: the site is a
- * document about two products, not a stage, so it reads as printed matter —
- * paper ground, one ink, hairline rules, and type doing the work.
+ * motion (AD-23). Dark "night" key, chosen 2026-09-26 with the night-scroll
+ * scene: the products are lit things on a dark stage, and the lotus behind
+ * them carries their hues. Supersedes the 2026-09-17 paper key.
  *
- * The previous dark tokens served a WebGL narrative that no longer ships.
+ * Each product has two shades: a HUE for glows, strokes and the lotus, and a
+ * TEXT shade for type. The hues fail AA as text on this ground (xBill 2.93:1,
+ * the accent 3.70:1); tokens.test.ts measures every text token.
  */
 :root {
   /* ---- Surfaces -------------------------------------------------------- */
-  /* Warm paper rather than white: at full-page scale pure white glares, and
-     the app screenshots are saturated enough to need a calmer ground. */
-  --paper: #f6f5f1;
-  --paper-raised: #fffefb;
-  --paper-sunken: #edebe4;
+  --ground: #0b0b0d;
+  --ground-raised: #151518;
+  --ground-sunken: #070708;
 
   /* ---- Ink ------------------------------------------------------------- */
-  --ink: #0f0f10;
-  --ink-rgb: 15 15 16;
-  --ink-muted: #5c5c60;
-  /* 4.6:1 on paper: the stage numbers are set at label size, where anything
-     lighter fails AA. #8b8b8f measured 3.11 and failed the gate. */
-  --ink-faint: #6e6e72;
+  --ink: #f4f3ef;
+  --ink-rgb: 244 243 239;
+  --ink-muted: #b4b3ae;
+  --ink-faint: #8a8a93;
 
   /* ---- Rules ----------------------------------------------------------- */
   /* Two weights only: a structural rule in full ink, and a hairline between
      items. Every division on the page is one of these. */
+  --line-hair: #2a2a2e;
   --rule-strong: 1px solid var(--ink);
-  --rule-hair: 1px solid #dcdad3;
-  --line-hair: #dcdad3;
+  --rule-hair: 1px solid var(--line-hair);
 
   /* ---- Accent ---------------------------------------------------------- */
-  /* One editorial accent for what the reader should act on, plus the two
-     product hues sampled from the apps' own captures. */
   --accent: #c33a24;
+  --accent-rgb: 195 58 36;
+  --accent-text: #ec5a3f;
   --accent-xbill: #5b3fd6;
-  --accent-spade: #8a6a1f;
+  --xbill-rgb: 91 63 214;
+  --accent-xbill-text: #8f7cf5;
+  /* Readable as text as it is (6.61:1), so one shade serves both jobs. */
+  --accent-spade: #b8902c;
+  --spade-rgb: 184 144 44;
 
   /* ---- Type ------------------------------------------------------------ */
   /* Inter, self-hosted and subset to latin: the look depends on a real
@@ -49,13 +51,6 @@
   --font-body: 1.0625rem;
   --font-small: 0.9rem;
   --font-label: 0.6875rem;
-
-  /* The capture read-through is lettered inside an SVG whose viewBox is the
-     screenshot's own 768 x 1670 pixel space, so its type is sized in those
-     units rather than in rem: at 30 it reads at the same optical size as a
-     label does beside it, at every width the capture is drawn. */
-  --font-caption-capture: 30px;
-  --tracking-caption-capture: 1.5px;
 
   --weight-regular: 400;
   --weight-medium: 500;
@@ -95,8 +90,11 @@
   --radius-sm: 0.25rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
-  /* Screens lift off the paper; nothing else does. */
-  --shadow-screen: 0 20px 44px rgb(var(--ink-rgb) / 16%);
+  /* On a dark stage a screen does not cast a shadow, it glows in its hue. */
+  --glow-xbill: 0 0 0 1px rgb(var(--xbill-rgb) / 50%), 0 26px 70px rgb(var(--xbill-rgb) / 38%),
+    0 0 110px rgb(var(--xbill-rgb) / 22%);
+  --glow-spade: 0 0 0 1px rgb(var(--spade-rgb) / 50%), 0 26px 70px rgb(var(--spade-rgb) / 32%),
+    0 0 110px rgb(var(--spade-rgb) / 18%);
 
   /* ---- Motion ---------------------------------------------------------- */
   --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
@@ -105,16 +103,20 @@
   --duration-slow: 480ms;
   --duration-slower: 720ms;
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-/* A product section re-points the accent to its own app's hue. */
+/* A product section re-points the accent to its own app's hue and text shade. */
 [data-accent="xbill"] {
   --accent: var(--accent-xbill);
+  --accent-rgb: var(--xbill-rgb);
+  --accent-text: var(--accent-xbill-text);
 }
 
 [data-accent="spade"] {
   --accent: var(--accent-spade);
+  --accent-rgb: var(--spade-rgb);
+  --accent-text: var(--accent-spade);
 }
 
 @media (prefers-reduced-motion: reduce) {
