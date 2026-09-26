@@ -294,6 +294,26 @@ draw calls." — the live figures appear only while the scene is rendering.
 
 ---
 
+## 4b. Night scene (added 2026-09-26)
+
+The scene at the top of Work (AD-25) carries running labels and the two app
+icons. None of it is a claim (AD-15): the labels name what is on screen, and
+the icons come from each app's own `AppIcon.appiconset`.
+
+| Where | Words |
+| --- | --- |
+| Beat 1 | 01 — Two products |
+| Beat 2 | 02 — xBill, read through |
+| Beat 3 | 03 — The Shady Spade, read through |
+| Beat 4 | 04 — Both, shipped |
+| xBill icon alt | The xBill app icon |
+| Shady Spade icon alt | The Shady Spade app icon |
+
+The read-through captions are the anchor labels already listed with each
+product's capture in `src/sections/content.ts`.
+
+---
+
 ## 5. Words this site does not use
 
 From §6, and worth keeping as a checklist because they arrive by reflex:

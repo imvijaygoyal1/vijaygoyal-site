@@ -1,6 +1,8 @@
 import { LINKS } from "../lib/links";
 import xbillScreen from "../assets/xbill-screen.webp";
 import spadeScreen from "../assets/spade-screen.webp";
+import xbillIcon from "../assets/xbill-icon.webp";
+import spadeIcon from "../assets/spade-icon.webp";
 
 /**
  * Every word and destination on the page, from `docs/CONTENT.md` (AD-15: a
@@ -11,6 +13,9 @@ import spadeScreen from "../assets/spade-screen.webp";
 /** The captures' pixel size, so the page can reserve their space. */
 export const SCREEN_W = 768;
 export const SCREEN_H = 1670;
+
+/** The icons' pixel size, so the page can reserve their space. */
+export const ICON_SIZE = 224;
 
 export interface Beat {
   heading: string;
@@ -41,6 +46,9 @@ export interface Product {
   facts: readonly string[];
   screen: string;
   screenAlt: string;
+  /** The real App Store icon, from the app's own asset catalogue (AD-14). */
+  icon: string;
+  iconAlt: string;
   /** Read in order as the section is scrolled. */
   spots: readonly Spot[];
   links: readonly { href: string; label: string; name?: string }[];
@@ -82,6 +90,8 @@ export const PRODUCTS: readonly Product[] = [
     ],
     facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", "8 releases · 537 tests"],
     screen: xbillScreen,
+    icon: xbillIcon,
+    iconAlt: "The xBill app icon",
     screenAlt: "xBill reviewing a scanned ALDI receipt on an iPhone: each line item parsed with its price, and tappable chips assigning every item to one or more people",
     spots: [
       { x: 40, y: 292, w: 688, h: 96, label: "Scanned, and it says how sure it is" },
@@ -113,6 +123,8 @@ export const PRODUCTS: readonly Product[] = [
     ],
     facts: ["Swift · watchOS", "Bluetooth · Firebase", "v1.10 live · 192 tests"],
     screen: spadeScreen,
+    icon: spadeIcon,
+    iconAlt: "The Shady Spade app icon",
     screenAlt: "The Shady Spade mid-hand on an iPhone: six players marked bidder, partner or defense, spades as trump, two called cards, and the bidding team 150 points into a 130 bid",
     spots: [
       { x: 30, y: 78, w: 708, h: 168, label: "Bidder, partners, defence" },
@@ -127,6 +139,16 @@ export const PRODUCTS: readonly Product[] = [
     ],
   },
 ];
+
+/** The night scene's running labels, one per beat of the choreography. */
+export const SCENE = {
+  beats: [
+    "01 — Two products",
+    "02 — xBill, read through",
+    "03 — The Shady Spade, read through",
+    "04 — Both, shipped",
+  ],
+} as const;
 
 export const STAGES: readonly { stage: string; copy: string; emphasis?: string }[] = [
   { stage: "Discover", copy: "Use the thing. Most of what is worth building shows up as an irritation first." },
