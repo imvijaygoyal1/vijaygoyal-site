@@ -4,10 +4,14 @@ Run this before every deploy. **Do not read it and assume — execute it.**
 
 ## What this site is, since 2026-09-17
 
-A **static editorial page**: one document about two products. No canvas, no
-scroll engine, no animation — the owner rejected the scroll-driven WebGL
-narrative ("looks unpolished", after five rounds on the playing cards alone),
-and chose a typographic, case-study-led site instead.
+A **static editorial page**: one document about two products. No canvas and no
+3D engine — the owner rejected the scroll-driven WebGL narrative ("looks
+unpolished", after five rounds on the playing cards alone) and chose a
+typographic, case-study-led site instead.
+
+**That retirement was about the 3D scene, not about scroll.** Since 2026-09-25
+the product captures are read through as their sections scroll (see Motion) —
+asked for, and approved from a working prototype.
 
 - `src/sections/content.ts` — every word and destination on the page, sourced
   from `docs/CONTENT.md` (AD-15). Components lay out; they do not carry copy.
@@ -29,14 +33,25 @@ framing — live in git history and in the session memory. Recover them from
 Five pieces: the opening lines rise out of their clipping boxes on load,
 content arrives as it is reached, each screenshot wipes up, links sweep an
 underline on hover — all from `src/lib/reveal.ts` and `styles.css` — and each
-screenshot drifts as it passes, from `src/lib/drift.ts`.
+product capture is **read through** as its section is scrolled, from
+`src/lib/scrollScene.ts`.
 
-The drift is the **only** thing on the page tied to scroll position. The site
-had a scroll-driven narrative once and it was retired; this is a detail, not a
-structure, and it should stay that way. It is `translateY` on a wrapper span,
-never on the image — the image's own `transform` belongs to the CSS wipe-up,
-and an inline transform from the animation library beats a stylesheet rule, so
-sharing one element kills the wipe-up silently. `page.test.tsx` pins that.
+**The read-through is the one thing tied to scroll position.** A product
+section is a 200vh scene whose spread is pinned; how far the section has
+travelled is how far the capture has been read. A spotlight rests on one
+region, travels to the next and rests again: everything else is under a veil of
+the page's own paper, the active region is framed in the product's accent, and
+a caption names it. The anchors are measured in the capture's own 768 x 1670
+pixel space and live in `content.ts`, sourced from `CONTENT.md` — the overlay's
+`viewBox` is that same space, so an anchor cannot drift off the thing it names.
+
+The geometry is pure: `sceneProgress` and `spotlightAt` in `src/lib/spotlight.ts`
+take numbers and return numbers, and are tested without a browser.
+
+**The 48px screen drift and `animejs` were removed when this shipped** (payload
+82.4 kB → 67.2 kB). The drift animated the same captures this pins, and the
+scrub is only *progress → set attributes*, which the existing scroll listener
+already does. A prototype used anime.js; the shipped version needs none.
 
 **It has been rebuilt twice, both times because "verified" meant "verified in
 the engines that happen to agree with me".**
@@ -65,14 +80,22 @@ anything at or above the trigger line has arrived, however it got there.
   opacity/transform at several scroll offsets), not from a still. Judge the
   *amount* as a share of the element's travel, not in pixels: 14px of drift
   sounds deliberate and measures 1.1% of a 1280px passage, which is the same
-  order as the motion pass the owner could not see at all. The drift ships at
-  48px, ≈3.7%.
+  order as the motion pass the owner could not see at all. Three passes were
+  rejected as invisible before the read-through landed — the lesson was that
+  the problem was never the amount, it was that nothing on screen was *doing*
+  anything.
 - **`reuseExistingServer` will serve you a stale `dist/`.** A preview server
   left running from an earlier `npx playwright test` is reused as-is, so a
   source change never reaches the browser and the e2e passes on the old build.
   It reported a deleted animation as working. **Kill port 4173 before any e2e
   run that is meant to prove a source change**, and prove the test fails when
   you break the thing it checks.
+- **A sticky element is transparent.** On a phone the pinned capture floated
+  over the section's own heading, which reads as a broken page rather than a
+  pinned one. A sticky band needs its own opaque ground and a rule under it.
+- **A `file://` render has no viewport meta**, so WebKit lays the page out at
+  980px and a "phone" screenshot is nothing of the kind. Inject
+  `width=device-width` before measuring anything as a phone.
 - **Measure a scroll-linked range at its clamped ends.** Sampling "near" the
   start and end of a passage reads the travel low — 47.4 against a declared 48
   — and the tolerance you then loosen is hiding a real defect next time.

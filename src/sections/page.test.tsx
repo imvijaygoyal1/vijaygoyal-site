@@ -4,7 +4,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { App } from "../App";
 import { LINKS } from "../lib/links";
-import { PRODUCTS, STAGES, TOOLKIT } from "./content";
+import { PRODUCTS, SCREEN_H, SCREEN_W, STAGES, TOOLKIT } from "./content";
 
 const content = readFileSync(resolve(process.cwd(), "docs/CONTENT.md"), "utf8");
 const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
@@ -46,19 +46,38 @@ describe("the page", () => {
     }
   });
 
-  it("drifts a wrapper, never the screenshot itself", () => {
-    // The screenshot's own `transform` belongs to the CSS wipe-up. An inline
-    // transform from the animation library beats a stylesheet rule, so if the
-    // two ever share an element the wipe-up dies silently.
+  it("gives each capture a read-through overlay bound to its anchors", () => {
+    // The overlay's viewBox must be the capture's own pixel space, or an
+    // anchor in content.ts lands somewhere other than the thing it names.
     const { container } = render(<App />);
-    const drifted = [...container.querySelectorAll("[data-drift]")];
-    expect(drifted).toHaveLength(PRODUCTS.length);
-    for (const wrapper of drifted) {
-      expect(wrapper.tagName).not.toBe("IMG");
-      const shot = wrapper.querySelector("img.screen")!;
-      expect(shot).not.toBeNull();
-      expect(shot.hasAttribute("data-drift")).toBe(false);
-      expect(shot.hasAttribute("data-reveal")).toBe(true);
+    const scenes = [...container.querySelectorAll("[data-scene]")];
+    expect(scenes).toHaveLength(PRODUCTS.length);
+
+    for (const [i, scene] of scenes.entries()) {
+      const product = PRODUCTS[i]!;
+      expect(JSON.parse(scene.getAttribute("data-spots")!)).toEqual(product.spots);
+
+      const svg = scene.querySelector("svg.screen-read")!;
+      expect(svg.getAttribute("viewBox")).toBe(`0 0 ${SCREEN_W} ${SCREEN_H}`);
+      expect(svg.getAttribute("aria-hidden")).toBe("true");
+      for (const part of ["[data-hole]", "[data-frame]", "[data-caption]"]) {
+        expect(svg.querySelector(part), `${product.id} ${part}`).not.toBeNull();
+      }
+      // The capture itself keeps its own transform for the CSS wipe-up.
+      expect(scene.querySelector("img.screen[data-reveal]")).not.toBeNull();
+    }
+  });
+
+  it("gives every anchor a label, inside the capture's bounds", () => {
+    for (const product of PRODUCTS) {
+      expect(product.spots.length).toBeGreaterThan(1);
+      for (const spot of product.spots) {
+        expect(spot.label.length, product.id).toBeGreaterThan(2);
+        expect(spot.x).toBeGreaterThanOrEqual(0);
+        expect(spot.y).toBeGreaterThanOrEqual(0);
+        expect(spot.x + spot.w, `${product.id} ${spot.label}`).toBeLessThanOrEqual(SCREEN_W);
+        expect(spot.y + spot.h, `${product.id} ${spot.label}`).toBeLessThanOrEqual(SCREEN_H);
+      }
     }
   });
 

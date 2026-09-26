@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { DRIFT } from "../src/lib/drift";
 
 const SECTIONS = ["opening", "work", "process", "toolkit", "about", "contact"];
 
@@ -170,67 +169,61 @@ test("content arrives on scroll, and is fully visible once passed", async ({ pag
   }
 });
 
-test("each screenshot drifts as it passes, in every engine", async ({ page }) => {
+/** Reads a scene's spotlight straight off the DOM, in the capture's own units. */
+async function spotlight(page: import("@playwright/test").Page, id: string) {
+  return page.locator(`#${id} [data-frame]`).evaluate((el) => ({
+    x: Number(el.getAttribute("x")),
+    y: Number(el.getAttribute("y")),
+    h: Number(el.getAttribute("height")),
+    caption: el.parentElement!.querySelector("[data-caption]")!.textContent,
+  }));
+}
+
+test("each capture is read through as its section is scrolled, in every engine", async ({ page }) => {
   await page.goto("/");
+  // The script marks the root only while it is actually driving the scenes.
+  await expect(page.locator("html")).toHaveClass(/js-scene/);
 
-  // Sampled at the element's own position rather than at fixed scroll offsets,
-  // so the four viewport shapes are all asking the same question.
-  const { interior, ends } = await page.evaluate(async () => {
-    const el = document.querySelector<HTMLElement>("[data-drift]")!;
-    const settle = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    const read = () => {
-      const t = getComputedStyle(el).transform;
-      return t === "none" ? 0 : new DOMMatrix(t).m42;
-    };
+  for (const id of ["xbill", "shady-spade"]) {
+    const scene = page.locator(`#${id}`);
+    const seen: { y: number; caption: string | null }[] = [];
 
-    // Mid-passage, where the drift is actually being driven.
-    const interior: number[] = [];
-    for (const fraction of [1, 0.5, 0, -0.5, -0.9]) {
-      window.scrollBy(0, el.getBoundingClientRect().top - fraction * window.innerHeight);
-      await settle();
-      interior.push(read());
+    // Walk the scene's own passage rather than fixed offsets, so the four
+    // viewport shapes all ask the same question.
+    for (const fraction of [0, 0.25, 0.5, 0.75, 1]) {
+      await scene.evaluate((el, f) => {
+        const box = el.getBoundingClientRect();
+        const travel = box.height - window.innerHeight;
+        window.scrollBy(0, box.top + travel * f);
+      }, fraction);
+      await page.waitForTimeout(90);
+      const { y, caption } = await spotlight(page, id);
+      seen.push({ y, caption });
     }
 
-    // The two clamped ends: before the passage starts and after it finishes.
-    // Measuring the travel anywhere short of these reads low, because the
-    // element has not reached the end of its range.
-    window.scrollTo(0, 0);
-    await settle();
-    const before = read();
-    window.scrollTo(0, document.body.scrollHeight);
-    await settle();
-    const after = read();
+    // It works down the capture: every sample at or below the one before it,
+    // and the ends land exactly on the first and last anchors.
+    for (let i = 1; i < seen.length; i++) {
+      expect(seen[i]!.y, `${id} sample ${i} of ${JSON.stringify(seen)}`).toBeGreaterThanOrEqual(
+        seen[i - 1]!.y,
+      );
+    }
+    expect(seen[seen.length - 1]!.y, id).toBeGreaterThan(seen[0]!.y);
 
-    return { interior, ends: [before, after] as [number, number] };
-  });
-
-  // It rises steadily the whole way through: every sample below the one before
-  // it. A drift that stalls, or only moves at the ends, is the jumpiness the
-  // full-passage window exists to avoid.
-  for (let i = 1; i < interior.length; i++) {
-    expect(interior[i]!, `sample ${i} of ${JSON.stringify(interior)}`).toBeLessThan(interior[i - 1]!);
+    // And it says what it is pointing at, in the words CONTENT.md sources.
+    const captions = seen.map((s) => s.caption).filter(Boolean);
+    expect(new Set(captions).size, `${id} captions: ${JSON.stringify(captions)}`).toBeGreaterThan(1);
   }
-  // And it is a drift, not a lurch: the whole travel is the declared distance,
-  // centred on the resting position.
-  expect(ends[0] - ends[1]).toBeCloseTo(DRIFT, 0);
-  expect(ends[0] + ends[1]).toBeCloseTo(0, 0);
 });
 
-test("the drift is absent entirely under reduced motion", async ({ page }) => {
+test("a capture is shown plainly under reduced motion", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
-  const transforms = await page.evaluate(async () => {
-    const el = document.querySelector<HTMLElement>("[data-drift]")!;
-    const out: string[] = [];
-    for (const fraction of [1, 0.25, -0.5]) {
-      window.scrollBy(0, el.getBoundingClientRect().top - fraction * window.innerHeight);
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-      out.push(getComputedStyle(el).transform);
-    }
-    return out;
-  });
-
-  // Not "transformed by zero" — untouched. The resting state is the finished state.
-  for (const t of transforms) expect(t).toBe("none");
+  // Not "veiled by zero" — never driven at all, so the overlay stays hidden
+  // and the capture is the picture it has always been.
+  await expect(page.locator("html")).not.toHaveClass(/js-scene/);
+  const shown = await page.locator("#xbill .screen-read").evaluate((el) => getComputedStyle(el).display);
+  expect(shown).toBe("none");
+  await expect(page.locator("#xbill img.screen")).toBeVisible();
 });

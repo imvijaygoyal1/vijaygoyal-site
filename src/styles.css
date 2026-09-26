@@ -224,13 +224,28 @@ a {
 
 /* ---- Work ------------------------------------------------------------- */
 
+/* A product section is also the scene its capture is read in: the article's
+   own passage past the viewport is how far the read-through has got, so it
+   needs length to be read across. The text spreads down that length rather
+   than sitting in a block at the top with dead space under it. */
 .work-item {
+  min-height: 200vh;
+  padding-block: var(--space-2xl);
+  border-bottom: var(--rule-hair);
+}
+
+/* The section holds still — words and capture together — while the scroll
+   reads the capture. Spreading the words down the scene's whole length
+   instead left a column of dead paper beside them. */
+.work-spread {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr 19rem;
   gap: var(--space-2xl);
   align-items: center;
-  padding-block: var(--space-2xl);
-  border-bottom: var(--rule-hair);
+  padding-block: var(--space-xl);
 }
 
 .work-eyebrow {
@@ -294,19 +309,65 @@ a {
   margin-top: var(--space-md);
 }
 
-/* Carries the scroll-linked drift so the image keeps its own transform for the wipe-up.
-   `display: block` so it does not add an inline-box baseline gap under the picture. */
-.screen-drift {
+/* On a wide screen the whole spread is pinned, so the capture needs no
+   stickiness of its own; stacked on a phone it takes over the pinning. */
+.screen-pin {
+  align-self: center;
+}
+
+/* Shrink-wraps the capture so the overlay's box is exactly the image's box.
+   Sizing the wrapper from an aspect-ratio instead let it overflow the pinned
+   viewport on a phone. */
+.screen-stack {
+  position: relative;
   display: block;
+  width: fit-content;
+  margin-inline: auto;
 }
 
 .screen {
-  width: 100%;
-  height: auto;
+  display: block;
+  height: min(74vh, 40rem);
+  width: auto;
+  max-width: 100%;
   aspect-ratio: 768 / 1670;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-screen);
+}
+
+/* Inert until the script says it is driving, so a page without JavaScript —
+   or with reduced motion — shows the capture plainly, as it did before. */
+.screen-read {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+.js-scene .screen-read {
   display: block;
+}
+
+/* The veil is the page's own paper, so the capture is quietened rather than
+   darkened and the section stays light while it points. */
+.screen-veil {
+  fill: var(--paper);
+  fill-opacity: 0.66;
+}
+
+.screen-frame {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+}
+
+.screen-caption {
+  fill: var(--accent);
+  font-family: var(--family-mono);
+  font-size: var(--font-caption-capture);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-caption-capture);
 }
 
 /* ---- Stages, toolkit, about ------------------------------------------- */
@@ -487,7 +548,6 @@ a {
     gap: var(--space-3xs);
   }
 
-  .work-item,
   .about,
   .contact {
     grid-template-columns: 1fr;
@@ -500,8 +560,36 @@ a {
     align-items: flex-start;
   }
 
+  /* A phone cannot hold the capture and all the words at once, so the spread
+     stops pinning and the capture alone stays put while the words pass it. */
+  .work-spread {
+    position: static;
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: var(--space-lg);
+    padding-block: 0;
+  }
+
+  .work-item {
+    min-height: 170vh;
+  }
+
+  /* Pinned as an opaque band on the page's own paper, with a hairline under
+     it: a transparent sticky capture let the heading show straight through
+     itself, which reads as a broken page rather than as a pinned one. */
+  .screen-pin {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    order: -1;
+    align-self: start;
+    background: var(--paper);
+    padding-block: var(--space-sm);
+    border-bottom: var(--rule-hair);
+  }
+
   .screen {
-    max-width: 17rem;
+    height: min(46vh, 22rem);
   }
 }
 

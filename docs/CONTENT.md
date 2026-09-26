@@ -168,6 +168,19 @@ Four beats. Each needs its own capture; only one exists today.
 balances and who is allowed to record a payment are both real decisions with
 reasons, and both are verifiable in the schema.*
 
+
+**Capture read-through.** The capture is read feature by feature as the
+section is scrolled. Each label describes what is visibly in the screenshot —
+no claim beyond the picture itself.
+
+| # | Region | Label |
+| --- | --- | --- |
+| 1 | The scan status row | Scanned, and it says how sure it is |
+| 2 | The merchant field | Merchant, parsed from the receipt |
+| 3 | The first item row | Every line item, priced |
+| 4 | That item's assignment chips | Assigned per person, per item |
+| 5 | A single-assignee item | One item, one person |
+
 Links: [App Store](https://apps.apple.com/app/id6780284715) · `/work/xbill` *(links once the case-study route exists)* ·
 `xbill.vijaygoyal.org`
 
@@ -186,6 +199,17 @@ Gameplay below is taken from the app's own rules screen — not inferred.
 | 2 | **Play together** | Online, over Bluetooth with no network at all, or against AI opponents. |
 | 3 | **Think strategically** | 250 points on the table. The three of spades alone is worth thirty. Make your bid and you score what your team caught; get set and you lose it. |
 | 4 | **Built independently** | Product, design, code and release — v1.10 is live on the App Store, and v2.0 brings an Apple Watch companion, a real-life scorekeeper and shareable scorecards. |
+
+
+**Capture read-through.** As above, describing only what the capture shows.
+
+| # | Region | Label |
+| --- | --- | --- |
+| 1 | The six seats | Bidder, partners, defence |
+| 2 | The trump panel | Trump |
+| 3 | The called-cards panel | The called cards |
+| 4 | The score panel | 150 into a 130 bid |
+| 5 | The last card in hand | The three of spades is worth thirty |
 
 Links: [App Store](https://apps.apple.com/app/id6760261655) ·
 `/work/shady-spade` *(links once the case-study route exists)* · `shadyspade.vijaygoyal.org`

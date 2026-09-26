@@ -1,7 +1,18 @@
 import { useEffect } from "react";
 import { observeReveals } from "../lib/reveal";
-import { observeDrift } from "../lib/drift";
-import { SCREEN_H, SCREEN_W, ABOUT, CONTACT, DESCRIPTOR, OPENING, PRODUCTS, STAGES, TOOLKIT, type Product } from "./content";
+import { observeScenes } from "../lib/scrollScene";
+import {
+  SCREEN_H,
+  SCREEN_W,
+  ABOUT,
+  CONTACT,
+  DESCRIPTOR,
+  OPENING,
+  PRODUCTS,
+  STAGES,
+  TOOLKIT,
+  type Product,
+} from "./content";
 import { LINKS } from "../lib/links";
 
 /** The masthead: who this is, and the page's own sections. */
@@ -11,10 +22,18 @@ function Masthead() {
       <p className="masthead-name">Vijay Goyal</p>
       <nav aria-label="Sections">
         <ul>
-          <li><a href="#work">Work</a></li>
-          <li><a href="#process">How I build</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li>
+            <a href="#work">Work</a>
+          </li>
+          <li>
+            <a href="#process">How I build</a>
+          </li>
+          <li>
+            <a href="#about">About</a>
+          </li>
+          <li>
+            <a href="#contact">Contact</a>
+          </li>
         </ul>
       </nav>
     </header>
@@ -45,7 +64,15 @@ function Opening() {
   );
 }
 
-function SectionHead({ id, title, note }: { id: string; title: string; note: string }) {
+function SectionHead({
+  id,
+  title,
+  note,
+}: {
+  id: string;
+  title: string;
+  note: string;
+}) {
   return (
     <div className="section-head">
       <h2 id={`${id}-heading`}>{title}</h2>
@@ -56,55 +83,84 @@ function SectionHead({ id, title, note }: { id: string; title: string; note: str
 
 function WorkItem({ product }: { product: Product }) {
   return (
-    <article className="work-item" id={product.id} data-accent={product.accent}>
-      <div data-reveal>
-        <span className="work-eyebrow">{product.eyebrow}</span>
-        <h3>{product.heading}</h3>
-        <p>{product.lede}</p>
-        <ul className="beats">
-          {product.beats.map((beat) => (
-            <li className="beat" key={beat.heading}>
-              <h4>{beat.heading}</h4>
-              <p>{beat.copy}</p>
-            </li>
-          ))}
-        </ul>
-        <ul className="facts">
-          {product.facts.map((fact) => (
-            <li key={fact}>{fact}</li>
-          ))}
-        </ul>
-        <ul className="facts work-links">
-          {product.links.map((link) => (
-            <li key={link.href}>
-              <a className="action" href={link.href} aria-label={link.name}>
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-      {/* Real captures, never a mockup (AD-14). Lazy: both sit below the fold. */}
-      {/* Intrinsic size given, so the column reserves the space before the
+    <article
+      className="work-item"
+      id={product.id}
+      data-accent={product.accent}
+      data-scene=""
+      data-spots={JSON.stringify(product.spots)}
+    >
+      <div className="work-spread">
+        <div data-reveal>
+          <span className="work-eyebrow">{product.eyebrow}</span>
+          <h3>{product.heading}</h3>
+          <p>{product.lede}</p>
+          <ul className="beats">
+            {product.beats.map((beat) => (
+              <li className="beat" key={beat.heading}>
+                <h4>{beat.heading}</h4>
+                <p>{beat.copy}</p>
+              </li>
+            ))}
+          </ul>
+          <ul className="facts">
+            {product.facts.map((fact) => (
+              <li key={fact}>{fact}</li>
+            ))}
+          </ul>
+          <ul className="facts work-links">
+            {product.links.map((link) => (
+              <li key={link.href}>
+                <a className="action" href={link.href} aria-label={link.name}>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* Real captures, never a mockup (AD-14). Lazy: both sit below the fold. */}
+        {/* Intrinsic size given, so the column reserves the space before the
           image loads: without it a lazy screenshot has zero height until it
           arrives — a layout shift, and in Safari a box that is not there at
           all until it loads. */}
-      {/* The drift lives on a wrapper, NOT on the image. The CSS reveal animates the image's own
-          `transform` (scale 1.03 -> none, with clip-path), and an inline transform from the
-          animation library beats a stylesheet rule — putting both on one element silently
-          cancelled the wipe-up. Two transforms, two elements. */}
-      <span className="screen-drift" data-drift="">
-        <img
-          className="screen"
-          data-reveal
-          src={product.screen}
-          alt={product.screenAlt}
-          width={SCREEN_W}
-          height={SCREEN_H}
-          loading="lazy"
-          decoding="async"
-        />
-      </span>
+        <div className="screen-pin">
+          <div className="screen-stack">
+            <img
+              className="screen"
+              data-reveal
+              src={product.screen}
+              alt={product.screenAlt}
+              width={SCREEN_W}
+              height={SCREEN_H}
+              loading="lazy"
+              decoding="async"
+            />
+            {/* The overlay's viewBox is the capture's own pixel space, so an
+              anchor in content.ts lands on the thing it names at every size.
+              It is inert until the script marks the root as driving. */}
+            <svg
+              className="screen-read"
+              viewBox={`0 0 ${SCREEN_W} ${SCREEN_H}`}
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <mask id={`read-${product.id}`}>
+                <rect width={SCREEN_W} height={SCREEN_H} fill="#fff" />
+                <rect data-hole rx="18" fill="#000" />
+              </mask>
+              <rect
+                className="screen-veil"
+                width={SCREEN_W}
+                height={SCREEN_H}
+                mask={`url(#read-${product.id})`}
+              />
+              <rect className="screen-frame" data-frame rx="18" />
+              <text className="screen-caption" data-caption />
+            </svg>
+          </div>
+        </div>
+      </div>
     </article>
   );
 }
@@ -112,7 +168,11 @@ function WorkItem({ product }: { product: Product }) {
 function Work() {
   return (
     <section className="section" id="work" aria-labelledby="work-heading">
-      <SectionHead id="work" title="Selected work" note="Two products, built end to end" />
+      <SectionHead
+        id="work"
+        title="Selected work"
+        note="Two products, built end to end"
+      />
       {PRODUCTS.map((product) => (
         <WorkItem key={product.id} product={product} />
       ))}
@@ -133,9 +193,13 @@ function Process() {
             <h3>{stage}</h3>
             <p>
               {emphasis
-                ? copy.split(emphasis).flatMap((part, index, parts) =>
-                    index < parts.length - 1 ? [part, <em key={index}>{emphasis}</em>] : [part],
-                  )
+                ? copy
+                    .split(emphasis)
+                    .flatMap((part, index, parts) =>
+                      index < parts.length - 1
+                        ? [part, <em key={index}>{emphasis}</em>]
+                        : [part],
+                    )
                 : copy}
             </p>
           </li>
@@ -148,7 +212,11 @@ function Process() {
 function Toolkit() {
   return (
     <section className="section" id="toolkit" aria-labelledby="toolkit-heading">
-      <SectionHead id="toolkit" title="Toolkit" note="Verified, nothing aspirational" />
+      <SectionHead
+        id="toolkit"
+        title="Toolkit"
+        note="Verified, nothing aspirational"
+      />
       <dl className="toolkit">
         {TOOLKIT.map(({ area, items }) => (
           <div data-reveal key={area}>
@@ -164,7 +232,11 @@ function Toolkit() {
 function About() {
   return (
     <section className="section" id="about" aria-labelledby="about-heading">
-      <SectionHead id="about" title="About" note="Product thinker · builder · constant learner" />
+      <SectionHead
+        id="about"
+        title="About"
+        note="Product thinker · builder · constant learner"
+      />
       <div className="about">
         <div data-reveal>
           <h3>{ABOUT.heading}</h3>
@@ -172,7 +244,9 @@ function About() {
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-        <p className="photo-pending" data-reveal>Photograph</p>
+        <p className="photo-pending" data-reveal>
+          Photograph
+        </p>
       </div>
     </section>
   );
@@ -220,16 +294,18 @@ export function Page() {
   // hidden before it starts.
   useEffect(() => {
     const stopReveals = observeReveals();
-    const stopDrift = observeDrift();
+    const stopScenes = observeScenes();
     return () => {
       stopReveals();
-      stopDrift();
+      stopScenes();
     };
   }, []);
 
   return (
     <div className="page">
-      <a className="skip-link" href="#opening">Skip to introduction</a>
+      <a className="skip-link" href="#opening">
+        Skip to introduction
+      </a>
       <Masthead />
       <main id="main-content">
         <Opening />

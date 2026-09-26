@@ -50,6 +50,13 @@
   --font-small: 0.9rem;
   --font-label: 0.6875rem;
 
+  /* The capture read-through is lettered inside an SVG whose viewBox is the
+     screenshot's own 768 x 1670 pixel space, so its type is sized in those
+     units rather than in rem: at 30 it reads at the same optical size as a
+     label does beside it, at every width the capture is drawn. */
+  --font-caption-capture: 30px;
+  --tracking-caption-capture: 1.5px;
+
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;

@@ -17,6 +17,19 @@ export interface Beat {
   copy: string;
 }
 
+/**
+ * One region of a product capture, in the capture's own 768 x 1670 pixel
+ * space, with the label that names it. The overlay's viewBox is that same
+ * space, so an anchor cannot drift away from what it points at.
+ */
+export interface Spot {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly label: string;
+}
+
 export interface Product {
   id: string;
   accent: "xbill" | "spade";
@@ -28,6 +41,8 @@ export interface Product {
   facts: readonly string[];
   screen: string;
   screenAlt: string;
+  /** Read in order as the section is scrolled. */
+  spots: readonly Spot[];
   links: readonly { href: string; label: string; name?: string }[];
 }
 
@@ -68,6 +83,13 @@ export const PRODUCTS: readonly Product[] = [
     facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", "8 releases · 537 tests"],
     screen: xbillScreen,
     screenAlt: "xBill reviewing a scanned ALDI receipt on an iPhone: each line item parsed with its price, and tappable chips assigning every item to one or more people",
+    spots: [
+      { x: 40, y: 292, w: 688, h: 96, label: "Scanned, and it says how sure it is" },
+      { x: 40, y: 706, w: 688, h: 202, label: "Merchant, parsed from the receipt" },
+      { x: 40, y: 1032, w: 688, h: 190, label: "Every line item, priced" },
+      { x: 60, y: 1148, w: 440, h: 56, label: "Assigned per person, per item" },
+      { x: 40, y: 1468, w: 688, h: 172, label: "One item, one person" },
+    ],
     links: [
       { href: LINKS.xbillAppStore, label: "App Store", name: "xBill on the App Store" },
       { href: LINKS.xbillSite, label: "xbill.vijaygoyal.org" },
@@ -92,6 +114,13 @@ export const PRODUCTS: readonly Product[] = [
     facts: ["Swift · watchOS", "Bluetooth · Firebase", "v1.10 live · 192 tests"],
     screen: spadeScreen,
     screenAlt: "The Shady Spade mid-hand on an iPhone: six players marked bidder, partner or defense, spades as trump, two called cards, and the bidding team 150 points into a 130 bid",
+    spots: [
+      { x: 30, y: 78, w: 708, h: 168, label: "Bidder, partners, defence" },
+      { x: 22, y: 276, w: 234, h: 82, label: "Trump" },
+      { x: 266, y: 276, w: 236, h: 82, label: "The called cards" },
+      { x: 512, y: 276, w: 230, h: 82, label: "150 into a 130 bid" },
+      { x: 626, y: 1150, w: 96, h: 136, label: "The three of spades is worth thirty" },
+    ],
     links: [
       { href: LINKS.spadeAppStore, label: "App Store", name: "The Shady Spade on the App Store" },
       { href: LINKS.spadeSite, label: "shadyspade.vijaygoyal.org" },
