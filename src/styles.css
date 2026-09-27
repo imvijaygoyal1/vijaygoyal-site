@@ -570,9 +570,11 @@ a {
   max-width: var(--measure-wide);
 }
 
+/* One column: the second held a photograph placeholder, removed until a real
+   photograph exists (AD-14 forbids a generated or stock stand-in). */
 .about {
   display: grid;
-  grid-template-columns: 1fr 19rem;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-2xl);
   align-items: start;
   padding-block: var(--space-2xl);
@@ -591,21 +593,6 @@ a {
   margin: 0 0 var(--space-sm);
   max-width: var(--measure);
   color: var(--ink-muted);
-}
-
-/* Until a photograph exists. A plain marked-out block is honest; a stock
-   portrait or a generated one is not (AD-14). */
-.photo-pending {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 4 / 5;
-  border: var(--rule-hair);
-  background: var(--ground-sunken);
-  color: var(--ink-faint);
-  font-size: var(--font-label);
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
 }
 
 /* ---- Contact and footer ----------------------------------------------- */

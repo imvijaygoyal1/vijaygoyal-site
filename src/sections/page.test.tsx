@@ -131,11 +131,40 @@ describe("the page", () => {
     expect(html).not.toMatch(/ios developer/i);
   });
 
-  it("keeps the About photograph honest until one exists", () => {
-    // AD-14: no generated portrait, and no stock stand-in pretending to be one.
+  it("shows no photograph until a real one exists, and no empty box in its place", () => {
+    // AD-14: no generated portrait, and no stock stand-in pretending to be
+    // one. The marked-out "Photograph" box read as an unfinished page.
     const { container } = render(<App />);
-    const pending = container.querySelector(".photo-pending")!;
-    expect(pending.textContent).toBe("Photograph");
     expect(container.querySelector(".about img")).toBeNull();
+    expect(container.querySelector(".photo-pending")).toBeNull();
+    expect(container.querySelector("#about")!.textContent).not.toContain("Photograph");
+  });
+});
+
+describe("the facts on the page", () => {
+  // Checked against the App Store lookup API on 2026-09-27: The Shady Spade
+  // 2.0 (released 2026-09-24), xBill 1.7 (2026-09-11). Release records
+  // confirmed by the owner the same day. Sources in docs/CONTENT.md.
+  const facts = (id: string) => PRODUCTS.find((p) => p.id === id)!.facts;
+
+  it("names the versions that are live", () => {
+    expect(facts("shady-spade")).toContain("v2.0 live · with Apple Watch");
+    expect(facts("xbill")).toContain("v1.7 live · 8 releases");
+  });
+
+  it("credits each app with its own approval record, not a combined one", () => {
+    const { container } = render(<App />);
+    expect(container.textContent).toContain(
+      "xBill: 8 releases, all approved first time. The Shady Spade: 9 releases, 8 approved first time.",
+    );
+    expect(container.textContent).not.toMatch(/eight releases, eight first-pass/i);
+  });
+
+  it("states no test count, until one can be read at build time", () => {
+    // Counts changed weekly and the recorded ones disagreed; a stale number
+    // shipped twice. They return with the facts pipeline, not by hand.
+    const { container } = render(<App />);
+    expect(container.textContent).not.toMatch(/\b\d{3} tests\b/);
+    expect(container.textContent).not.toContain("v1.10");
   });
 });

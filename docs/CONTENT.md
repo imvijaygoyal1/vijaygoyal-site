@@ -23,6 +23,9 @@ all four are true.** None was invented.
 | 537 tests (xBill) | **true** | `xBill/CLAUDE.md` — `537/537` |
 | 729 tests across the two | **true** | 537 (xBill) + 192 (Shady Spade, `MyApp/CLAUDE.md:440` `192/193`) = 729 |
 | v1.10 on the App Store; v2.0 brings the Watch | **true** | `MyApp/CLAUDE.md:4` — v1.10 "approved and live"; v2.0 is "the first release containing the Apple Watch companion" |
+| **Updated 2026-09-27:** xBill 8 releases, all approved first time | **true** | App Store lookup API 2026-09-27: xBill **1.7**, released 2026-09-11; owner confirmed the record 2026-09-27 |
+| **Updated 2026-09-27:** The Shady Spade 9 releases, 8 approved first time; v2.0 live with Apple Watch | **true** | App Store lookup API 2026-09-27: **2.0**, released 2026-09-24; one rejection (v1.9, guideline 5.1.2); owner confirmed 2026-09-27 |
+| **Retired 2026-09-27:** every test count (537, 192, 729) | removed | Recorded totals disagreed (Shady Spade 179–193 across September) and a stale count shipped twice. They return only when read at build time |
 | Postgres row-level security where money is involved | **true** | 7 of 59 migrations enable `ROW LEVEL SECURITY`; `settlements` policies documented at `xBill/CLAUDE.md:48` |
 
 **These are point-in-time claims.** "Eight releases" becomes nine on the next
@@ -40,7 +43,7 @@ undated one quietly rots.
 | Shady Spade site | `https://shadyspade.vijaygoyal.org` — live, 200 | checked 2026-09-14 |
 | Shady Spade privacy policy | `https://shadyspade.vijaygoyal.org/privacy` — live, 200 | checked 2026-09-14 |
 | xBill in-app terms | `TermsOfServiceView.swift` — in-app, not hosted | xBill sources |
-| Shady Spade version state | v1.10 live; v2.0 build 12 **not yet submitted** | `MyApp/CLAUDE.md:67` |
+| Shady Spade version state | **2.0 live** since 2026-09-24 (was v1.10 when this table was written) | App Store lookup API, 2026-09-27 |
 
 ### Two subdomains are shipped-app infrastructure — do not touch them
 
@@ -198,7 +201,7 @@ Gameplay below is taken from the app's own rules screen — not inferred.
 | 1 | **The game** | Six players, no fixed teams. The highest bidder declares trump and calls two secret partners — so you learn who you are playing with by playing. |
 | 2 | **Play together** | Online, over Bluetooth with no network at all, or against AI opponents. |
 | 3 | **Think strategically** | 250 points on the table. The three of spades alone is worth thirty. Make your bid and you score what your team caught; get set and you lose it. |
-| 4 | **Built independently** | Product, design, code and release — v1.10 is live on the App Store, and v2.0 brings an Apple Watch companion, a real-life scorekeeper and shareable scorecards. |
+| 4 | **Built independently** | Product, design, code and release — v2.0 is live on the App Store with an Apple Watch companion, a real-life scorekeeper and shareable scorecards. |
 
 
 **Capture read-through.** As above, describing only what the capture shows.
@@ -227,7 +230,7 @@ Links: [App Store](https://apps.apple.com/app/id6760261655) ·
 | 02 | Define | Decide what it is *not*. Scope is the first design decision. |
 | 03 | Design | In SwiftUI, not in a mockup — the real thing on a real device, early. |
 | 04 | Build | Offline-first, so the apps work on a train. Row-level security where money is involved. |
-| 05 | Refine | 729 tests across the two apps as of September 2026, and a release runbook that gets executed, not read. |
+| 05 | Refine | Automated tests behind every release, and a release runbook that gets executed, not read. |
 | 06 | Ship | Submit, get approved, watch what people actually do, repeat. |
 
 ### 05 · Toolkit
@@ -256,7 +259,7 @@ one person can finish.*
 > — and how much further modern tools let one person take an idea than used
 > to be possible.
 
-Photograph: `TODO: VERIFY WITH VIJAY`
+Photograph: `TODO: VERIFY WITH VIJAY` — until one is supplied the page shows **no** photograph and no placeholder box (removed 2026-09-27; the empty box read as unfinished).
 
 ### 07 · Contact
 

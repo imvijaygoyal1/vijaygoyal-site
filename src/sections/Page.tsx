@@ -274,9 +274,6 @@ function About() {
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-        <p className="photo-pending" data-reveal>
-          Photograph
-        </p>
       </div>
     </section>
   );

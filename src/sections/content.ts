@@ -66,7 +66,7 @@ export const OPENING = {
     },
     {
       label: "Shipped",
-      copy: "Two iOS apps · eight releases, eight first-pass App Store approvals as of September 2026 · 729 tests across the two.",
+      copy: "Two iOS apps on the App Store. xBill: 8 releases, all approved first time. The Shady Spade: 9 releases, 8 approved first time.",
     },
   ],
 } as const;
@@ -88,7 +88,7 @@ export const PRODUCTS: readonly Product[] = [
         copy: "Either party records a payment: the person who owes, or the person owed. A correction is a delete and a re-record, so there is no silent edit of someone else’s money.",
       },
     ],
-    facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", "8 releases · 537 tests"],
+    facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", "v1.7 live · 8 releases"],
     screen: xbillScreen,
     icon: xbillIcon,
     iconAlt: "The xBill app icon",
@@ -121,7 +121,7 @@ export const PRODUCTS: readonly Product[] = [
         copy: "250 points on the table. The three of spades alone is worth thirty. Make your bid and you score what your team caught; get set and you lose it.",
       },
     ],
-    facts: ["Swift · watchOS", "Bluetooth · Firebase", "v1.10 live · 192 tests"],
+    facts: ["Swift · watchOS", "Bluetooth · Firebase", "v2.0 live · with Apple Watch"],
     screen: spadeScreen,
     icon: spadeIcon,
     iconAlt: "The Shady Spade app icon",
@@ -155,7 +155,7 @@ export const STAGES: readonly { stage: string; copy: string; emphasis?: string }
   { stage: "Define", copy: "Decide what it is not. Scope is the first design decision.", emphasis: "not" },
   { stage: "Design", copy: "In SwiftUI, not in a mockup — the real thing on a real device, early." },
   { stage: "Build", copy: "Offline-first, so the apps work on a train. Row-level security where money is involved." },
-  { stage: "Refine", copy: "729 tests across the two apps as of September 2026, and a release runbook that gets executed, not read." },
+  { stage: "Refine", copy: "Automated tests behind every release, and a release runbook that gets executed, not read." },
   { stage: "Ship", copy: "Submit, get approved, watch what people actually do, repeat." },
 ];
 
