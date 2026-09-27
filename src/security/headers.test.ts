@@ -36,10 +36,17 @@ describe("security headers", () => {
   it("allow only this site's own scripts: nothing inline, nothing evaluated", () => {
     const csp = all().get("content-security-policy") ?? "";
     expect(csp).toMatch(/default-src 'self'/);
-    expect(csp).toMatch(/script-src 'self'(;|$)/);
     expect(csp).not.toMatch(/unsafe-inline|unsafe-eval/);
     // The icons are small enough that Vite inlines them as data: URIs.
     expect(csp).toMatch(/img-src 'self' data:/);
+  });
+
+  it("let Cloudflare Web Analytics run, and nothing else from outside", () => {
+    // Cloudflare injects its beacon at the edge, so no local test sees it: the
+    // first deploy of this policy blocked it and stopped the site's analytics.
+    const csp = all().get("content-security-policy") ?? "";
+    expect(csp).toMatch(/script-src 'self' https:\/\/static\.cloudflareinsights\.com;/);
+    expect(csp).toMatch(/connect-src 'self' https:\/\/cloudflareinsights\.com;/);
   });
 
   it("refuse to be framed, embedded as a plugin, or re-based", () => {
