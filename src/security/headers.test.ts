@@ -73,3 +73,28 @@ describe("security headers", () => {
     expect(hsts).toBe("max-age=2592000");
   });
 });
+
+describe("what is published", () => {
+  it("keeps source maps local: built for debugging, never uploaded", () => {
+    // vite emits hidden maps (vite.config.ts); nothing reads them in
+    // production, and wrangler uploads everything in dist/ unless told not to.
+    const ignore = resolve(process.cwd(), "public/.assetsignore");
+    expect(existsSync(ignore)).toBe(true);
+    expect(readFileSync(ignore, "utf8").split("\n").map((l) => l.trim())).toContain("*.map");
+  });
+
+  it("says where to report a security problem, and until when that holds", () => {
+    const txt = resolve(process.cwd(), "public/.well-known/security.txt");
+    expect(existsSync(txt)).toBe(true);
+    const body = readFileSync(txt, "utf8");
+    expect(body).toMatch(/^Contact: mailto:imvijaygoyal@gmail\.com$/m);
+    const expires = body.match(/^Expires: (.+)$/m)?.[1];
+    expect(expires, "RFC 9116 requires Expires").toBeDefined();
+    const when = new Date(expires!);
+    expect(when.getTime()).toBeGreaterThan(Date.now());
+    // RFC 9116 recommends under a year, so it is renewed rather than forgotten.
+    expect(when.getTime() - Date.now()).toBeLessThan(366 * 24 * 3600 * 1000);
+    expect(body).toMatch(/^Canonical: https:\/\/vijaygoyal\.org\/\.well-known\/security\.txt$/m);
+  });
+});
+

@@ -1,0 +1,2 @@
+# Built but not uploaded: nothing in production reads source maps.
+*.map
