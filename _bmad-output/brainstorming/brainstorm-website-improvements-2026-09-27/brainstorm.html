@@ -1,0 +1,253 @@
+<title>Night Garden Ideas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  /* One deliberate world: the same night ground and three hues as
+     vijaygoyal.org, so this page reads as a leaf from the site itself. */
+  :root {
+    --ground: #0b0b0d;
+    --raised: #141419;
+    --line: #26262d;
+    --ink: #f4f3ef;
+    --muted: #b4b3ae;
+    --faint: #8a8a93;
+    --violet: #8f7cf5;
+    --violet-hue: #5b3fd6;
+    --gold: #b8902c;
+    --red: #ec5a3f;
+    --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --body: "IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+    color-scheme: dark;
+  }
+  html { background: var(--ground); }
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font: 400 16px/1.6 var(--body);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 62rem;
+    margin-inline: auto;
+    padding-inline: clamp(16px, 4vw, 40px);
+    padding-block: 2.5rem 4rem;
+    display: grid;
+    gap: 3.5rem;
+  }
+  .label {
+    font: 500 0.72rem/1.4 var(--mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin: 0;
+  }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+  h1 { font-weight: 800; font-size: clamp(2.2rem, 1.2rem + 5vw, 4.2rem); line-height: 0.98; letter-spacing: -0.03em; }
+  h2 { font-weight: 800; font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.1rem); line-height: 1.05; letter-spacing: -0.02em; }
+  h3 { font-weight: 500; font-size: 1.15rem; line-height: 1.2; }
+  p { margin: 0; max-width: 40rem; }
+
+  /* ---- Opening: the count as a lotus ---- */
+  .opening { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2rem; align-items: center; }
+  .opening .lede { color: var(--muted); margin-top: 1rem; }
+  .count { font: 800 clamp(3rem, 2rem + 4vw, 5rem)/1 var(--display); color: var(--ink); }
+  .count small { display: block; font: 500 0.72rem/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); margin-top: 0.4rem; }
+  #lotus { width: min(46vw, 17rem); aspect-ratio: 1; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; margin-top: 1.2rem; }
+  .legend span { font: 500 0.72rem/1.4 var(--mono); color: var(--muted); display: inline-flex; align-items: center; gap: 0.4rem; }
+  .legend i { width: 0.6rem; height: 0.6rem; border-radius: 50%; display: inline-block; }
+
+  /* ---- The plan ---- */
+  .plan { display: grid; gap: 1.25rem; }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .steps li { display: grid; grid-template-columns: 3rem minmax(0, 1fr) auto; gap: 1rem; padding-block: 1.1rem; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .steps .n { font: 800 1.6rem/1 var(--display); color: var(--gold); font-variant-numeric: tabular-nums; }
+  .steps p { color: var(--muted); font-size: 0.95rem; margin-top: 0.3rem; }
+  .size { font: 500 0.7rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; padding: 0.35rem 0.55rem; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); white-space: nowrap; }
+  .size.s { color: var(--violet); border-color: color-mix(in srgb, var(--violet) 45%, transparent); }
+  .size.l { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 45%, transparent); }
+
+  /* ---- The audit, set apart: it is the one grounded in the live page ---- */
+  .audit { background: var(--raised); border: 1px solid var(--line); border-radius: 14px; padding: clamp(1.1rem, 3vw, 1.75rem); display: grid; gap: 1rem; }
+  .audit ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; }
+  .audit li { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr); gap: 0.75rem; align-items: baseline; font-size: 0.95rem; }
+  .chip { font: 500 0.66rem/1 var(--mono); letter-spacing: 0.12em; text-align: center; padding: 0.4rem 0; border-radius: 6px; }
+  .chip.fix { color: #0b0b0d; background: var(--red); }
+  .chip.extend { color: #0b0b0d; background: var(--gold); }
+  .chip.new { color: #0b0b0d; background: var(--violet); }
+
+  /* ---- Connections ---- */
+  .links { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; }
+  .links div { border-top: 2px solid var(--violet-hue); padding-top: 0.9rem; display: grid; gap: 0.5rem; }
+  .links p { color: var(--muted); font-size: 0.95rem; }
+
+  /* ---- Every idea, by lens ---- */
+  .lenses { display: grid; gap: 0.6rem; }
+  details { border-top: 1px solid var(--line); }
+  details:last-child { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; padding-block: 1rem; align-items: baseline; }
+  summary::-webkit-details-marker { display: none; }
+  summary:focus-visible { outline: 2px solid var(--violet); outline-offset: 4px; border-radius: 4px; }
+  summary .lens { color: var(--faint); font-size: 0.9rem; display: block; margin-top: 0.2rem; }
+  summary .tally { font: 800 1.3rem/1 var(--display); font-variant-numeric: tabular-nums; }
+  details ol { margin: 0 0 1.2rem; padding-left: 1.4rem; display: grid; gap: 0.55rem; color: var(--muted); font-size: 0.95rem; }
+  details ol li::marker { color: var(--faint); font: 500 0.75rem var(--mono); }
+
+  .avoid p { color: var(--muted); }
+  footer { color: var(--faint); font: 500 0.72rem/1.6 var(--mono); letter-spacing: 0.06em; border-top: 1px solid var(--line); padding-top: 1rem; }
+
+  @media (max-width: 40rem) {
+    .opening { grid-template-columns: minmax(0, 1fr); }
+    #lotus { width: min(70vw, 15rem); justify-self: center; }
+    .steps li { grid-template-columns: 2.2rem minmax(0, 1fr); }
+    .steps .size { grid-column: 2; justify-self: start; }
+    .audit li { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; }
+    .chip { justify-self: start; padding-inline: 0.55rem; }
+  }
+</style>
+
+<main class="wrap">
+  <section class="opening">
+    <div>
+      <p class="label">Brainstorm · vijaygoyal.org · 27 Sep 2026</p>
+      <h1>What the site could show the world next</h1>
+      <p class="lede">An ideate-for-me session with one goal from you: the site is to showcase your work. Seven lenses, then every idea checked against what vijaygoyal.org shows today.</p>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div>
+      <canvas id="lotus" width="560" height="560" aria-label="A lotus of petals, one whorl per technique, each petal one idea"></canvas>
+      <div class="count" id="count">106<small>ideas, one petal each</small></div>
+    </div>
+  </section>
+
+  <section class="plan">
+    <p class="label">Recommended order</p>
+    <h2>Five moves, smallest first</h2>
+    <ol class="steps">
+      <li><span class="n">1</span><div><h3>Fix what the live page gets wrong</h3><p>Stale versions and test counts, the combined approvals line, the share image, and the empty Photograph box. Visitors see these today.</p></div><span class="size s">Small</span></li>
+      <li><span class="n">2</span><div><h3>One facts pipeline</h3><p>Read versions from the App Store and test counts from the app repos at build time. The same source feeds a ship log, structured data and fact sheets, and stale numbers stop being possible.</p></div><span class="size">Medium</span></li>
+      <li><span class="n">3</span><div><h3>Case studies, done properly</h3><p>/work/xbill and /work/shady-spade as decision trails, prerendered, each with its own share card, plus a sitemap and real 404s. The architecture already asks for all of it.</p></div><span class="size l">Large</span></li>
+      <li><span class="n">4</span><div><h3>Measure what showcasing means</h3><p>Count App Store clicks and contact emails, and connect Search Console, so the next change is chosen from data.</p></div><span class="size s">Small</span></li>
+      <li><span class="n">5</span><div><h3>Something to play</h3><p>A scripted xBill split and one trick of The Shady Spade, in the browser, with no backend.</p></div><span class="size l">Large</span></li>
+    </ol>
+  </section>
+
+  <section class="audit">
+    <p class="label">Grounded in the live page</p>
+    <h2>What vijaygoyal.org shows today</h2>
+    <ul id="audit"></ul>
+  </section>
+
+  <section>
+    <p class="label">Connections</p>
+    <h2 style="margin-bottom:1.25rem">Three ideas that are really one</h2>
+    <div class="links">
+      <div><h3>The facts pipeline</h3><p>Build-time facts, the ship log, evidence links, structured data and fact sheets all read one source. Building it once also retires the stale-number problem.</p></div>
+      <div><h3>The case-study project</h3><p>Routes, prerendering, per-product share cards, the sitemap and real 404s arrive together. The Read the case study links are already designed and waiting.</p></div>
+      <div><h3>First impressions</h3><p>The share image and the About photograph are what people see before they scroll. The share card can be made now from the real captures. Only the photograph needs you.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Every idea</p>
+    <h2 style="margin-bottom:1.25rem">By lens</h2>
+    <div class="lenses" id="lenses"></div>
+  </section>
+
+  <section class="avoid">
+    <p class="label">Left out on purpose</p>
+    <h2 style="margin-bottom:0.75rem">What not to build</h2>
+    <p>An "ask about my work" chatbot, because it can state things that are not true about you. Autoplaying sound or video. New navigation sections. Each works against a page whose strength is that every claim on it holds.</p>
+  </section>
+
+  <footer>Source: _bmad-output/brainstorming/brainstorm-website-improvements-2026-09-27/.memlog.md · BMAD brainstorming, ideate-for-me</footer>
+</main>
+
+<script>
+  const GROUPS = [{"name": "Job to Be Done", "lens": "what is a visitor hiring vijaygoyal.org to do?", "ideas": ["Ship log: every release of both apps with date, version and first-pass approval, as a timeline — proof this person ships, not a claim", "Try-before-install: an in-browser, scripted xBill split demo (tap an item, assign it to a person, watch balances settle) — no backend", "Play one trick of The Shady Spade in the browser: deal a hand, pick trump, watch the bid resolve", "A 30-second 'who is Vijay' card at the very top: one line, three proof points, one action", "Case studies told as decision trails: problem, options considered, the choice, what happened", "Desktop visitors get a QR code beside each App Store badge so the phone in their hand installs it", "Say what conversations are welcome (product roles, collaborations, app feedback) next to the contact link", "Credibility links: App Store ratings/review counts pulled live and linked, never paraphrased", "Short writing: notes on shipping solo with AI tools — the thing people would come back for", "Publish the release runbook and audit templates as downloadable resources", "Follow along: an RSS feed of releases and notes", "A downloadable one-page CV/résumé PDF for recruiters"]}, {"name": "Persona Journey", "lens": "recruiter, peer developer, app user, journalist, AI company, family, Apple editorial", "ideas": ["Recruiter lens: a PM-flavoured case study with scope decisions, trade-offs and outcomes, not just features", "Recruiter lens: a print stylesheet so the page prints as a clean one-pager", "Recruiter lens: a compact roles-and-impact timeline", "Peer-developer lens: 'lab notes' engineering deep-dives — SwiftUI list identity, Supabase RLS, receipt-scan accuracy 95%", "Peer-developer lens: extract small open-source snippets/packages from the apps and link them", "Peer-developer lens: a /uses page — Xcode, Claude Code, Codex, BMAD, the gates", "App-user lens: one support/FAQ hub linking to xbill. and shadyspade. help pages", "App-user lens: 'what's new' changelog per app in plain language", "App-user lens: a Watch showcase for Shady Spade v2.0 — the first release with the Watch app", "Journalist lens: a press kit — icons, real screenshots, bios, one-paragraph fact sheet per app", "Podcaster lens: a 'talks & topics' list (solo shipping, AI-assisted audits, first-pass approvals)", "AI-company lens: the 'built with AI' story — how one person runs audits (214 findings resolved) and releases with Claude and Codex", "Family/friends lens: the personal origin story of each app (why a card game, why expense splitting)", "Apple-editorial lens: an App Store-ready polish per app — tagline, hero capture, what makes it special", "Android-user lens: 'coming to Android' note with a notify-me link while the port lands", "Screen-reader lens: a plain text rendition of what the night scene shows, for anyone who can't see it", "Impatient mobile lens: a 'skip the scene' control that jumps past the 620vh stage", "Hiring-manager lens: an availability line — open to product roles / consulting / not looking"]}, {"name": "Build on What Works", "lens": "amplify the night scene, real captures, verified claims, performance", "ideas": ["Each case-study route opens with a mini night scene for just that app, in its own hue", "More captures per app in the read-through, so the spotlight travels across two or three real screens", "The lotus leans subtly toward the pointer or phone tilt — alive without asking for input", "Tappable beat labels: tap '03 — The Shady Spade' to jump the scene there", "'Receipts' mode: every claim links to its evidence (App Store page, CI run, release tag)", "Facts generated at build: test counts read from the app repos, so the page can never go stale again", "App Store versions fetched at build from the iTunes lookup API — 'v1.10 live' can never ship again", "Performance as brand: a colophon line with this page's real weight and Lighthouse score", "A colophon/how-this-site-was-built page telling the night-scene engineering story (sprites, 1.25x, 43 fps)", "A public 'How I ship' page — the actual release checklist with first-pass approval record", "A gallery of real screens per app, the AD-14 pipeline turned into a feature", "Per-product theming on case-study routes: xBill violet, Shady Spade gold", "The lotus becomes the brand mark: favicon, OG image, 404 page", "Regenerate the OG share image dark, with the lotus and both captures — the current one predates the redesign"]}, {"name": "Worst Possible Idea", "lens": "the worst portfolio imaginable, then flipped", "ideas": ["Worst: autoplaying music. Flip: short muted looping screen recordings of real app use", "Worst: a contact form with a captcha. Flip: one-tap email plus an optional calendar booking link", "Worst: a wall of buzzwords. Flip: plain lines, each with evidence beside it", "Worst: facts that rot. Flip: a CI freshness check that fails when the page disagrees with the App Store", "Worst: broken links. Flip: a weekly link checker", "Worst: fake testimonials. Flip: real App Store reviews, quoted exactly and linked", "Worst: twelve menu items. Flip: one page plus two case studies, nothing more", "Worst: no sign of life. Flip: a 'last updated' date and a short site changelog", "Worst: every URL answers 200. Flip: a real 404 page with the lotus and a way home", "Worst: invisible to search. Flip: prerender, sitemap, and JSON-LD (Person, SoftwareApplication)", "Worst: a stock photo. Flip: the real photograph the About section is still waiting for", "Worst: can't share one product. Flip: per-product URLs with their own share cards", "Worst: one email address to spam. Flip: hello@vijaygoyal.org via Cloudflare Email Routing (would change the no-mail DNS)", "Worst: slow on old phones. Flip: auto-fallback to a static composed frame when measured fps drops"]}, {"name": "Kill the Crown Jewel", "lens": "the site wins with no night scene at all", "ideas": ["Story-first: an essay 'from idea to App Store' for each app", "Numbers-first: a shipping dashboard — releases, approvals, tests, days between versions", "People-first: user stories and quotes from real players and splitters", "Video-first: a 60-second screen recording per app as the hero", "Playable-first: the interactive demos as the centrepiece", "One-feature-only: the page exists to start conversations — everything points at contact"]}, {"name": "Time Horizon Ladder", "lens": "the site in one, two and five years", "ideas": ["A products shelf built as a template, so app number three drops in without a redesign", "A small 'lab' of web experiments and toys", "An 'ask about my work' assistant grounded only in the case studies (risk: must not invent claims — AD-15)", "A talks and newsletter archive", "A 'now' page: what I'm working on this month (Android port, xBill v1.8)", "Public roadmaps for both apps", "Showcase the Android versions when they ship", "One design system across vijaygoyal.org, xbill. and shadyspade. — same headers, same tokens, same lotus", "Cross-link the apps' own sites back to vijaygoyal.org"]}, {"name": "Six Thinking Hats", "lens": "risks, feelings and process", "ideas": ["Black hat: a visible reduce-motion toggle on the page, not only the OS setting", "Black hat: an uptime monitor with an alert for all three sites", "Black hat: a monthly maintenance ritual — deps, links, facts, certificates", "Red hat: a delight moment — a hidden gesture deals a Shady Spade hand", "Red hat: a 404 joke — 'this card was never dealt'", "Green hat: xBill drag-to-split mini game", "Green hat: a 'guess the trump' Shady Spade quiz", "Green hat: before/after design evolution (icon audit, onboarding) as a visual story", "Green hat: the audit story — 214 findings found and fixed — as a quality case study", "Green hat: the receipt-scanning accuracy story as an engineering case study", "Green hat: the leaderboard RCA as a debugging story", "White hat: define success — contact emails per month and App Store clicks — and measure it", "White hat: count App Store link clicks with a tiny first-party counter (Cloudflare Web Analytics can't see clicks)", "White hat: Search Console and Bing verification to see what people search to find the site", "Blue hat: a per-app fact sheet PDF generated from the same content source", "Blue hat: structured data with real ratings so search results show stars", "Blue hat: preload the captures just before the scene so nothing pops in", "Blue hat: a humans.txt / colophon", "Blue hat: permissioned quotes from beta testers"]}, {"name": "Grounded Audit", "lens": "every idea checked against what vijaygoyal.org already shows", "ideas": ["FIX (exists, wrong): Shady Spade facts say 'v1.10 live · 192 tests' — v2.0 with the Watch app is live since 2026-09-24", "FIX (exists, wrong): xBill '8 releases · 537 tests' — tests are now 565; the opening's 729 total is stale too", "FIX (exists, misleading): the opening row says 'two iOS apps · eight releases, eight first-pass approvals' as if combined — xBill alone is 8/8; Shady Spade adds 9 submissions, 8 first-pass", "FIX (exists, broken share): og-image.webp is a 768x1670 portrait of the Shady Spade title screen from before the redesign — link previews crop it and show one app; make a 1200x630 dark share card with both products", "FIX (exists, unfinished): About shows a visible 'Photograph' placeholder box to every visitor — ship the real photo or remove the box until it exists", "EXTEND (exists): the App Store links read just 'App Store' — use Apple's official badge, and a QR code on desktop", "EXTEND (exists): contact lists only the Shady Spade privacy policy — add xBill's, or move both into each product article", "EXTEND (exists): the facts say 'Swift · watchOS' but nothing on the page shows the Watch app — add a Watch capture to the Shady Spade read-through", "EXTEND (exists): 'How I build' stages are claims; each could link to its evidence (runbook, audit report, release tags)", "EXTEND (exists): the Toolkit's AI row could link to a short write-up of how the audits actually run", "EXTEND (exists): 'Have an interesting idea?' — say which conversations are welcome (product roles, collaborations, app feedback)", "EXTEND (exists): each product article gets the 'Read the case study' link the moment its route exists — the button is already designed and held back", "EXTEND (exists): the night scene ends at '04 — Both, shipped' — end it on a call to action (install / get in touch) rather than a label", "NEW: a 'last updated' line in the footer so visitors see the page is alive"]}];
+  const HUES = ["#5b3fd6", "#b8902c", "#c33a24", "#8f7cf5", "#d4b25a", "#ec5a3f", "#b4b3ae", "#f4f3ef"];
+
+  const total = GROUPS.reduce((n, g) => n + g.ideas.length, 0);
+  document.getElementById("count").firstChild.textContent = total;
+
+  const legend = document.getElementById("legend");
+  GROUPS.forEach((g, i) => {
+    const s = document.createElement("span");
+    s.innerHTML = `<i style="background:${HUES[i]}"></i>${g.name} · ${g.ideas.length}`;
+    legend.append(s);
+  });
+
+  const audit = document.getElementById("audit");
+  const grounded = GROUPS.find((g) => g.name === "Grounded Audit");
+  for (const idea of grounded ? grounded.ideas : []) {
+    const m = idea.match(/^(FIX|EXTEND|NEW)[^:]*:\s*(.*)$/);
+    const kind = m ? m[1] : "NEW";
+    const li = document.createElement("li");
+    const chip = document.createElement("span");
+    chip.className = "chip " + kind.toLowerCase();
+    chip.textContent = kind;
+    const text = document.createElement("span");
+    text.textContent = m ? m[2] : idea;
+    li.append(chip, text);
+    audit.append(li);
+  }
+
+  const lenses = document.getElementById("lenses");
+  GROUPS.forEach((g, i) => {
+    const d = document.createElement("details");
+    if (i === 0) d.open = true;
+    d.innerHTML = `<summary><span><h3 style="color:${HUES[i] === "#5b3fd6" ? "#8f7cf5" : HUES[i] === "#c33a24" ? "#ec5a3f" : HUES[i]}">${g.name}</h3><span class="lens"></span></span><span class="tally">${g.ideas.length}</span></summary><ol></ol>`;
+    d.querySelector(".lens").textContent = g.lens;
+    const ol = d.querySelector("ol");
+    for (const idea of g.ideas) {
+      const li = document.createElement("li");
+      li.textContent = idea;
+      ol.append(li);
+    }
+    lenses.append(d);
+  });
+
+  // The lotus: one whorl per technique, one petal per idea, outermost first.
+  const c = document.getElementById("lotus");
+  const ctx = c.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function draw(t) {
+    const W = c.width, cx = W / 2, R = W / 2 - 12;
+    ctx.clearRect(0, 0, W, W);
+    GROUPS.forEach((g, i) => {
+      const k = GROUPS.length;
+      const len = R * (1 - i / (k + 1.5));
+      const wide = len * 0.2;
+      const n = g.ideas.length;
+      ctx.save();
+      ctx.translate(cx, cx);
+      ctx.rotate((i % 2 ? -1 : 1) * t * (0.04 + i * 0.01) + i * 0.3);
+      for (let p = 0; p < n; p++) {
+        ctx.save();
+        ctx.rotate((p / n) * Math.PI * 2);
+        const grad = ctx.createLinearGradient(0, 0, 0, -len);
+        grad.addColorStop(0, "rgba(11,11,13,0)");
+        grad.addColorStop(0.6, HUES[i]);
+        grad.addColorStop(1, "rgba(244,243,239,0.55)");
+        ctx.globalAlpha = 0.34;
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(wide, -len * 0.35, wide * 0.6, -len * 0.85, 0, -len);
+        ctx.bezierCurveTo(-wide * 0.6, -len * 0.85, -wide, -len * 0.35, 0, 0);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "#f4f3ef";
+    ctx.beginPath();
+    ctx.arc(cx, cx, 7, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  if (reduce) draw(0);
+  else (function loop(now) { draw(now / 1000); requestAnimationFrame(loop); })(0);
+</script>
