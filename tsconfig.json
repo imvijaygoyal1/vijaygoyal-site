@@ -9,7 +9,9 @@
     "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "types": ["vitest/globals", "vite/client", "node"]
   },
-  "include": ["src", "e2e"]
+  "include": ["src", "e2e", "scripts"]
 }
