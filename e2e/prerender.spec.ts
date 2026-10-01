@@ -90,3 +90,27 @@ test("a malformed address is answered, not fatal to the server", async ({ reques
   expect(bad.status()).toBe(400);
   expect((await request.get("/")).status()).toBe(200);
 });
+
+test("the opening rows are visible from the first paint: they slide, they do not fade", async ({ page }) => {
+  // The "Shipped" row is the LCP element. A fade from opacity 0 kept it from
+  // counting until ~2.3 s after its HTML arrived (live LH 0.95, 2026-10-01).
+  await page.addInitScript(() => {
+    const look = () => {
+      const row = document.querySelector<HTMLElement>("#opening .row");
+      if (!row) return requestAnimationFrame(look);
+      (window as unknown as { firstRow: string }).firstRow = getComputedStyle(row).opacity;
+    };
+    requestAnimationFrame(look);
+  });
+  await page.goto("/");
+  await page.waitForFunction(() => typeof (window as unknown as { firstRow?: string }).firstRow === "string");
+  expect(await page.evaluate(() => (window as unknown as { firstRow: string }).firstRow)).toBe("1");
+  // Still motion: each row runs a rise animation that moves it.
+  const moves = await page.locator("#opening .row").evaluateAll((rows) =>
+    rows.every((r) => r.getAnimations().some((a) => {
+      const k = (a.effect as KeyframeEffect).getKeyframes();
+      return k.some((f) => typeof f.transform === "string" && f.transform !== "none");
+    })),
+  );
+  expect(moves).toBe(true);
+});

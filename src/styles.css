@@ -775,9 +775,11 @@ a {
  */
 
 @media (prefers-reduced-motion: no-preference) {
+  /* A slide, not a fade: the "Shipped" row is the page's LCP element, and an
+     element at opacity 0 does not count as painted. Fading it in held the
+     live LCP ~2.3 s after its HTML arrived (Lighthouse 0.95, 2026-10-01). */
   @keyframes rise {
     from {
-      opacity: 0;
       transform: translateY(18px);
     }
   }
