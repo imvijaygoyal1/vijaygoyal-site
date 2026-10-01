@@ -30,14 +30,16 @@ test("the page arrives as HTML: every section and fact is there with JavaScript 
   await context.close();
 });
 
-test("hydrates with no React errors", async ({ page }) => {
-  const errors: string[] = [];
-  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
-  page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("/");
-  await page.waitForTimeout(1500);
-  expect(errors.filter((e) => /hydrat|did not match|Minified React error/i.test(e))).toEqual([]);
-});
+for (const path of ["/", "/index.html", "/no-such-page"]) {
+  test(`hydrates with no React errors at ${path}`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+    page.on("pageerror", (e) => errors.push(e.message));
+    await page.goto(path);
+    await page.waitForTimeout(1500);
+    expect(errors.filter((e) => /hydrat|did not match|Minified React error/i.test(e))).toEqual([]);
+  });
+}
 
 test("with the app script blocked, the safety net still shows the headline and the products", async ({ page }) => {
   await page.route(/\/assets\/index-[^/]+\.js$/, (r) => r.abort());

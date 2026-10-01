@@ -48,8 +48,16 @@ export const NOT_FOUND: Route = {
 
 export const ROUTES: readonly Route[] = [HOME, NOT_FOUND];
 
+/** One spelling per page: "/index.html", "/x/index.html" and trailing slashes
+ *  name the same page as "/" and "/x". */
+export function normalizePath(path: string): string {
+  const p = path.replace(/\/index\.html$/, "/").replace(/\/+$/, "");
+  return p === "" ? "/" : p;
+}
+
 export function routeFor(path: string): Route {
-  return ROUTES.find((r) => r.indexable && r.path === path) ?? NOT_FOUND;
+  const p = normalizePath(path);
+  return ROUTES.find((r) => r.indexable && r.path === p) ?? NOT_FOUND;
 }
 
 /** Where a page is written in dist/, so Cloudflare serves it at its address. */

@@ -13,6 +13,14 @@ describe("the page list", () => {
     }
   });
 
+  it("finds a page however its address is spelled: /index.html, a trailing slash", () => {
+    // Lighthouse opened the home page as /index.html; the lookup missed, and
+    // the 404 page tried to hydrate onto the home page's HTML (React #418).
+    expect(routeFor("/index.html")).toBe(HOME);
+    expect(routeFor("//")).toBe(HOME);
+    expect(routeFor("/404.html")).toBe(NOT_FOUND);
+  });
+
   it("finds a page by its address, and anything unknown is the not-found page", () => {
     expect(routeFor("/")).toBe(HOME);
     expect(routeFor("/nope")).toBe(NOT_FOUND);
