@@ -1,23 +1,220 @@
 {
   "apps": {
-    "xbill": { "name": "xBill", "appStoreId": "6780284715", "scheme": "xBill" },
-    "shady-spade": { "name": "The Shady Spade", "appStoreId": "6760261655", "scheme": "MyApp" }
+    "xbill": {
+      "name": "xBill",
+      "appStoreId": "6780284715",
+      "scheme": "xBill"
+    },
+    "shady-spade": {
+      "name": "The Shady Spade",
+      "appStoreId": "6760261655",
+      "scheme": "MyApp"
+    }
   },
   "submissions": [
-    { "app": "shady-spade", "version": "1.5", "build": null, "submitted": null, "decided": null, "outcome": "approved", "guideline": null, "tests": null, "source": "Shady Spade release history (owner records); submitted ~2026-04-05" },
-    { "app": "shady-spade", "version": "1.6", "build": null, "submitted": "2026-04-16", "decided": null, "outcome": "approved", "guideline": null, "tests": null, "source": "Shady Spade release history (owner records)" },
-    { "app": "shady-spade", "version": "1.7", "build": null, "submitted": "2026-04-23", "decided": null, "outcome": "approved", "guideline": null, "tests": null, "source": "Shady Spade release history (owner records)" },
-    { "app": "shady-spade", "version": "1.8", "build": null, "submitted": "2026-04-28", "decided": null, "outcome": "approved", "guideline": null, "tests": null, "source": "Shady Spade release history (owner records)" },
-    { "app": "shady-spade", "version": "1.9", "build": 7, "submitted": "2026-05-31", "decided": null, "outcome": "rejected", "guideline": "5.1.2", "tests": null, "source": "Shady Spade release history; tag v1.9-build7-rejected" },
-    { "app": "shady-spade", "version": "1.10", "build": 8, "submitted": "2026-06-07", "decided": null, "outcome": "approved", "guideline": null, "tests": null, "source": "Shady Spade release history; tag v1.10-build8-live-approx" },
-    { "app": "shady-spade", "version": "2.0", "build": 17, "submitted": "2026-09-23", "decided": "2026-09-24", "outcome": "approved", "guideline": null, "tests": { "count": 280, "covers": ["unit", "ui"] }, "source": "RELEASE_v2.0.md state at 2.0 (17): 256 unit + 24 UI green; tag v2.0-build17; App Store lookup 2026-09-27" },
-    { "app": "xbill", "version": "1.0", "build": 1, "submitted": "2026-08-04", "decided": "2026-08-11", "outcome": "approved", "guideline": null, "tests": { "count": 361, "covers": ["unit", "ui", "widget"] }, "source": "xBill App Store checklist, v1.0 (1): full scheme 361/361, 0 skips" },
-    { "app": "xbill", "version": "1.1", "build": 2, "submitted": null, "decided": "2026-08-18", "outcome": "approved", "guideline": null, "tests": null, "source": "xBill App Store checklist, v1.1 (2)" },
-    { "app": "xbill", "version": "1.2", "build": 3, "submitted": "2026-08-22", "decided": "2026-08-22", "outcome": "approved", "guideline": null, "tests": { "count": 410, "covers": ["unit"] }, "source": "xBill App Store checklist, v1.2 (3): unit 410/410; tag v1.2-approved" },
-    { "app": "xbill", "version": "1.3", "build": 5, "submitted": "2026-08-23", "decided": "2026-08-24", "outcome": "approved", "guideline": null, "tests": { "count": 441, "covers": ["unit"] }, "source": "xBill App Store checklist, v1.3 (5): unit 441/441; tag v1.3-approved" },
-    { "app": "xbill", "version": "1.4", "build": 6, "submitted": "2026-08-24", "decided": "2026-08-25", "outcome": "approved", "guideline": null, "tests": { "count": 469, "covers": ["unit"] }, "source": "xBill App Store checklist, v1.4 (6): unit 469/469; tag v1.4-approved" },
-    { "app": "xbill", "version": "1.5", "build": 7, "submitted": null, "decided": "2026-08-27", "outcome": "approved", "guideline": null, "tests": null, "source": "xBill App Store checklist, v1.5 (7); tag v1.5-approved" },
-    { "app": "xbill", "version": "1.6", "build": 8, "submitted": "2026-09-03", "decided": "2026-09-04", "outcome": "approved", "guideline": null, "tests": { "count": 513, "covers": ["unit", "widget"] }, "source": "xBill App Store checklist, v1.6 (8): unit+widget 513/513; tag v1.6-approved" },
-    { "app": "xbill", "version": "1.7", "build": 9, "submitted": "2026-09-10", "decided": "2026-09-11", "outcome": "approved", "guideline": null, "tests": { "count": 531, "covers": ["unit"] }, "source": "xBill App Store checklist, v1.7 (9): 531/531; tag v1.7-approved; App Store lookup 2026-09-27" }
+    {
+      "app": "shady-spade",
+      "version": "1.5",
+      "build": null,
+      "submitted": null,
+      "decided": null,
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "Shady Spade release history (owner records); submitted ~2026-04-05"
+    },
+    {
+      "app": "shady-spade",
+      "version": "1.6",
+      "build": null,
+      "submitted": "2026-04-16",
+      "decided": null,
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "Shady Spade release history (owner records)"
+    },
+    {
+      "app": "shady-spade",
+      "version": "1.7",
+      "build": null,
+      "submitted": "2026-04-23",
+      "decided": null,
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "Shady Spade release history (owner records)"
+    },
+    {
+      "app": "shady-spade",
+      "version": "1.8",
+      "build": null,
+      "submitted": "2026-04-28",
+      "decided": null,
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "Shady Spade release history (owner records)"
+    },
+    {
+      "app": "shady-spade",
+      "version": "1.9",
+      "build": 7,
+      "submitted": "2026-05-31",
+      "decided": null,
+      "outcome": "rejected",
+      "guideline": "5.1.2",
+      "tests": null,
+      "source": "Shady Spade release history; tag v1.9-build7-rejected"
+    },
+    {
+      "app": "shady-spade",
+      "version": "1.10",
+      "build": 8,
+      "submitted": "2026-06-07",
+      "decided": null,
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "Shady Spade release history; tag v1.10-build8-live-approx"
+    },
+    {
+      "app": "shady-spade",
+      "version": "2.0",
+      "build": 17,
+      "submitted": "2026-09-23",
+      "decided": "2026-09-24",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 280,
+        "covers": [
+          "unit",
+          "ui"
+        ]
+      },
+      "source": "RELEASE_v2.0.md state at 2.0 (17): 256 unit + 24 UI green; tag v2.0-build17; App Store lookup 2026-09-27"
+    },
+    {
+      "app": "xbill",
+      "version": "1.0",
+      "build": 1,
+      "submitted": "2026-08-04",
+      "decided": "2026-08-11",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 361,
+        "covers": [
+          "unit",
+          "ui",
+          "widget"
+        ]
+      },
+      "source": "xBill App Store checklist, v1.0 (1): full scheme 361/361, 0 skips"
+    },
+    {
+      "app": "xbill",
+      "version": "1.1",
+      "build": 2,
+      "submitted": null,
+      "decided": "2026-08-18",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "xBill App Store checklist, v1.1 (2)"
+    },
+    {
+      "app": "xbill",
+      "version": "1.2",
+      "build": 3,
+      "submitted": "2026-08-22",
+      "decided": "2026-08-22",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 410,
+        "covers": [
+          "unit"
+        ]
+      },
+      "source": "xBill App Store checklist, v1.2 (3): unit 410/410; tag v1.2-approved"
+    },
+    {
+      "app": "xbill",
+      "version": "1.3",
+      "build": 5,
+      "submitted": "2026-08-23",
+      "decided": "2026-08-24",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 441,
+        "covers": [
+          "unit"
+        ]
+      },
+      "source": "xBill App Store checklist, v1.3 (5): unit 441/441; tag v1.3-approved"
+    },
+    {
+      "app": "xbill",
+      "version": "1.4",
+      "build": 6,
+      "submitted": "2026-08-24",
+      "decided": "2026-08-25",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 469,
+        "covers": [
+          "unit"
+        ]
+      },
+      "source": "xBill App Store checklist, v1.4 (6): unit 469/469; tag v1.4-approved"
+    },
+    {
+      "app": "xbill",
+      "version": "1.5",
+      "build": 7,
+      "submitted": null,
+      "decided": "2026-08-27",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": null,
+      "source": "xBill App Store checklist, v1.5 (7); tag v1.5-approved"
+    },
+    {
+      "app": "xbill",
+      "version": "1.6",
+      "build": 8,
+      "submitted": "2026-09-03",
+      "decided": "2026-09-04",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 513,
+        "covers": [
+          "unit",
+          "widget"
+        ]
+      },
+      "source": "xBill App Store checklist, v1.6 (8): unit+widget 513/513; tag v1.6-approved"
+    },
+    {
+      "app": "xbill",
+      "version": "1.7",
+      "build": 9,
+      "submitted": "2026-09-10",
+      "decided": "2026-09-11",
+      "outcome": "approved",
+      "guideline": null,
+      "tests": {
+        "count": 531,
+        "covers": [
+          "unit"
+        ]
+      },
+      "source": "xBill App Store checklist, v1.7 (9): 531/531; tag v1.7-approved; App Store lookup 2026-09-27"
+    }
   ]
 }
