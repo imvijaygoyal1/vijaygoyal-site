@@ -299,6 +299,48 @@ a {
   margin-top: var(--space-md);
 }
 
+/* The release history: a document's appendix, set small and quiet. */
+.releases {
+  margin-top: var(--space-md);
+  font-size: var(--font-small);
+  color: var(--ink-muted);
+}
+
+.releases summary {
+  cursor: pointer;
+  width: fit-content;
+  min-height: var(--target-min);
+  display: flex;
+  align-items: center;
+  color: var(--ink);
+  font-weight: var(--weight-semibold);
+}
+
+.releases summary:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+.releases ol {
+  margin: var(--space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--rule-hair);
+}
+
+.releases li {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1fr);
+  gap: var(--space-xs);
+  padding-block: var(--space-2xs);
+  border-bottom: var(--rule-hair);
+}
+
+.release-version {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---- The night stage -------------------------------------------------- */
 
 /* Full-bleed by margin, never 100vw: 100vw includes the scrollbar and gives

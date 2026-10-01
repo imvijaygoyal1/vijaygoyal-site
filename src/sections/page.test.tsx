@@ -4,7 +4,8 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { App } from "../App";
 import { LINKS } from "../lib/links";
-import { ICON_SIZE, PRODUCTS, SCREEN_H, SCREEN_W, STAGES, TOOLKIT } from "./content";
+import { ICON_SIZE, PRODUCTS, RELEASES, SCREEN_H, SCREEN_W, STAGES, TOOLKIT } from "./content";
+import { factLine, history, liveRelease, shippedLine } from "../lib/releases";
 
 const content = readFileSync(resolve(process.cwd(), "docs/CONTENT.md"), "utf8");
 const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
@@ -142,29 +143,29 @@ describe("the page", () => {
 });
 
 describe("the facts on the page", () => {
-  // Checked against the App Store lookup API on 2026-09-27: The Shady Spade
-  // 2.0 (released 2026-09-24), xBill 1.7 (2026-09-11). Release records
-  // confirmed by the owner the same day. Sources in docs/CONTENT.md.
-  const facts = (id: string) => PRODUCTS.find((p) => p.id === id)!.facts;
+  const content = readFileSync(resolve(process.cwd(), "src/sections/content.ts"), "utf8");
 
-  it("names the versions that are live", () => {
-    expect(facts("shady-spade")).toContain("v2.0 live · with Apple Watch");
-    expect(facts("xbill")).toContain("v1.7 live · 8 releases");
+  it("types no release fact by hand: versions, counts and approvals come from data/releases.json", () => {
+    expect(content).not.toMatch(/\bv\d+\.\d+ live\b/);
+    expect(content).not.toMatch(/\b\d+ tests\b/);
+    expect(content).not.toMatch(/\b\d+ (releases|submissions)\b/);
+    expect(content).not.toMatch(/approved first time/);
   });
 
-  it("credits each app with its own approval record, not a combined one", () => {
+  it("shows each product's live version and count exactly as the record derives them", () => {
     const { container } = render(<App />);
-    expect(container.textContent).toContain(
-      "xBill: 8 releases, all approved first time. The Shady Spade: 9 releases, 8 approved first time.",
-    );
-    expect(container.textContent).not.toMatch(/eight releases, eight first-pass/i);
+    const text = container.textContent ?? "";
+    expect(text).toContain(factLine(RELEASES, "xbill"));
+    expect(text).toContain(factLine(RELEASES, "shady-spade", "with Apple Watch"));
+    expect(text).toContain(shippedLine(RELEASES));
   });
 
-  it("states no test count, until one can be read at build time", () => {
-    // Counts changed weekly and the recorded ones disagreed; a stale number
-    // shipped twice. They return with the facts pipeline, not by hand.
+  it("lists every recorded submission under its product, newest first", () => {
     const { container } = render(<App />);
-    expect(container.textContent).not.toMatch(/\b\d{3} tests\b/);
-    expect(container.textContent).not.toContain("v1.10");
+    for (const product of PRODUCTS) {
+      const rows = container.querySelectorAll(`#${product.id} .releases li`);
+      expect(rows, product.id).toHaveLength(history(RELEASES, product.id).length);
+      expect(rows[0]!.textContent).toContain(`v${liveRelease(RELEASES, product.id).version}`);
+    }
   });
 });

@@ -1,4 +1,9 @@
 import { LINKS } from "../lib/links";
+import raw from "../../data/releases.json";
+import { factLine, parseRecord, releaseRows, shippedLine, type ReleaseRow } from "../lib/releases";
+
+/** Every release fact on the page comes from here (data/releases.json). */
+export const RELEASES = parseRecord(raw);
 import xbillScreen from "../assets/xbill-screen.webp";
 import spadeScreen from "../assets/spade-screen.webp";
 import xbillIcon from "../assets/xbill-icon.webp";
@@ -52,6 +57,8 @@ export interface Product {
   /** Read in order as the section is scrolled. */
   spots: readonly Spot[];
   links: readonly { href: string; label: string; name?: string }[];
+  /** Every App Review submission, newest first, derived from the record. */
+  releases: readonly ReleaseRow[];
 }
 
 export const OPENING = {
@@ -66,7 +73,7 @@ export const OPENING = {
     },
     {
       label: "Shipped",
-      copy: "Two iOS apps on the App Store. xBill: 8 releases, all approved first time. The Shady Spade: 9 releases, 8 approved first time.",
+      copy: shippedLine(RELEASES),
     },
   ],
 } as const;
@@ -88,7 +95,8 @@ export const PRODUCTS: readonly Product[] = [
         copy: "Either party records a payment: the person who owes, or the person owed. A correction is a delete and a re-record, so there is no silent edit of someone else’s money.",
       },
     ],
-    facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", "v1.7 live · 8 releases"],
+    facts: ["Swift · SwiftUI", "Supabase · Postgres row-level security", factLine(RELEASES, "xbill")],
+    releases: releaseRows(RELEASES, "xbill"),
     screen: xbillScreen,
     icon: xbillIcon,
     iconAlt: "The xBill app icon",
@@ -121,7 +129,8 @@ export const PRODUCTS: readonly Product[] = [
         copy: "250 points on the table. The three of spades alone is worth thirty. Make your bid and you score what your team caught; get set and you lose it.",
       },
     ],
-    facts: ["Swift · watchOS", "Bluetooth · Firebase", "v2.0 live · with Apple Watch"],
+    facts: ["Swift · watchOS", "Bluetooth · Firebase", factLine(RELEASES, "shady-spade", "with Apple Watch")],
+    releases: releaseRows(RELEASES, "shady-spade"),
     screen: spadeScreen,
     icon: spadeIcon,
     iconAlt: "The Shady Spade app icon",

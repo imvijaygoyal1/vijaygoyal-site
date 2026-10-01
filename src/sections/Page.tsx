@@ -116,6 +116,19 @@ function WorkItem({ product }: { product: Product }) {
             <li key={fact}>{fact}</li>
           ))}
         </ul>
+        {/* Every submission, from data/releases.json. Closed by default: the
+            live version is already in the facts line above it. */}
+        <details className="releases">
+          <summary>Release history · {product.releases.length}</summary>
+          <ol>
+            {product.releases.map((r) => (
+              <li key={r.key}>
+                <span className="release-version">{r.version}</span>
+                <span>{[r.when, r.outcome, r.tests].filter(Boolean).join(" · ")}</span>
+              </li>
+            ))}
+          </ol>
+        </details>
         <ul className="facts work-links">
           {product.links.map((link) => (
             <li key={link.href}>
