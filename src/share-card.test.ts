@@ -2,7 +2,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
+import { HOME, headTags } from "./routes";
+// The head comes from the page list now (AD-24), not from index.html.
+const html = headTags(HOME);
 const meta = (key: string) =>
   html.match(new RegExp(`<meta (?:property|name)="${key}" content="([^"]+)"`))?.[1];
 

@@ -1,5 +1,7 @@
-import { Page } from "./sections/Page";
+import { routeFor } from "./routes";
 
-export function App() {
+/** The page for an address; anything unknown is the not-found page. */
+export function App({ path = "/" }: { path?: string }) {
+  const Page = routeFor(path).component;
   return <Page />;
 }
