@@ -23,6 +23,9 @@ for (const size of [
     });
     await page.goto("/");
     await expect(page.locator("[data-night]")).toHaveAttribute("data-progress", /.+/);
+    // The recorder runs in a rAF callback, which can land just after the
+    // attribute appears: wait for it rather than reading a value not yet set.
+    await page.waitForFunction(() => typeof (window as unknown as { firstPaint?: number }).firstPaint === "number");
     const first = await page.evaluate(() => (window as unknown as { firstPaint: number }).firstPaint);
     const settled = await page.locator('[data-icon="xbill"]').evaluate((el) => Number(getComputedStyle(el).opacity));
     expect(first, "first painted frame").toBeCloseTo(settled, 2);
