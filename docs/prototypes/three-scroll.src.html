@@ -1,0 +1,389 @@
+<title>Assembled Phone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap">
+<style>
+  /* One deliberate world, as on vijaygoyal.org: night by default, a pale
+     drafting-paper section for "How I build". Both colour sets are explicit. */
+  :root {
+    --night: #0b0b0d;
+    --paper: #e6e4de;
+    --ink: #f4f3ef;
+    --ink-dark: #141417;
+    --muted: #b4b3ae;
+    --muted-dark: #4a4a50;
+    --faint: #8a8a93;
+    --xbill: #8f7cf5;
+    --spade: #c9a23f;
+    --red: #ec5a3f;
+    --edge: clamp(16px, 5vw, 72px);
+    --font: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme: dark;
+  }
+  html { background: var(--night); }
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--ink);
+    font: 400 17px/1.6 var(--font);
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.7s ease, color 0.7s ease;
+  }
+  body.light { background: var(--paper); color: var(--ink-dark); }
+
+  #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+
+  /* The dial, pinned around wherever the phone is drawn. */
+  #dial { position: fixed; left: 0; top: 0; width: 0; height: 0; z-index: 0; pointer-events: none; }
+  #dial svg { position: absolute; transform: translate(-50%, -50%); overflow: visible; }
+  #dial .tick { stroke: currentColor; opacity: 0.22; }
+  #dial .arc { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke 0.6s ease; }
+
+  .hud { position: fixed; z-index: 2; font: 500 11px/1.4 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .brand { top: calc(env(safe-area-inset-top, 0px) + 18px); left: var(--edge); color: inherit; }
+  .chapter { top: calc(env(safe-area-inset-top, 0px) + 18px); right: var(--edge); }
+  .ruler { bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); right: var(--edge); display: flex; gap: 4px; align-items: flex-end; padding: 8px 10px; border-radius: 8px; background: rgb(20 20 23 / 70%); }
+  body.light .ruler { background: rgb(255 255 255 / 55%); }
+  .ruler i { width: 2px; height: 8px; background: currentColor; opacity: 0.35; display: block; }
+  .ruler i.on { opacity: 1; height: 14px; background: var(--red); }
+
+  main { position: relative; z-index: 1; }
+  section { min-height: 165vh; padding-inline: var(--edge); }
+  .copy {
+    position: sticky;
+    top: 22vh;
+    max-width: 27rem;
+    padding-block: 1rem;
+  }
+  .eyebrow { font: 500 11px/1.4 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin: 0 0 1rem; }
+  h1, h2 { margin: 0; font-weight: 800; letter-spacing: -0.04em; line-height: 0.98; text-wrap: balance; }
+  h1 { font-size: clamp(2.6rem, 1.2rem + 5.5vw, 5.4rem); }
+  h2 { font-size: clamp(2rem, 1.1rem + 3.2vw, 3.6rem); }
+  .copy p { color: var(--muted); margin: 1.1rem 0 0; }
+  body.light .copy p { color: var(--muted-dark); }
+  .facts { margin: 1.25rem 0 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; font-size: 0.9rem; }
+  .x .facts li:last-child { color: var(--xbill); }
+  .s .facts li:last-child { color: var(--spade); }
+  .x h2 { color: var(--ink); }
+  .stages { margin: 1.4rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.15rem; counter-reset: s; }
+  .stages li { display: grid; grid-template-columns: 2.4rem 1fr; font-size: 0.95rem; }
+  .stages li::before { counter-increment: s; content: "0" counter(s); font: 500 12px/1.9 var(--mono); color: var(--red); }
+  .stages b { font-weight: 600; }
+  .mail { display: inline-block; margin-top: 1.4rem; font: 600 1.15rem/1.3 var(--font); color: var(--ink); border-bottom: 2px solid var(--red); user-select: all; }
+  .word { display: inline-block; }
+
+  .note { min-height: auto; padding-block: 4rem 6rem; position: relative; z-index: 1; color: var(--muted); max-width: 40rem; }
+  .note p { margin: 0 0 0.8rem; }
+  .note strong { color: var(--ink); }
+
+  /* Phone: the copy sits above the phone, on a scrim so it always reads. */
+  @media (max-width: 760px) {
+    .copy { top: 12vh; }
+    .copy::before {
+      content: ""; position: absolute; inset: -2rem -16px -2.5rem; z-index: -1;
+      background: linear-gradient(var(--night) 78%, rgb(11 11 13 / 0));
+      transition: opacity 0.7s ease;
+    }
+    body.light .copy::before { background: linear-gradient(var(--paper) 78%, rgb(230 228 222 / 0)); }
+    h1 { font-size: clamp(2.2rem, 1rem + 7vw, 3rem); }
+    h2 { font-size: clamp(1.8rem, 1rem + 5vw, 2.4rem); }
+  }
+  @media (prefers-reduced-motion: reduce) { body { transition: none; } }
+</style>
+
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="dial" aria-hidden="true"></div>
+<div class="hud brand">Vijay Goyal</div>
+<div class="hud chapter" id="chapter">01 / 05</div>
+<div class="hud ruler" id="ruler" aria-hidden="true"></div>
+
+<main>
+  <section data-theme="dark" data-accent="#ec5a3f">
+    <div class="copy">
+      <p class="eyebrow">Product · Design · Technology · AI</p>
+      <h1 data-words>I turn ideas into products.</h1>
+      <p>Product manager and independent app builder. I design, build and ship my own iOS apps, end to end.</p>
+    </div>
+  </section>
+
+  <section class="x" data-theme="dark" data-accent="#8f7cf5">
+    <div class="copy">
+      <p class="eyebrow">01 — xBill · Shared expenses</p>
+      <h2 data-words>Splitting expenses shouldn't be complicated.</h2>
+      <p>xBill divides a bill, tracks who owes what, and closes the loop when people pay.</p>
+      <ul class="facts"><li>Swift · SwiftUI</li><li>Supabase · Postgres RLS</li><li>v1.7 live</li></ul>
+    </div>
+  </section>
+
+  <section class="s" data-theme="dark" data-accent="#c9a23f">
+    <div class="copy">
+      <p class="eyebrow">02 — The Shady Spade · Card game</p>
+      <h2 data-words>A classic card game. A modern experience.</h2>
+      <p>Six players, no fixed teams. The highest bidder declares trump and calls two secret partners.</p>
+      <ul class="facts"><li>Swift · watchOS</li><li>Bluetooth · Firebase</li><li>v2.0 live · with Apple Watch</li></ul>
+    </div>
+  </section>
+
+  <section data-theme="light" data-accent="#ec5a3f">
+    <div class="copy">
+      <p class="eyebrow">How I build</p>
+      <h2 data-words>Problem to store, part by part.</h2>
+      <ol class="stages">
+        <li><span><b>Discover.</b> Use the thing.</span></li>
+        <li><span><b>Define.</b> Decide what it is not.</span></li>
+        <li><span><b>Design.</b> In SwiftUI, on a real device.</span></li>
+        <li><span><b>Build.</b> Offline-first, secure where money is.</span></li>
+        <li><span><b>Refine.</b> Tests behind every release.</span></li>
+        <li><span><b>Ship.</b> Submit, get approved, repeat.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section data-theme="dark" data-accent="#ec5a3f">
+    <div class="copy">
+      <p class="eyebrow">Contact</p>
+      <h2 data-words>Have an interesting idea?</h2>
+      <p>I'd love to hear about it.</p>
+      <span class="mail">imvijaygoyal@gmail.com</span>
+    </div>
+  </section>
+
+  <div class="note">
+    <p><strong>A prototype, not the site.</strong> The phone is real 3D, built in code from parts with three.js: frame, glass back, camera bump, lenses and buttons. It comes apart in the opening, assembles to show xBill, turns to hand over to The Shady Spade, becomes a line drawing on paper for How I build, and settles at the end. Everything is your scroll position, so scrolling back runs it backwards.</p>
+    <p>The screens are your real App Store captures. The dial and ruler follow the animejs.com pattern. Headlines arrive word by word with anime.js.</p>
+  </div>
+</main>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/animejs@4.5.0/dist/bundles/anime.umd.min.js"></script>
+<script type="module">
+  import * as THREE from "three";
+  import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+  import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+  const XBILL = "__XBILL__";
+  const SPADE = "__SPADE__";
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const A = window.anime;
+
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const band = (s, a, b) => smooth(clamp01((s - a) / (b - a)));
+  const lerp = (a, b, t) => a + (b - a) * t;
+
+  // ---- Renderer, camera, light -------------------------------------------
+  const canvas = document.getElementById("gl");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const scene = new THREE.Scene();
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
+  camera.position.set(0, 0, 5.0);
+  const key = new THREE.DirectionalLight(0xffffff, 1.4);
+  key.position.set(2, 3, 4);
+  scene.add(key);
+
+  // ---- The phone, built from parts ---------------------------------------
+  // Proportioned like a current iPhone Pro; the screen matches the captures'
+  // 768 x 1670 shape exactly.
+  const W = 0.72, H = 1.5, D = 0.085;
+  const SW = 0.655, SH = SW * 1670 / 768;
+  const titanium = new THREE.MeshStandardMaterial({ color: 0x2b2b30, metalness: 0.85, roughness: 0.32, transparent: true });
+  const glass = new THREE.MeshStandardMaterial({ color: 0x1d1d22, metalness: 0.2, roughness: 0.18, transparent: true });
+  const lensGlass = new THREE.MeshStandardMaterial({ color: 0x08080a, metalness: 0.6, roughness: 0.05, transparent: true });
+  const loader = new THREE.TextureLoader();
+  const tex = (src) => { const t = loader.load(src); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+  const screens = { xbill: tex(XBILL), spade: tex(SPADE) };
+  const screenMat = new THREE.MeshBasicMaterial({ map: screens.xbill, transparent: true, toneMapped: false });
+
+  const phone = new THREE.Group();
+  scene.add(phone);
+  const parts = [];
+  // explode: where each part travels when the phone comes apart.
+  function part(mesh, explode, spin = 0) {
+    mesh.userData.home = mesh.position.clone();
+    mesh.userData.explode = new THREE.Vector3(...explode);
+    mesh.userData.spin = spin;
+    phone.add(mesh);
+    parts.push(mesh);
+    return mesh;
+  }
+
+  part(new THREE.Mesh(new RoundedBoxGeometry(W, H, D, 6, 0.1), titanium), [0, 0, 0]);
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(SW, SH), screenMat);
+  scr.position.z = D / 2 + 0.002;
+  part(scr, [0, 0, 0.9], 0.15);
+  const back = new THREE.Mesh(new RoundedBoxGeometry(W - 0.03, H - 0.03, 0.01, 4, 0.085), glass);
+  back.position.z = -D / 2 - 0.004;
+  part(back, [0, 0, -0.6], -0.1);
+  const bump = new THREE.Mesh(new RoundedBoxGeometry(0.34, 0.34, 0.03, 4, 0.07), glass);
+  bump.position.set(-W / 2 + 0.22, H / 2 - 0.22, -D / 2 - 0.02);
+  part(bump, [-0.25, 0.25, -1.0], 0.3);
+  for (const [x, y] of [[-0.075, 0.075], [-0.075, -0.075], [0.075, 0]]) {
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.035, 32), lensGlass);
+    lens.rotation.x = Math.PI / 2;
+    lens.position.set(bump.position.x + x, bump.position.y + y, -D / 2 - 0.045);
+    part(lens, [-0.35 + x * 3, 0.35 + y * 3, -1.45], 0.6);
+  }
+  for (const [y, h, side] of [[0.28, 0.16, 1], [0.38, 0.06, -1], [0.22, 0.11, -1], [0.05, 0.11, -1]]) {
+    const b = new THREE.Mesh(new RoundedBoxGeometry(0.02, h, 0.03, 2, 0.008), titanium);
+    b.position.set(side * (W / 2 + 0.006), y, 0);
+    part(b, [side * 0.55, y * 0.4, 0], 0.4);
+  }
+
+  // The line drawing: every part's edges, hidden until the paper section.
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x26262b, transparent: true, opacity: 0 });
+  for (const m of parts) {
+    const lines = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry, 24), lineMat);
+    m.add(lines);
+  }
+
+  // ---- Dial and ruler (2D, pinned) ---------------------------------------
+  const dial = document.getElementById("dial");
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
+  dial.append(svg);
+  const ticks = document.createElementNS(NS, "g");
+  svg.append(ticks);
+  const tickEls = [];
+  for (let i = 0; i < 120; i++) {
+    const l = document.createElementNS(NS, "line");
+    l.setAttribute("class", "tick");
+    ticks.append(l);
+    tickEls.push(l);
+  }
+  const arcs = ["#ec5a3f", "#8f7cf5", "#c9a23f", "#f4f3ef"].map((c, i) => {
+    const a = document.createElementNS(NS, "circle");
+    a.setAttribute("class", "arc");
+    a.setAttribute("stroke", c);
+    svg.append(a);
+    return a;
+  });
+  const ruler = document.getElementById("ruler");
+  const rulerTicks = Array.from({ length: 30 }, () => { const i = document.createElement("i"); ruler.append(i); return i; });
+
+  // ---- Words arrive with anime.js -----------------------------------------
+  const sections = [...document.querySelectorAll("main > section")];
+  for (const h of document.querySelectorAll("[data-words]")) {
+    h.innerHTML = h.textContent.split(" ").map((w) => `<span class="word">${w}</span>`).join(" ");
+  }
+  const arrived = new Set();
+  function arrive(i) {
+    if (arrived.has(i) || !A || reduced) return;
+    arrived.add(i);
+    A.animate(sections[i].querySelectorAll(".word"), {
+      opacity: [0, 1], y: ["0.5em", "0em"], duration: 700, ease: "outExpo", delay: A.stagger(55),
+    });
+  }
+
+  // ---- Layout ------------------------------------------------------------
+  let view = { w: 1, h: 1, mobile: false };
+  function fit() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    view = { w, h, mobile: w <= 760 };
+    const r = Math.min(view.mobile ? w * 0.4 : h * 0.4, 360);
+    svg.setAttribute("width", r * 2 + 20);
+    svg.setAttribute("height", r * 2 + 20);
+    svg.setAttribute("viewBox", `${-r - 10} ${-r - 10} ${r * 2 + 20} ${r * 2 + 20}`);
+    tickEls.forEach((l, i) => {
+      const a = (i / tickEls.length) * Math.PI * 2, long = i % 10 === 0 ? 14 : 7;
+      l.setAttribute("x1", Math.cos(a) * r); l.setAttribute("y1", Math.sin(a) * r);
+      l.setAttribute("x2", Math.cos(a) * (r - long)); l.setAttribute("y2", Math.sin(a) * (r - long));
+    });
+    arcs.forEach((a, i) => {
+      const rr = r + 6;
+      a.setAttribute("r", rr);
+      a.dataset.c = String(2 * Math.PI * rr);
+      a.setAttribute("stroke-dasharray", `${a.dataset.c} ${a.dataset.c}`);
+      a.setAttribute("transform", `rotate(${i * 90 - 90})`);
+    });
+  }
+  addEventListener("resize", fit, { passive: true });
+  fit();
+
+  // ---- Where we are: s runs 0..5, one unit per section ----------------
+  function progress() {
+    const mid = innerHeight / 2;
+    for (let i = 0; i < sections.length; i++) {
+      const r = sections[i].getBoundingClientRect();
+      if (r.bottom > mid || i === sections.length - 1) {
+        const travel = Math.max(1, r.height - innerHeight);
+        return i + clamp01(-r.top / travel);
+      }
+    }
+    return 0;
+  }
+
+  const v3 = new THREE.Vector3();
+  let current = -1;
+  function frame(now) {
+    const s = progress();
+    const idx = Math.min(sections.length - 1, Math.floor(s));
+    if (idx !== current) {
+      current = idx;
+      document.body.classList.toggle("light", sections[idx].dataset.theme === "light");
+      document.getElementById("chapter").textContent = `0${idx + 1} / 0${sections.length}`;
+      arrive(idx);
+    }
+    const t = reduced ? 0 : now / 1000;
+
+    // Apart at the opening; assembled for the products; apart again, drawn
+    // in line, on paper; together at the end.
+    const paper = band(s, 2.95, 3.35) * (1 - band(s, 3.7, 4.15));
+    const apart = reduced ? 0 : Math.max(1 - band(s, 0.25, 0.95), paper * 1.25);
+    const drawn = band(s, 2.85, 3.15) * (1 - band(s, 3.8, 4.1));
+    // The Shady Spade arrives by a full turn; its screen swaps while the
+    // back faces the camera.
+    const flip = reduced ? 0 : band(s, 1.85, 2.35);
+    screenMat.map = (reduced ? s >= 2 && s < 3 : flip >= 0.5 && s < 3) ? screens.spade : screens.xbill;
+
+    for (const m of parts) {
+      m.position.copy(m.userData.home).addScaledVector(m.userData.explode, apart);
+      m.rotation.z = m.userData.spin * apart * Math.sin(t * 0.6 + m.userData.spin * 4);
+    }
+    titanium.opacity = glass.opacity = lensGlass.opacity = 1 - drawn;
+    screenMat.opacity = 1 - drawn;
+    lineMat.opacity = drawn * 0.9;
+
+    const idle = reduced ? 0 : Math.sin(t * 0.5) * 0.08;
+    const yaw = lerp(-0.55, -0.12, band(s, 0.3, 1.0)) + flip * Math.PI * 2 - paper * 0.75 + idle;
+    phone.rotation.set(lerp(0.18, 0.04, band(s, 0.3, 1)) + paper * 0.32 + (reduced ? 0 : Math.cos(t * 0.4) * 0.03), yaw, paper * -0.12);
+    const x = view.mobile ? 0 : lerp(0.95, 1.05, band(s, 0.5, 1)) * camera.aspect * 0.62;
+    const y = view.mobile ? -0.72 : 0;
+    const scale = (view.mobile ? 0.62 : 1) * lerp(1, 0.86, band(s, 4.2, 4.8));
+    phone.position.set(x, y, 0);
+    phone.scale.setScalar(scale);
+
+    // Pin the dial to the phone's drawn centre, and draw its arcs by section.
+    v3.copy(phone.position).project(camera);
+    dial.style.transform = `translate(${(v3.x * 0.5 + 0.5) * view.w}px, ${(-v3.y * 0.5 + 0.5) * view.h}px)`;
+    dial.style.color = document.body.classList.contains("light") ? "#141417" : "#f4f3ef";
+    const local = s - idx;
+    arcs.forEach((a, i) => {
+      const c = Number(a.dataset.c);
+      const fill = i === Math.min(idx, 3) ? 0.12 + local * 0.13 : i < Math.min(idx, 3) ? 0.25 : 0.04;
+      a.setAttribute("stroke-dashoffset", String(c * (1 - fill)));
+    });
+    const on = Math.round((s / sections.length) * (rulerTicks.length - 1));
+    rulerTicks.forEach((el, i) => el.classList.toggle("on", i === on));
+
+    renderer.render(scene, camera);
+    if (!reduced) requestAnimationFrame(frame);
+  }
+  if (reduced) {
+    addEventListener("scroll", () => requestAnimationFrame(frame), { passive: true });
+    addEventListener("resize", () => requestAnimationFrame(frame), { passive: true });
+  }
+  requestAnimationFrame(frame);
+</script>
