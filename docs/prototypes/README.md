@@ -23,7 +23,7 @@ icons they use are already in `assets/`, downscaled to 512 from each app's own
 | `dynamic-heroes.html` | Continuous, full-screen motion, two ways: paper-alive vs dark showcase | [link](https://claude.ai/artifact/PB4dG66y6NZVE7CRzEgtYr) |
 | `night-products.html` | The anime.js posture with the products as the subject, no scroll | [link](https://claude.ai/artifact/RzAfs6oQjNa6A8BLDv2Hsx) |
 | `night-scroll.html` | **The furthest point.** Dark, scroll-scrubbed, a drawn lotus opening behind the captures, the real App Store icons flying to the focused product | [link](https://claude.ai/artifact/9iDGt8JcTVjCzUBkK3WW9Z) |
-| `three-scroll.html` | **2026-09-30, animejs.com-style.** A real 3D iPhone built from parts in three.js (frame, glass back, camera bump, lenses, buttons) that comes apart, assembles, turns from xBill to The Shady Spade and becomes a line drawing on a paper section; a pinned dial and a progress ruler. Source with image placeholders: `three-scroll.src.html` | [link](https://claude.ai/artifact/9sNSW5pt7EHjGctGsP7ghf) |
+| `three-scroll.html` | **2026-09-30, animejs.com-style.** v1 was a 3D iPhone built from parts; the owner said "don't put the phone". v2: each real capture cut into its own parts (cards, rows, chips, player tiles, playing cards) that float apart in 3D and slot back one after another, lift out in turn while read, hand over xBill → Shady Spade, and become an exploded line drawing on paper. Source: `three-scroll.src.html` + `three-scroll.module.js` | [link](https://claude.ai/artifact/9sNSW5pt7EHjGctGsP7ghf) |
 
 ## What was learned, in order
 
