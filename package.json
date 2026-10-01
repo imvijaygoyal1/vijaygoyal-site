@@ -11,7 +11,8 @@
     "size": "size-limit",
     "e2e": "playwright test --grep-invert @perf",
     "lh": "lhci autorun",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run check-facts && npm run build && wrangler deploy",
+    "check-facts": "node scripts/facts/check.ts"
   },
   "dependencies": {
     "animejs": "4.5.0",
