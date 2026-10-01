@@ -1,4 +1,5 @@
-import { useEffect, useLayoutEffect } from "react";
+import { Fragment, useEffect, useLayoutEffect } from "react";
+import { playHeadline } from "../lib/headline";
 import { observeReveals } from "../lib/reveal";
 import { observeNightScene } from "../scene/nightScene";
 import {
@@ -46,11 +47,23 @@ function Opening() {
   return (
     <section className="opening" id="opening" aria-labelledby="opening-heading">
       <h1 id="opening-heading">
-        {/* Two lines, so they can lift in turn. They still wrap naturally at
-            any width -- the spans are inline. */}
+        {/* Two lines, each a clipping box the words rise out of, one word at
+            a time (lib/headline.ts). They still wrap naturally at any width --
+            the spans are inline. */}
         {OPENING.lines.map((line) => (
           <span className="line" key={line}>
-            <span className="line-inner">{line}</span>
+            <span className="line-inner">
+              {line
+                .trim()
+                .split(" ")
+                .map((word, i, all) => (
+                  <Fragment key={word}>
+                    <span className="word">{word}</span>
+                    {i < all.length - 1 ? " " : null}
+                  </Fragment>
+                ))}
+              {line.endsWith(" ") ? " " : null}
+            </span>
           </span>
         ))}
       </h1>
@@ -320,6 +333,8 @@ export function Page() {
   // see lib/reveal.ts. The effect runs after the first paint, so nothing is
   // hidden before it starts.
   useEffect(() => observeReveals(), []);
+  // Before first paint, so the words are already at their start pose.
+  useLayoutEffect(() => playHeadline(), []);
   // A layout effect, so the scene's first frame is set before first paint:
   // see scene/nightScene.ts.
   useLayoutEffect(() => observeNightScene(), []);

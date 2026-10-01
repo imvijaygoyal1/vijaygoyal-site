@@ -151,6 +151,11 @@ a {
   display: inline-block;
 }
 
+/* Inline blocks, so each word can rise on its own (lib/headline.ts). */
+.opening h1 .word {
+  display: inline-block;
+}
+
 .opening h1 {
   margin: var(--space-2xl) 0 0;
   max-width: 13ch;
@@ -691,7 +696,7 @@ a {
  * do not perform. Four pieces, all CSS, all compositor-only (transform,
  * opacity, clip-path):
  *
- *   1. the opening's lines rise out of their own clipping boxes, on load;
+ *   1. the opening's words rise out of their lines, on load (anime.js, lib/headline.ts);
  *   2. work, stages, toolkit rows and the closing arrive as they are reached;
  *   3. the night scene (scene/nightScene.ts), which is script-driven;
  *   4. links answer the pointer, where there is one.
@@ -707,12 +712,6 @@ a {
  */
 
 @media (prefers-reduced-motion: no-preference) {
-  @keyframes rise-out {
-    from {
-      transform: translateY(105%);
-    }
-  }
-
   @keyframes rise {
     from {
       opacity: 0;
@@ -720,17 +719,11 @@ a {
     }
   }
 
-  .opening h1 .line-inner,
+  /* The headline's words are animated by anime.js (lib/headline.ts). */
   .opening .row {
-    animation: rise-out var(--duration-slow) var(--ease-out) backwards;
+    animation: rise var(--duration-slow) var(--ease-out) backwards;
   }
 
-  .opening .row {
-    animation-name: rise;
-  }
-
-  .opening h1 .line:nth-child(1) .line-inner { animation-delay: 80ms; }
-  .opening h1 .line:nth-child(2) .line-inner { animation-delay: 190ms; }
   .opening .row:nth-of-type(1) { animation-delay: 320ms; }
   .opening .row:nth-of-type(2) { animation-delay: 400ms; }
 }

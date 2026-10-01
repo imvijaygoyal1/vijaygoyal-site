@@ -36,12 +36,15 @@ test.describe("reduced motion, again", () => {
   test("runs no animation at all, and hides nothing", async ({ page }) => {
     await page.goto("/");
     expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+    // anime.js never touches the headline: no inline style on any word.
+    const styled = await page.locator("#opening h1 .word").evaluateAll((els) => els.filter((el) => el.getAttribute("style")).length);
+    expect(styled).toBe(0);
     // The reveal script leaves the root unmarked, so nothing is held back.
     await expect(page.locator("html")).not.toHaveClass(/js-reveal/);
     // Everything the clock would otherwise move: opening, work, stages,
     // toolkit rows, screenshots.
     const rest = await page
-      .locator("#opening h1 .line-inner, #opening .row, #xbill > div, [data-device] img, .stage, .toolkit div")
+      .locator("#opening h1 .word, #opening .row, #xbill > div, [data-device] img, .stage, .toolkit div")
       .evaluateAll((els) =>
         els.map((el) => {
           const s = getComputedStyle(el);

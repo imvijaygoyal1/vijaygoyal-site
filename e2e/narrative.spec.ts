@@ -88,13 +88,12 @@ test("footer and contact links point at the sourced destinations", async ({ page
 
 test("the opening lifts in once, then rests fully visible", async ({ page }) => {
   await page.goto("/");
-  // Running at load...
+  // The rows rise with CSS at load...
   const running = await page.evaluate(() =>
     document.getAnimations().filter((a) => a.playState === "running").length,
   );
   expect(running).toBeGreaterThan(0);
-  // ...and finished, with nothing left displaced or faded. Only the
-  // time-driven ones: a scroll-driven animation never finishes, by design.
+  // ...and finish, with nothing left displaced or faded.
   await page.evaluate(() =>
     Promise.all(
       document
@@ -114,6 +113,30 @@ test("the opening lifts in once, then rests fully visible", async ({ page }) => 
     expect(Number(r.opacity)).toBe(1);
     expect(r.transform === "none" || r.transform === "matrix(1, 0, 0, 1, 0, 0)").toBe(true);
   }
+});
+
+test("the headline arrives word by word with anime.js, then rests exactly in place", async ({ page }) => {
+  await page.goto("/");
+  const words = page.locator("#opening h1 .word");
+  await expect(words).toHaveCount(5);
+  // anime.js drives inline styles, not CSS animations: proof it ran is the
+  // transform it leaves on every word.
+  await expect
+    .poll(() => words.evaluateAll((els) => els.every((el) => /translate/.test(el.style.transform))))
+    .toBe(true);
+  // And every word comes to rest fully visible and exactly on its line.
+  await expect
+    .poll(
+      () =>
+        words.evaluateAll((els) =>
+          els.every((el) => {
+            const s = getComputedStyle(el);
+            return Number(s.opacity) === 1 && (s.transform === "none" || s.transform === "matrix(1, 0, 0, 1, 0, 0)");
+          }),
+        ),
+      { timeout: 4000 },
+    )
+    .toBe(true);
 });
 
 test("section rules are drawn once their section has been passed", async ({ page }) => {
