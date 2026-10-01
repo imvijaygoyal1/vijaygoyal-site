@@ -1,63 +1,23 @@
   import * as THREE from "three";
 
-  const SRC = { xbill: "__XBILL__", spade: "__SPADE__" };
+  // ---- The six cards -------------------------------------------------------
+  // Placeholders for now. To put a real screen on a card later, set its `src`
+  // to the image (a URL or data: URI, shaped 768 x 1670) — nothing else changes.
+  const CARDS = [
+    { app: "xBill", n: 1, hue: "#8f7cf5", src: null },
+    { app: "xBill", n: 2, hue: "#8f7cf5", src: null },
+    { app: "xBill", n: 3, hue: "#8f7cf5", src: null },
+    { app: "The Shady Spade", n: 1, hue: "#c9a23f", src: null },
+    { app: "The Shady Spade", n: 2, hue: "#c9a23f", src: null },
+    { app: "The Shady Spade", n: 3, hue: "#c9a23f", src: null },
+  ];
+
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const A = window.anime;
-
   const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
   const smooth = (t) => t * t * (3 - 2 * t);
   const band = (s, a, b) => smooth(clamp01((s - a) / (b - a)));
   const lerp = (a, b, t) => a + (b - a) * t;
-  const rand = (i) => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
-
-  // ---- The parts, measured in each capture's own 768 x 1670 pixels --------
-  // r: [x, y, w, h], rad: corner radius, tier: how far forward it floats,
-  // lift: read in turn while its section is on screen, kids: parts cut out of it.
-  const PARTS = {
-    xbill: [
-      { r: [20, 118, 728, 84], rad: 0, tier: 1, lift: true },
-      { r: [30, 290, 708, 100], rad: 34, tier: 2, lift: true },
-      { r: [56, 440, 310, 48], rad: 0, tier: 1 },
-      { r: [30, 500, 708, 150], rad: 40, tier: 1, kids: [
-        { r: [60, 532, 240, 84], rad: 42, tier: 3, lift: true },
-        { r: [316, 532, 170, 84], rad: 42, tier: 3 },
-      ] },
-      { r: [30, 716, 708, 196], rad: 40, tier: 2, lift: true, kids: [
-        { r: [60, 782, 648, 100], rad: 22, tier: 3 },
-      ] },
-      { r: [56, 966, 150, 48], rad: 0, tier: 1 },
-      { r: [30, 1040, 708, 172], rad: 0, tier: 2, lift: true, kids: [
-        { r: [186, 1096, 176, 56], rad: 28, tier: 4 },
-        { r: [62, 1152, 462, 46], rad: 22, tier: 4, lift: true },
-      ] },
-      { r: [30, 1252, 708, 172], rad: 0, tier: 2, kids: [
-        { r: [186, 1308, 176, 56], rad: 28, tier: 4 },
-        { r: [62, 1362, 462, 46], rad: 22, tier: 4 },
-      ] },
-      { r: [30, 1462, 708, 172], rad: 0, tier: 2, lift: true, kids: [
-        { r: [186, 1518, 176, 56], rad: 28, tier: 4 },
-        { r: [62, 1574, 462, 46], rad: 22, tier: 4 },
-      ] },
-    ],
-    spade: [
-      ...[32, 150, 268, 386, 504, 622].map((x, i) => ({ r: [x, 84, 114, 152], rad: 12, tier: 2 + (i % 2), lift: i === 0 })),
-      { r: [22, 274, 236, 84], rad: 14, tier: 3, lift: true },
-      { r: [266, 274, 238, 84], rad: 14, tier: 3, lift: true },
-      { r: [512, 274, 232, 84], rad: 14, tier: 3, lift: true },
-      { r: [22, 380, 722, 374], rad: 26, tier: 1, kids: [
-        { r: [70, 478, 152, 214], rad: 14, tier: 4, lift: true },
-      ] },
-      { r: [22, 776, 722, 286], rad: 26, tier: 1, kids: [
-        { r: [96, 842, 116, 146], rad: 10, tier: 3 },
-        { r: [326, 842, 116, 146], rad: 10, tier: 4 },
-        { r: [556, 842, 116, 146], rad: 10, tier: 5, lift: true },
-      ] },
-      { r: [22, 1082, 722, 280], rad: 26, tier: 1, kids: [
-        { r: [284, 1084, 200, 60], rad: 30, tier: 3 },
-        ...[50, 134, 216, 300, 382, 466, 548, 630].map((x, i) => ({ r: [x, 1158, 84, 120], rad: 8, tier: 3 + (i % 3), lift: i === 7 })),
-      ] },
-    ],
-  };
 
   // ---- Renderer ------------------------------------------------------------
   const canvas = document.getElementById("gl");
@@ -66,111 +26,126 @@
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 50);
-  camera.position.set(0, 0, 5.2);
+  camera.position.set(0, 0, 5.4);
 
-  const SH = 1.75, K = SH / 1670;  // world units per capture pixel
-  const loadImage = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+  const CW = 0.66, CH = CW * 1670 / 768;
 
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.roundRect(x, y, w, h, Math.min(r, w / 2, h / 2));
+  // ---- A placeholder card, drawn once ------------------------------------
+  function cardCanvas(card) {
+    const c = document.createElement("canvas");
+    c.width = 768; c.height = 1670;
+    const g = c.getContext("2d");
+    const R = 64;
+    g.beginPath(); g.roundRect(0, 0, 768, 1670, R); g.clip();
+    const bg = g.createLinearGradient(0, 0, 0, 1670);
+    bg.addColorStop(0, "#1b1b21"); bg.addColorStop(1, "#101014");
+    g.fillStyle = bg; g.fillRect(0, 0, 768, 1670);
+    // A faint drafting grid: the card reads as a slot waiting for a screen.
+    g.strokeStyle = "rgba(244,243,239,0.05)"; g.lineWidth = 2;
+    for (let x = 64; x < 768; x += 64) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 1670); g.stroke(); }
+    for (let y = 64; y < 1670; y += 64) { g.beginPath(); g.moveTo(0, y); g.lineTo(768, y); g.stroke(); }
+    const glow = g.createRadialGradient(384, 0, 0, 384, 0, 900);
+    glow.addColorStop(0, card.hue + "55"); glow.addColorStop(1, card.hue + "00");
+    g.fillStyle = glow; g.fillRect(0, 0, 768, 1670);
+    g.fillStyle = "rgba(244,243,239,0.55)";
+    g.font = "600 34px ui-monospace, Menlo, monospace";
+    g.fillText(card.app.toUpperCase(), 64, 140);
+    g.fillStyle = card.hue;
+    g.font = "800 300px Inter, -apple-system, sans-serif";
+    g.fillText(String(card.n).padStart(2, "0"), 52, 930);
+    g.fillStyle = "rgba(244,243,239,0.75)";
+    g.font = "600 44px Inter, -apple-system, sans-serif";
+    g.fillText("Screen", 64, 1010);
+    g.fillStyle = "rgba(244,243,239,0.4)";
+    g.font = "500 30px ui-monospace, Menlo, monospace";
+    g.fillText("PLACEHOLDER · 768 × 1670", 64, 1580);
+    g.strokeStyle = card.hue + "aa"; g.lineWidth = 6;
+    g.beginPath(); g.roundRect(3, 3, 762, 1664, R - 2); g.stroke();
+    return c;
   }
 
-  /** A part's own picture: its crop, with its children's places filled in. */
-  function partTexture(img, pick, part, isBase) {
-    const [x, y, w, h] = part.r;
-    const c = document.createElement("canvas");
-    c.width = w; c.height = h;
-    const g = c.getContext("2d");
-    roundRect(g, 0, 0, w, h, isBase ? 46 : part.rad);
-    g.clip();
-    g.drawImage(img, x, y, w, h, 0, 0, w, h);
-    for (const k of part.kids ?? []) {
-      const [kx, ky, kw, kh] = k.r;
-      // The colour just outside the child, so the hole reads as the surface beneath it.
-      g.fillStyle = pick(Math.max(0, kx - 6), Math.max(0, ky + kh / 2));
-      roundRect(g, kx - x - 1, ky - y - 1, kw + 2, kh + 2, k.rad);
-      g.fill();
-    }
-    const t = new THREE.CanvasTexture(c);
+  function cardTexture(card) {
+    const t = new THREE.CanvasTexture(cardCanvas(card));
     t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = 8;
+    if (card.src) {
+      // A real screen replaces the placeholder, clipped to the same corners.
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement("canvas"); c.width = 768; c.height = 1670;
+        const g = c.getContext("2d"); g.beginPath(); g.roundRect(0, 0, 768, 1670, 64); g.clip();
+        g.drawImage(img, 0, 0, 768, 1670);
+        t.image = c; t.needsUpdate = true;
+      };
+      img.src = card.src;
+    }
     return t;
   }
 
   const lineMat = new THREE.LineBasicMaterial({ color: 0x26262b, transparent: true, opacity: 0 });
-  // Hidden outright outside the paper section: at opacity 0 they still showed
-  // as hard outlines around the assembled parts.
-  const outlines = [];
+  const cards = CARDS.map((card) => {
+    const mat = new THREE.MeshBasicMaterial({ map: cardTexture(card), transparent: true, toneMapped: false, depthWrite: false, side: THREE.DoubleSide });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(CW, CH), mat);
+    const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), lineMat);
+    outline.visible = false;  // opacity 0 alone still drew hard outlines
+    mesh.add(outline);
+    mesh.userData = { mat, outline };
+    scene.add(mesh);
+    return mesh;
+  });
+  // Inter may arrive after the first draw; redraw the placeholders once it has.
+  document.fonts?.ready.then(() => cards.forEach((m, i) => {
+    if (!CARDS[i].src) { m.userData.mat.map.image = cardCanvas(CARDS[i]); m.userData.mat.map.needsUpdate = true; }
+  }));
 
-  async function buildScreen(key) {
-    const img = await loadImage(SRC[key]);
-    const full = document.createElement("canvas");
-    full.width = 768; full.height = 1670;
-    const fg = full.getContext("2d", { willReadFrequently: true });
-    fg.drawImage(img, 0, 0);
-    const pick = (px, py) => { const d = fg.getImageData(px | 0, py | 0, 1, 1).data; return `rgb(${d[0]},${d[1]},${d[2]})`; };
+  // ---- Poses: each a pure function of where the story is -----------------
+  // A pose is [x, y, z, rx, ry, rz, scale, opacity].
+  const N = CARDS.length, mid = (N - 1) / 2;
+  let mobile = false;
 
-    const group = new THREE.Group();
-    const parts = [];
-    let n = 0;
-    function add(part, isBase) {
-      const [x, y, w, h] = part.r;
-      const mat = new THREE.MeshBasicMaterial({ map: partTexture(img, pick, part, isBase), transparent: true, toneMapped: false, depthWrite: false });
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w * K, h * K), mat);
-      const home = new THREE.Vector3((x + w / 2 - 384) * K, (835 - (y + h / 2)) * K, isBase ? 0 : 0.002 * part.tier);
-      const i = n++;
-      // Where it floats when the screen comes apart: forward by its tier,
-      // outward from the centre, turned a little.
-      const away = new THREE.Vector3(home.x * 0.55 + (rand(i) - 0.5) * 0.5, home.y * 0.35 + (rand(i + 9) - 0.5) * 0.4, isBase ? -0.35 : 0.25 + part.tier * 0.32 + rand(i + 3) * 0.25);
-      mesh.renderOrder = isBase ? 0 : part.tier;
-      const outline = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), lineMat);
-      outline.visible = false;
-      outlines.push(outline);
-      mesh.add(outline);
-      mesh.userData = { home, away, spin: new THREE.Vector3((rand(i + 1) - 0.5) * 0.5, (rand(i + 2) - 0.5) * 0.6, (rand(i + 4) - 0.5) * 0.35), order: i, lift: !!part.lift, isBase, mat };
-      group.add(mesh);
-      parts.push(mesh);
-      for (const kid of part.kids ?? []) add(kid, false);
-    }
-    add({ r: [0, 0, 768, 1670], rad: 46, tier: 0, kids: PARTS[key] }, true);
-    // Assembly order: the base first, then the big panels, then the small parts.
-    const movers = parts.filter((p) => !p.userData.isBase);
-    movers.forEach((m, i) => (m.userData.seq = i / Math.max(1, movers.length - 1)));
-    const lifters = movers.filter((m) => m.userData.lift);
-    lifters.forEach((m, i) => (m.userData.liftSlot = i / lifters.length));
-    group.userData = { parts, lifters: lifters.length };
-    scene.add(group);
-    return group;
+  const deck = (i) => [0.02 * (i - mid), -0.012 * (i - mid), -0.05 * i, 0.32, -0.55, 0.04, 1, 1];
+  const fan = (i, spread = 1) => {
+    const a = (i - mid) * 0.17 * spread, r = 2.2;
+    return [Math.sin(a) * r, Math.cos(a) * r - r + 0.05, -Math.abs(i - mid) * 0.08, 0.12, -0.18, -a, 0.92, 1];
+  };
+  // A carousel around a continuous focus F: the card at F faces you, the rest
+  // step back and turn away the further they are from it.
+  const carousel = (i, F) => {
+    const d = i - F, ad = Math.min(Math.abs(d), 3);
+    const step = mobile ? 0.48 : 0.82;
+    return [
+      Math.sign(d) * Math.min(ad, 2.2) * step * (1 - ad * 0.08),
+      0,
+      0.75 - ad * 0.55,
+      0.04,
+      -Math.max(-1.4, Math.min(1.4, d)) * 0.55,
+      0,
+      1.12 - Math.min(ad, 1) * 0.3,
+      1 - clamp01(ad - 1.6) * 0.8,
+    ];
+  };
+  // Shifted left on wide screens: spread to the right it ran off the edge.
+  const paper = (i) => [(i - mid) * 0.34 - (mobile ? 0 : 0.6), -(i - mid) * 0.05, (i - mid) * 0.5, 0.5, -0.85, -0.05, 0.92, 1];
+  const mix = (a, b, t) => a.map((v, k) => lerp(v, b[k], t));
+
+  /** Focus with a hold on each card, so each one rests before the next comes. */
+  function holdAt(u, count) {
+    const x = clamp01(u) * (count - 1);
+    const k = Math.min(count - 2, Math.floor(x));
+    return k + smooth(clamp01((x - k - 0.25) / 0.5));
+  }
+  function focus(s) {
+    if (s < 1.95) return holdAt((s - 1.1) / 0.8, 3);          // xBill: 0 → 2
+    if (s < 2.15) return lerp(2, 3, band(s, 1.95, 2.15));     // hand over
+    return 3 + holdAt((s - 2.15) / 0.7, 3);                   // Shady Spade: 3 → 5
   }
 
-  /**
-   * Places one screen. `together` 0 = apart, 1 = assembled, with each part
-   * keeping its own staggered window so they slot in one after another.
-   * `read` 0..1 walks the lifting parts in turn. `shown` fades the screen.
-   */
-  function pose(group, together, read, shown, drawn, t) {
-    for (const m of group.userData.parts) {
-      const u = m.userData;
-      const start = u.isBase ? 0 : u.seq * 0.55;
-      const e = u.isBase ? smooth(clamp01(together * 1.6)) : band(together, start, start + 0.45);
-      const apart = 1 - e;
-      const drift = reduced ? 0 : Math.sin(t * 0.8 + u.order) * 0.03 * apart;
-      m.position.set(lerp(u.home.x, u.home.x + u.away.x, apart), lerp(u.home.y, u.home.y + u.away.y, apart) + drift, lerp(u.home.z, u.away.z, apart));
-      m.rotation.set(u.spin.x * apart, u.spin.y * apart, u.spin.z * apart);
-      // Reading: one part at a time lifts out of the screen and drops back.
-      if (u.lift && read > 0 && read < 1) {
-        const n = group.userData.lifters;
-        const local = clamp01((read - u.liftSlot) * n);
-        const bump = Math.sin(Math.PI * local) * (local > 0 && local < 1 ? 1 : 0);
-        m.position.z += 0.32 * bump;
-        m.scale.setScalar(1 + 0.06 * bump);
-      } else {
-        m.scale.setScalar(1);
-      }
-      u.mat.opacity = shown * (1 - drawn * 0.82);
-    }
-    group.visible = shown > 0.001;
+  function poseFor(i, s) {
+    let p = mix(deck(i), fan(i), band(s, 0.15, 0.85));
+    p = mix(p, carousel(i, focus(s)), band(s, 0.9, 1.15));
+    p = mix(p, paper(i), band(s, 2.95, 3.35));
+    p = mix(p, fan(i, 0.8), band(s, 3.7, 4.2));
+    return p;
   }
 
   // ---- Dial and ruler (2D, pinned) ---------------------------------------
@@ -208,14 +183,15 @@
   }
 
   // ---- Layout ------------------------------------------------------------
-  let view = { w: 1, h: 1, mobile: false };
+  let view = { w: 1, h: 1 };
   function fit() {
     const w = innerWidth, h = innerHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    view = { w, h, mobile: w <= 760 };
-    const r = Math.min(view.mobile ? w * 0.4 : h * 0.42, 380);
+    view = { w, h };
+    mobile = w <= 760;
+    const r = Math.min(mobile ? w * 0.4 : h * 0.42, 380);
     svg.setAttribute("width", r * 2 + 20);
     svg.setAttribute("height", r * 2 + 20);
     svg.setAttribute("viewBox", `${-r - 10} ${-r - 10} ${r * 2 + 20} ${r * 2 + 20}`);
@@ -236,10 +212,10 @@
   fit();
 
   function progress() {
-    const mid = innerHeight / 2;
+    const half = innerHeight / 2;
     for (let i = 0; i < sections.length; i++) {
       const r = sections[i].getBoundingClientRect();
-      if (r.bottom > mid || i === sections.length - 1) {
+      if (r.bottom > half || i === sections.length - 1) {
         const travel = Math.max(1, r.height - innerHeight);
         return i + clamp01(-r.top / travel);
       }
@@ -247,57 +223,54 @@
     return 0;
   }
 
-  const [xbill, spade] = await Promise.all([buildScreen("xbill"), buildScreen("spade")]);
-  const rig = new THREE.Group();
-  scene.add(rig);
-  rig.add(xbill, spade);
-
-  const v3 = new THREE.Vector3();
-  let current = -1;
+  // ---- The loop ------------------------------------------------------------
+  // The scene follows the scroll rather than snapping to it: `shown` eases
+  // toward the scroll position, settling over about half a second, so a
+  // thumb flick becomes a glide instead of a jump.
+  const anchor = new THREE.Vector3();
+  let shown = progress(), last = performance.now(), current = -1;
   function frame(now) {
-    const s = progress();
-    const idx = Math.min(sections.length - 1, Math.floor(s));
+    const target = progress();
+    const dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
+    last = now;
+    shown = reduced ? target : shown + (target - shown) * (1 - Math.exp(-dt * 5.5));
+    if (Math.abs(target - shown) < 0.0004) shown = target;
+
+    const idx = Math.min(sections.length - 1, Math.floor(target));
     if (idx !== current) {
       current = idx;
       document.body.classList.toggle("light", sections[idx].dataset.theme === "light");
       document.getElementById("chapter").textContent = `0${idx + 1} / 0${sections.length}`;
       arrive(idx);
     }
+
     const t = reduced ? 0 : now / 1000;
+    const drawn = band(shown, 2.95, 3.35) * (1 - band(shown, 3.7, 4.2));
+    const baseX = mobile ? 0 : camera.aspect * 0.62;
+    const baseY = mobile ? -0.62 : 0;
+    const k = mobile ? 0.66 : 1;
+    cards.forEach((m, i) => {
+      const [x, y, z, rx, ry, rz, sc, op] = poseFor(i, shown);
+      const breathe = reduced ? 0 : Math.sin(t * 0.7 + i * 0.9) * 0.012;
+      m.position.set(baseX + x * k, baseY + (y + breathe) * k, z * k);
+      m.rotation.set(rx, ry, rz);
+      m.scale.setScalar(sc * k);
+      m.renderOrder = Math.round(z * 100);
+      m.userData.mat.opacity = op * (1 - drawn * 0.85);
+      m.userData.outline.visible = drawn > 0.005;
+    });
+    lineMat.opacity = drawn * 0.9;
 
-    // xBill: apart at the opening, assembled through its section, flies apart
-    // as The Shady Spade assembles; the Shady Spade comes apart again on paper
-    // and settles at the end.
-    const paper = band(s, 2.9, 3.3) * (1 - band(s, 3.7, 4.15));
-    const xTogether = reduced ? 1 : band(s, 0.2, 1.05) * (1 - band(s, 1.85, 2.3));
-    const xShown = reduced ? (s < 2 ? 1 : 0) : 1 - band(s, 2.15, 2.4);
-    const sTogether = reduced ? 1 : band(s, 2.05, 2.55) * (1 - paper * 0.9);
-    const sShown = reduced ? (s >= 2 ? 1 : 0) : band(s, 1.95, 2.15);
-    pose(xbill, xTogether, reduced ? 0 : (s - 1.12) / 0.75, xShown, 0, t);
-    pose(spade, sTogether, reduced ? 0 : (s - 2.55) / 0.35, sShown, paper, t);
-    lineMat.opacity = paper * 0.9;
-    for (const o of outlines) o.visible = paper > 0.005;
-
-    const apartish = Math.max(1 - xTogether, paper);
-    const idle = reduced ? 0 : Math.sin(t * 0.5) * 0.05;
-    rig.rotation.set(
-      lerp(0.08, 0.32, apartish) + paper * 0.18 + (reduced ? 0 : Math.cos(t * 0.4) * 0.02),
-      lerp(-0.12, -0.62, apartish) - paper * 0.2 + idle,
-      paper * -0.08,
-    );
-    rig.position.set(view.mobile ? 0 : camera.aspect * 0.6, view.mobile ? -0.72 : 0, 0);
-    rig.scale.setScalar((view.mobile ? 0.6 : 1) * lerp(1, 0.88, band(s, 4.3, 4.9)));
-
-    v3.copy(rig.position).project(camera);
-    dial.style.transform = `translate(${(v3.x * 0.5 + 0.5) * view.w}px, ${(-v3.y * 0.5 + 0.5) * view.h}px)`;
+    anchor.set(baseX, baseY, 0).project(camera);
+    dial.style.transform = `translate(${(anchor.x * 0.5 + 0.5) * view.w}px, ${(-anchor.y * 0.5 + 0.5) * view.h}px)`;
     dial.style.color = document.body.classList.contains("light") ? "#141417" : "#f4f3ef";
-    const local = s - idx;
+    const local = target - idx;
     arcs.forEach((a, i) => {
       const c = Number(a.dataset.c);
       const fill = i === Math.min(idx, 3) ? 0.12 + local * 0.13 : i < Math.min(idx, 3) ? 0.25 : 0.04;
       a.setAttribute("stroke-dashoffset", String(c * (1 - fill)));
     });
-    const on = Math.round((s / sections.length) * (rulerTicks.length - 1));
+    const on = Math.round((target / sections.length) * (rulerTicks.length - 1));
     rulerTicks.forEach((el, i) => el.classList.toggle("on", i === on));
 
     renderer.render(scene, camera);
