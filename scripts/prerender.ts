@@ -11,7 +11,7 @@ const ssr = await import(join(ssrDir, "entry-server.js"));
 const template = readFileSync(join(dist, "index.html"), "utf8");
 
 for (const route of ssr.ROUTES) {
-  const html = ssr.fillTemplate(template, ssr.headTags(route), ssr.render(route.path));
+  const html = ssr.fillTemplate(template, ssr.headTags(route), ssr.render(route.path), route.path);
   const file = join(dist, ssr.outputFile(route.path));
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, html);

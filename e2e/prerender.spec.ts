@@ -44,6 +44,9 @@ for (const path of ["/", "/index.html", "/no-such-page"]) {
 test("with the app script blocked, the safety net still shows the headline and the products", async ({ page }) => {
   await page.route(/\/assets\/index-[^/]+\.js$/, (r) => r.abort());
   await page.goto("/");
+  // Hidden first, by CSS alone (the script never ran)...
+  expect(await page.locator("#opening h1 .word").first().evaluate((e) => getComputedStyle(e).opacity)).toBe("0");
+  // ...then shown by the safety net.
   await expect
     .poll(() => page.locator("#opening h1 .word").evaluateAll((els) => els.every((e) => Number(getComputedStyle(e).opacity) === 1)), { timeout: 2500 })
     .toBe(true);
@@ -66,4 +69,24 @@ test("the headline starts hidden in the HTML and anime.js reveals it", async ({ 
   await page.waitForFunction(() => typeof (window as unknown as { firstWord?: string }).firstWord === "string");
   expect(await page.evaluate(() => (window as unknown as { firstWord: string }).firstWord)).toBe("0");
   await expect(page.locator("#opening h1")).toHaveAttribute("data-driven", "");
+});
+
+test("hydrates the page it was sent, whatever the address says", async ({ page }) => {
+  // Review I1: Cloudflare can serve index.html under spellings normalizePath
+  // never anticipated. The page must trust its stamped route, not the address.
+  const home = await (await page.request.get("/")).text();
+  await page.route("**/some-alias-for-home", (r) => r.fulfill({ status: 200, contentType: "text/html", body: home }));
+  const errors: string[] = [];
+  page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/some-alias-for-home");
+  await page.waitForTimeout(1500);
+  expect(errors.filter((e) => /hydrat|did not match|Minified React error/i.test(e))).toEqual([]);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("I turn ideas into products.");
+});
+
+test("a malformed address is answered, not fatal to the server", async ({ request }) => {
+  const bad = await request.get("/%E0");
+  expect(bad.status()).toBe(400);
+  expect((await request.get("/")).status()).toBe(200);
 });

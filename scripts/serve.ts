@@ -16,7 +16,14 @@ const TYPES: Record<string, string> = {
 const isFile = (p: string) => existsSync(p) && statSync(p).isFile();
 
 createServer((req, res) => {
-  const path = normalize(decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname));
+  let path: string;
+  try {
+    path = normalize(decodeURIComponent(new URL(req.url ?? "/", "http://x").pathname));
+  } catch {
+    // A malformed escape (/%E0) threw and killed the e2e server mid-run.
+    res.writeHead(400).end();
+    return;
+  }
   const candidates = [join(dist, path), join(dist, path, "index.html")];
   const hit = candidates.find((p) => p.startsWith(dist) && isFile(p));
   const file = hit ?? join(dist, "404.html");
