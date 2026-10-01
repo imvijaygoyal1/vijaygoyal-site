@@ -149,14 +149,15 @@ see AD-19, which makes them machine-checkable.
 - **Binds:** build output, and how any new route is added
 - **Prevents:** a case study whose prose exists only after hydration
 - **Rule:** Navigation is client-side. **Every route also emits real static HTML at build** carrying its own title, description, OG tags and full copy. A route that cannot be prerendered may not be added.
+- **Amended 2026-10-01:** every route is static HTML at build (`scripts/prerender.ts`, routes in `src/routes.ts`); navigation between routes is by ordinary links. Client-side navigation existed to keep a 3D canvas alive across routes, which no longer exists.
 
-### AD-10 — The accessibility fallback is the prerender
+### AD-10 — The accessibility fallback is the prerender [HOLDS 2026-10-01]
 
 - **Binds:** `/`, the static route, SEO
 - **Prevents:** the no-JS path rotting unnoticed, because it would take the homepage's indexable content with it
 - **Rule:** There is no WebGL in the build environment, so the prerendered HTML for `/` is the same static route that serves reduced-motion and WebGL-absent visitors. One mechanism, three jobs. It may not be forked into a separate SEO-only rendering. **The client's first render must produce exactly this tree**; the canvas is an upgrade applied in an effect, so hydration always matches.
 
-### AD-11 — Unknown paths 404
+### AD-11 — Unknown paths 404 [HOLDS 2026-10-01]
 
 - **Binds:** `wrangler.jsonc`, `public/`
 - **Prevents:** soft-404s on every mistyped URL, and `robots.txt` returning HTML

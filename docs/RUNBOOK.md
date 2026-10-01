@@ -160,7 +160,14 @@ them. Gates have passed on a blank screen here before.
 ## Deploying
 
 `npm run deploy` (= `npm run check-facts && npm run build && wrangler deploy`).
-That is the whole deploy. `check-facts` asks the App Store for each app's live
+That is the whole deploy. The build pre-renders every page listed in
+`src/routes.ts` (`scripts/prerender.ts`): each gets its own HTML file and head,
+and the sitemap is generated from the same list. **A new page is added in
+`src/routes.ts` and nowhere else.** Unknown paths return `dist/404.html` with
+status 404 (`wrangler.jsonc`). e2e runs against `scripts/serve.ts`, which
+mimics Cloudflare's not-found rule, so local and live agree about missing
+files. The headline words and the night scene's devices start hidden in the
+HTML and have a 1.5 s CSS safety net if their script never takes over. `check-facts` asks the App Store for each app's live
 version and **stops the deploy** on any disagreement with `data/releases.json`.
 
 **After an app release is approved:** run the release's full test suite (no
