@@ -28,6 +28,12 @@ all four are true.** None was invented.
 | **Retired 2026-09-27:** every test count (537, 192, 729) | removed | Recorded totals disagreed (Shady Spade 179–193 across September) and a stale count shipped twice. They return only when read at build time |
 | Postgres row-level security where money is involved | **true** | 7 of 59 migrations enable `ROW LEVEL SECURITY`; `settlements` policies documented at `xBill/CLAUDE.md:48` |
 
+**From 2026-10-01, release facts are not written here.** Every version, date,
+approval record and test count on the page is derived from
+`data/releases.json`, whose entries each carry a `source`. The Shady Spade's
+record starts at 1.5; earlier submissions can be added with
+`npm run record-release`.
+
 **These are point-in-time claims.** "Eight releases" becomes nine on the next
 submission and 537 drifts with every test added. Where a number is used it
 carries its date, because a dated figure stays honest as it ages and an

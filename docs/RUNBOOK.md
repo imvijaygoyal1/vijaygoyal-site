@@ -159,8 +159,15 @@ them. Gates have passed on a blank screen here before.
 
 ## Deploying
 
-`npm run deploy` (= `npm run build && wrangler deploy`). That is the whole
-deploy. **The repo is not Git-connected to Cloudflare — pushing to GitHub does
+`npm run deploy` (= `npm run check-facts && npm run build && wrangler deploy`).
+That is the whole deploy. `check-facts` asks the App Store for each app's live
+version and **stops the deploy** on any disagreement with `data/releases.json`.
+
+**After an app release is approved:** run the release's full test suite (no
+skips), then `npm run record-release -- <xbill|shady-spade> <version>` and
+answer its questions. It refuses a run with failures or skips, or one far
+smaller than the last release with the same coverage (a partial run). Review
+`git diff data/releases.json`, commit, deploy. **The repo is not Git-connected to Cloudflare — pushing to GitHub does
 not deploy anything.**
 
 `wrangler.jsonc` at the repo root IS the deployment: no Worker script,
