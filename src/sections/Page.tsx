@@ -19,23 +19,23 @@ import {
 import { LINKS } from "../lib/links";
 
 /** The masthead: who this is, and the page's own sections. */
-function Masthead() {
+export function Masthead({ base = "" }: { base?: string }) {
   return (
     <header className="masthead">
       <p className="masthead-name">Vijay Goyal</p>
       <nav aria-label="Sections">
         <ul>
           <li>
-            <a href="#work">Work</a>
+            <a href={`${base}#work`}>Work</a>
           </li>
           <li>
-            <a href="#process">How I build</a>
+            <a href={`${base}#process`}>How I build</a>
           </li>
           <li>
-            <a href="#about">About</a>
+            <a href={`${base}#about`}>About</a>
           </li>
           <li>
-            <a href="#contact">Contact</a>
+            <a href={`${base}#contact`}>Contact</a>
           </li>
         </ul>
       </nav>
@@ -328,7 +328,7 @@ function Contact() {
   );
 }
 
-function Footer() {
+export function Footer() {
   return (
     <footer className="site-footer">
       <span>© 2026 Vijay Goyal</span>

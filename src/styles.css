@@ -642,6 +642,27 @@ a {
   color: var(--ink-muted);
 }
 
+/* The not-found page: the opening's scale, one line, one way home. */
+.not-found {
+  padding-block: var(--space-3xl);
+  display: grid;
+  gap: var(--space-md);
+  justify-items: start;
+}
+
+.not-found h1 {
+  margin: 0;
+  font-size: var(--font-h2);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-h2);
+  line-height: var(--leading-heading);
+}
+
+.not-found p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
 /* ---- Contact and footer ----------------------------------------------- */
 
 .contact {
