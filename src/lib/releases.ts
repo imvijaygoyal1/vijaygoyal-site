@@ -88,9 +88,17 @@ export function parseRecord(raw: unknown): ReleaseRecord {
     if (!VERSION.test(String(s.version))) fail(where, "version must look like 1.10");
     if (s.build !== null && !Number.isInteger(s.build)) fail(where, "build must be an integer or null");
     for (const k of ["submitted", "decided"] as const) {
-      if (s[k] !== null && !DATE.test(String(s[k]))) fail(where, `${k} must be YYYY-MM-DD or null`);
+      const v = s[k];
+      // Round-tripped through Date, so 2026-13-40 fails rather than rendering
+      // as "40 undefined 2026" (review I1).
+      const d = typeof v === "string" && DATE.test(v) ? new Date(`${v}T00:00:00Z`) : null;
+      const real = !!d && !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
+      if (v !== null && !real) fail(where, `${k} must be a real YYYY-MM-DD date or null`);
     }
     if (s.outcome !== "approved" && s.outcome !== "rejected") fail(where, 'outcome must be "approved" or "rejected"');
+    // An absent key is undefined, which is not null: name it rather than let
+    // it through to a bare TypeError (review I1).
+    if (s.tests === undefined) fail(where, "tests must be an object or null");
     if (s.outcome === "rejected" && s.tests !== null) fail(where, "a rejected submission carries no test count");
     if (s.tests !== null) {
       if (!Number.isInteger(s.tests.count) || s.tests.count <= 0) fail(where, "tests.count must be a positive integer");

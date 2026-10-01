@@ -57,6 +57,8 @@ describe("parseRecord", () => {
     ["a zero test count", { tests: { count: 0, covers: ["unit"] } }, /positive/],
     ["an unknown coverage", { tests: { count: 5, covers: ["e2e" as never] } }, /covers/],
     ["a missing source", { source: "" }, /source/],
+    ["an impossible date", { decided: "2026-13-40" }, /decided/],
+    ["a missing tests key", { tests: undefined }, /tests/],
   ];
   for (const [what, over, message] of bad) {
     it(`refuses ${what}, naming the entry`, () => {
@@ -136,5 +138,14 @@ describe("page facts", () => {
       { version: "v1.9", when: "submitted 31 May 2026", outcome: "rejected (guideline 5.1.2)", tests: null },
       { version: "v1.5", when: null, outcome: "approved first time", tests: null },
     ]);
+  });
+});
+
+describe("the build", () => {
+  it("validates the record before building, so a bad edit fails the build instead of the live page", () => {
+    // Review I1: parseRecord ran only in the browser; a malformed record built,
+    // deployed, and showed a blank page.
+    const pkg = JSON.parse(readFileSync(resolve(process.cwd(), "package.json"), "utf8"));
+    expect(pkg.scripts.prebuild).toBe("node scripts/facts/validate.ts");
   });
 });

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { App } from "../App";
 import { LINKS } from "../lib/links";
 import { ICON_SIZE, PRODUCTS, RELEASES, SCREEN_H, SCREEN_W, STAGES, TOOLKIT } from "./content";
-import { factLine, history, liveRelease, shippedLine } from "../lib/releases";
+import { factLine, history, liveRelease, releaseRows, shippedLine } from "../lib/releases";
 
 const content = readFileSync(resolve(process.cwd(), "docs/CONTENT.md"), "utf8");
 const html = readFileSync(resolve(process.cwd(), "index.html"), "utf8");
@@ -165,7 +165,14 @@ describe("the facts on the page", () => {
     for (const product of PRODUCTS) {
       const rows = container.querySelectorAll(`#${product.id} .releases li`);
       expect(rows, product.id).toHaveLength(history(RELEASES, product.id).length);
-      expect(rows[0]!.textContent).toContain(`v${liveRelease(RELEASES, product.id).version}`);
+      // The newest submission leads, which may be a rejection, so the first
+      // row is compared with the record's first row, exactly (review I2:
+      // assuming it was the live version broke on the first rejection, and a
+      // substring check let "v1.10" pass for "v1.1").
+      const versions = [...rows].map((li) => li.querySelector(".release-version")!.textContent);
+      expect(versions).toEqual(releaseRows(RELEASES, product.id).map((r) => r.version));
+      const item = container.querySelector(`#${product.id}`)!;
+      expect(item.textContent).toContain(`v${liveRelease(RELEASES, product.id).version} live`);
     }
   });
 });

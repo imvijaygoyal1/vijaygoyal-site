@@ -18,10 +18,26 @@ describe("reading a test result", () => {
     expect(coverageOf(tree)).toEqual(["unit", "ui", "widget"]);
   });
 
-  it("finds the last count recorded with the same coverage", () => {
-    expect(previousCount(record, "xbill", ["unit"])).toEqual({ count: 531, covers: ["unit"] });
-    expect(previousCount(record, "xbill", ["unit", "widget"])).toEqual({ count: 513, covers: ["unit", "widget"] });
-    expect(previousCount(record, "xbill", ["ui"])).toBeNull();
+  it("compares against the newest count recorded for the app, whatever it covered", () => {
+    expect(previousCount(record, "xbill")).toEqual({ count: 531, covers: ["unit"] });
+  });
+
+  it("refuses a run that covered less than the last release, even with a coverage never recorded", () => {
+    // Review C1: a 1-test unit-only Shady Spade run passed, because its only
+    // recorded count covered unit and UI, so nothing was compared.
+    const tiny: Summary = { ...(green as Summary), totalTestCount: 1, passedTests: 1 };
+    expect(runProblems(tiny, ["unit"], { count: 280, covers: ["unit", "ui"] }).join(" ")).toMatch(/partial run/);
+    expect(runProblems(tiny, ["ui"], { count: 531, covers: ["unit"] }).join(" ")).toMatch(/partial run/);
+  });
+
+  it("refuses a tiny run even when nothing has been recorded before", () => {
+    const tiny: Summary = { ...(green as Summary), totalTestCount: 4, passedTests: 4 };
+    expect(runProblems(tiny, ["unit"], null).join(" ")).toMatch(/too few/);
+  });
+
+  it("accepts a larger run that covers more than the last release", () => {
+    const big: Summary = { ...(green as Summary), totalTestCount: 560, passedTests: 560 };
+    expect(runProblems(big, ["unit", "ui"], { count: 531, covers: ["unit"] })).toEqual([]);
   });
 
   it("accepts a green, complete run", () => {

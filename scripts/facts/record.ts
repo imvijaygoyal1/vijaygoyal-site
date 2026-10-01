@@ -79,11 +79,13 @@ if (outcome === "approved") {
   };
   const summary = read("summary") as Summary;
   const covers = coverageOf(read("tests"));
-  const problems = runProblems(summary, covers, previousCount(record, app!, covers));
+  const problems = runProblems(summary, covers, previousCount(record, app!));
   if (problems.length) stop(problems.join("\n  "));
   tests = { count: summary.totalTestCount, covers };
   resultName = basename(path!);
   console.log(`Read ${tests.count} tests (${covers.join(", ")}) from ${resultName}.`);
+  const sure = await ask(`Record ${tests.count} tests (${covers.join(", ")}) for ${info.name} ${version}? (y/N): `);
+  if (sure.toLowerCase() !== "y") stop("Nothing was recorded.");
 }
 
 const source = (await ask("Source (where these facts came from, e.g. App Store Connect + release tag): ")) +
