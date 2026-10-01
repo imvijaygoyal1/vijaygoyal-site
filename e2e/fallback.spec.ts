@@ -18,9 +18,8 @@ test.describe("reduced motion", () => {
 });
 
 test("keeps its content when JavaScript never runs", async ({ browser }) => {
-  // The page is client-rendered until the prerender step, so the noscript
-  // block is what a crawler or a no-JS visitor gets. It must carry the
-  // positioning line and a way to reach both apps.
+  // The page is pre-rendered, so a no-JS visitor or crawler gets the whole
+  // page: the positioning line and a way to reach both apps.
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
   await page.goto("/");

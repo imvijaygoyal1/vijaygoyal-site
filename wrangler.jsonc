@@ -7,11 +7,11 @@
   },
   // Static site: `npm run build` emits dist/, and Cloudflare serves it directly.
   // There is no Worker script — `assets.directory` alone is the whole deployment.
-  // "single-page-application" makes unknown paths fall back to index.html, which
-  // the scroll narrative needs for anchor URLs like /#opening to resolve.
+  // Unknown paths get dist/404.html with status 404 (AD-11). Every page is
+  // pre-rendered (scripts/prerender.ts), so nothing needs the SPA fallback.
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "404-page"
   },
   "routes": [
     { "pattern": "vijaygoyal.org", "custom_domain": true },
