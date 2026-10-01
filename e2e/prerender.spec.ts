@@ -38,3 +38,30 @@ test("hydrates with no React errors", async ({ page }) => {
   await page.waitForTimeout(1500);
   expect(errors.filter((e) => /hydrat|did not match|Minified React error/i.test(e))).toEqual([]);
 });
+
+test("with the app script blocked, the safety net still shows the headline and the products", async ({ page }) => {
+  await page.route(/\/assets\/index-[^/]+\.js$/, (r) => r.abort());
+  await page.goto("/");
+  await expect
+    .poll(() => page.locator("#opening h1 .word").evaluateAll((els) => els.every((e) => Number(getComputedStyle(e).opacity) === 1)), { timeout: 2500 })
+    .toBe(true);
+  await page.locator("[data-night]").scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => page.locator("[data-device]").evaluateAll((els) => els.every((e) => Number(getComputedStyle(e).opacity) === 1)), { timeout: 2500 })
+    .toBe(true);
+});
+
+test("the headline starts hidden in the HTML and anime.js reveals it", async ({ page }) => {
+  await page.addInitScript(() => {
+    const look = () => {
+      const w = document.querySelector<HTMLElement>("#opening h1 .word");
+      if (!w) return requestAnimationFrame(look);
+      (window as unknown as { firstWord: string }).firstWord = getComputedStyle(w).opacity;
+    };
+    requestAnimationFrame(look);
+  });
+  await page.goto("/");
+  await page.waitForFunction(() => typeof (window as unknown as { firstWord?: string }).firstWord === "string");
+  expect(await page.evaluate(() => (window as unknown as { firstWord: string }).firstWord)).toBe("0");
+  await expect(page.locator("#opening h1")).toHaveAttribute("data-driven", "");
+});

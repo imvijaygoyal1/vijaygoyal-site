@@ -104,6 +104,8 @@ export function observeNightScene(root: ParentNode = document): () => void {
   const beat = scene.querySelector<HTMLElement>("[data-night-beat]");
   const readout = scene.querySelector<HTMLElement>("[data-night-readout]");
   if (!xbill || !spade || !iconX || !iconS || !caption || !beat || !readout) return () => {};
+  // Taking over: the CSS safety net stands down (see styles.css).
+  scene.setAttribute("data-driven", "");
 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const colours = palette();
@@ -187,6 +189,7 @@ export function observeNightScene(root: ParentNode = document): () => void {
       cancelAnimationFrame(first);
       first = 0;
       window.removeEventListener("resize", onResize);
+      scene.removeAttribute("data-driven");
     };
   }
 
@@ -227,5 +230,6 @@ export function observeNightScene(root: ParentNode = document): () => void {
     raf = 0;
     window.removeEventListener("scroll", wake);
     window.removeEventListener("resize", onResize);
+    scene.removeAttribute("data-driven");
   };
 }

@@ -19,6 +19,12 @@ export function playHeadline(root: ParentNode = document): () => void {
   const words = [...root.querySelectorAll<HTMLElement>(WORDS)];
   if (reduced || words.length === 0) return () => {};
 
+  const heading = root.querySelector<HTMLElement>(".opening h1");
+  // If the CSS safety net has already shown the words (the script arrived
+  // late), leave them: hiding and replaying them now would read as a flicker.
+  if (words[0] && getComputedStyle(words[0]).opacity === "1") return () => {};
+  heading?.setAttribute("data-driven", "");
+
   const clear = () => {
     for (const w of words) {
       w.style.removeProperty("transform");
@@ -42,10 +48,12 @@ export function playHeadline(root: ParentNode = document): () => void {
     return () => {
       animation.revert();
       clear();
+      heading?.removeAttribute("data-driven");
     };
   } catch {
     // If the animation cannot start, show the headline rather than hide it.
     clear();
+    heading?.removeAttribute("data-driven");
     return () => {};
   }
 }

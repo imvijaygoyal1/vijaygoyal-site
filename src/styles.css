@@ -892,3 +892,45 @@ a {
     transform: scaleX(1);
   }
 }
+
+/*
+ * The page now paints from pre-rendered HTML before its scripts arrive. The
+ * parts the scripts animate in start hidden, and a CSS safety net shows them
+ * at 1.5 s if the script has not taken over (slow network, blocked script).
+ * The script sets data-driven when it takes over, which stands the net down.
+ */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  @keyframes safety-net {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .opening h1 .word {
+    opacity: 0;
+    transform: translateY(105%);
+    animation: safety-net 1ms 1.5s forwards;
+  }
+
+  .opening h1[data-driven] .word {
+    animation: none;
+  }
+
+  .night-device,
+  .night-icon {
+    opacity: 0;
+    animation: safety-net-fade 1ms 1.5s forwards;
+  }
+
+  [data-night][data-driven] .night-device,
+  [data-night][data-driven] .night-icon {
+    animation: none;
+  }
+
+  @keyframes safety-net-fade {
+    to {
+      opacity: 1;
+    }
+  }
+}

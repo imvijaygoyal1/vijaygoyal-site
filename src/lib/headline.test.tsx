@@ -28,4 +28,23 @@ describe("the opening headline", () => {
     const stop = playHeadline(document.createElement("div"));
     expect(() => stop()).not.toThrow();
   });
+
+  it("marks the headline as driven when it takes over, so the CSS safety net stands down", () => {
+    const { container } = render(<App />);
+    // In a browser the CSS hides the words at first paint; jsdom loads no CSS
+    // and reports opacity 1, which reads as "already shown". State the
+    // browser's start instead.
+    vi.spyOn(window, "getComputedStyle").mockReturnValue({ opacity: "0" } as CSSStyleDeclaration);
+    playHeadline(container);
+    expect(container.querySelector(".opening h1")!.hasAttribute("data-driven")).toBe(true);
+  });
+
+  it("does not replay the headline once the safety net has shown it", () => {
+    const { container } = render(<App />);
+    const words = [...container.querySelectorAll<HTMLElement>(WORDS)];
+    vi.spyOn(window, "getComputedStyle").mockReturnValue({ opacity: "1" } as CSSStyleDeclaration);
+    playHeadline(container);
+    expect(container.querySelector(".opening h1")!.hasAttribute("data-driven")).toBe(false);
+    for (const w of words) expect(w.getAttribute("style")).toBeNull();
+  });
 });
