@@ -1,0 +1,5 @@
+{ "testNodes": [ { "nodeType": "Test Plan", "name": "xBill", "children": [
+  { "nodeType": "Unit test bundle", "name": "xBillTests", "children": [] },
+  { "nodeType": "UI test bundle", "name": "xBillUITests", "children": [] },
+  { "nodeType": "Unit test bundle", "name": "xBillWidgetTests", "children": [] }
+] } ] }

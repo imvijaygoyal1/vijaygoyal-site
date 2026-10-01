@@ -12,7 +12,8 @@
     "e2e": "playwright test --grep-invert @perf",
     "lh": "lhci autorun",
     "deploy": "npm run check-facts && npm run build && wrangler deploy",
-    "check-facts": "node scripts/facts/check.ts"
+    "check-facts": "node scripts/facts/check.ts",
+    "record-release": "node scripts/facts/record.ts"
   },
   "dependencies": {
     "animejs": "4.5.0",
